@@ -59,6 +59,7 @@ def level1(level, bsp, nodes):
                  lambda tile: tile.make_diggable()
     )
 
+
 #    # Stairs down
 #    for i in range(2):
 #        xy = level.random_xy(_free_square)

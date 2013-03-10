@@ -6,7 +6,7 @@ import colors
 
 libtcod.sys_set_fps(20)
 
-console.set_custom_font('tiles12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, 16, 21 )
+console.set_custom_font('tiles12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, 16, 23 )
 console.init_root(SCREEN_SIZE + Size(0, 7), 'FooQuest', False, libtcod.RENDERER_SDL)
 
 screen = console.Console()
