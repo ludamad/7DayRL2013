@@ -6,6 +6,7 @@ class GameObject:
     def __init__(self, xy, tile_type, draw_once_seen = False):
         self.xy = xy
         self.seen = False
+        self.waypoint = False
         self.tile_type = tile_type
         self.draw_once_seen = draw_once_seen
         self.tile_variant = 0

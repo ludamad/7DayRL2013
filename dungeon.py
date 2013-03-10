@@ -109,7 +109,6 @@ class DungeonLevel:
         for obj in self.objects:
             if obj.xy == xy:
                 yield obj
-
     def add(self, object):
         self.objects.append(object)
     def remove(self, object):

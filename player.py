@@ -7,6 +7,7 @@ import paths
 
 import dungeonfeatures
 from gameobject import GameObject
+from resource import Resource
 from tiles import *
 import colors
 
@@ -94,6 +95,11 @@ class Player(GameObject):
             return self.queue_move( -1, -1 )
         elif key.c == ord('u'):
             return self.queue_move( +1, -1 )
+        elif key.c == ord('m'):
+            for obj in globals.world.level.objects_at(self.xy):
+                if type(obj) == Resource:
+                    obj.waypoint = True
+            return False
         if mouse.lbutton:
             allow_dig = console.is_key_pressed(libtcod.KEY_SHIFT)
             map = globals.world.level.map
