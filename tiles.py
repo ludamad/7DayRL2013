@@ -105,7 +105,7 @@ def variant_list(chars, properties):
     return variants
 
 DIGGABLE = TileType(   # ASCII mode
-         { "color" : (LIGHT_RED, DARK_RED), 
+         { "color" : PALE_RED, 
            "char" : 176, 
            "bg_color" : (DARK_GRAY, DARKER_GRAY)}
         ,          # Tile mode
@@ -116,7 +116,7 @@ DIGGABLE = TileType(   # ASCII mode
 )
 
 WALL = TileType(   # ASCII mode
-         { "color" : PALE_RED }
+         { "color" : (LIGHT_RED, DARK_RED) }
         ,          # Tile mode
         { "char" : tile(2,3) }
 )
