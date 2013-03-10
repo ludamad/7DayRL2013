@@ -12,7 +12,7 @@ console.init_root(SCREEN_SIZE + Size(0, 7), 'FooQuest', False, libtcod.RENDERER_
 screen = console.Console()
 screen.set_default_foreground(colors.WHITE)
 
-libtcod.console_set_keyboard_repeat(30, 30)
+#libtcod.console_set_keyboard_repeat(30, 30)
 
 while not console.is_window_closed():
     world.step()

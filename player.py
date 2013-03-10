@@ -95,10 +95,11 @@ class Player(GameObject):
         elif key.c == ord('u'):
             return self.queue_move( +1, -1 )
         if mouse.lbutton:
+            allow_dig = console.is_key_pressed(libtcod.KEY_SHIFT)
             map = globals.world.level.map
             mouse_xy = Pos(mouse.cx, mouse.cy)
             if map.valid_xy(mouse_xy) and map[mouse_xy].explored:
-                new_xy = paths.towards( self.xy, mouse_xy )
+                new_xy = paths.towards( self.xy, mouse_xy, allow_dig )
                 if new_xy:
                     self.action = MoveAction(new_xy)
                     return True
