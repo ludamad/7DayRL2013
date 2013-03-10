@@ -7,7 +7,7 @@ import paths
 
 import dungeonfeatures
 from gameobject import GameObject
-from tiles import TileType, tile
+from tiles import *
 import colors
 
 PLAYER = TileType( 
@@ -51,8 +51,8 @@ class Player(GameObject):
         self.action.perform(self)
         self.action = None
 
-        level.map[self.xy].blocked = False
-        level.map[self.xy].block_sight = False
+        if level.map[self.xy].type == DIGGABLE:
+            level.map[self.xy].make_floor()
 
         for obj in level.objects_at(self.xy):
             if isinstance(obj, dungeonfeatures.Stairs):
@@ -68,9 +68,11 @@ class Player(GameObject):
     def queue_move(self, dx, dy):
         pos = self.xy + Pos(dx, dy)
         map = globals.world.level.map
-        if map.valid_xy(pos) and not map[pos].blocked:
-            self.action = MoveAction(pos)
-            return True
+        allow_dig = console.is_key_pressed(libtcod.KEY_SHIFT)
+        if map.valid_xy(pos):
+            if (allow_dig and map[pos].type == DIGGABLE) or not map[pos].blocked:
+                self.action = MoveAction(pos)
+                return True
         return False
 
     def has_action(self, key, mouse):

@@ -5,24 +5,17 @@ import tiles
 def rand(min,max): 
     return libtcod.random_get_int(0, min, max)
 
-bsp_depth = 8
-bsp_min_room_size = 9
-# a room fills a random part of the node or the maximum available space ?
-bsp_random_room = True
-# if true, there is always a wall on north & west side of a room
-bsp_room_walls = True
-bsp_tunnels = 4
-
 # Class that uses binary-space partitioning to generate rooms.
 # Adapted from samples_py.py
 class BSPGenerator:
 
     def __init__(self, map):
         self.map = map
+        self.bsp = libtcod.bsp_new_with_size(1, 1, self.map.size.w - 2, self.map.size.h - 2)
 
     # Fills a line to a room
     def line2room(self, p1, p2=None, delta=None, stop_blocked = True):
-        apply_function = lambda map, xy: map[xy].clear()
+        apply_function = lambda map, xy: map[xy].make_floor()
         stop_condition = lambda map, xy: not map[xy].blocked if stop_blocked else None
         self.map.apply_to_line(apply_function, p1, p2, delta, stop_condition)
 
@@ -87,15 +80,14 @@ class BSPGenerator:
                 self.hline_left(right.x - 1, y)
                 self.hline_right(right.x, y)
 
-    # the class building the dungeon from the bsp nodes
-    def traverse_node(self, node, dat):
+    def fill_node(self, node, tunnels=4, room_has_walls=True, min_size=6, random_fill=True):
         if libtcod.bsp_is_leaf(node):
             # calculate the room size
             minx = node.x + 1
             maxx = node.x + node.w - 1
             miny = node.y + 1
             maxy = node.y + node.h - 1
-            if not bsp_room_walls:
+            if not room_has_walls:
                 if minx > 1:
                     minx -= 1
                 if miny > 1:
@@ -104,11 +96,11 @@ class BSPGenerator:
                 maxx -= 1
             if maxy == self.map.size.h - 2:
                 maxy -= 1
-            if libtcod.random_get_int(None, 0,2) == 1:
-                minx = libtcod.random_get_int(None, minx, maxx - bsp_min_room_size + 1)
-                miny = libtcod.random_get_int(None, miny, maxy - bsp_min_room_size + 1)
-                maxx = libtcod.random_get_int(None, minx + bsp_min_room_size - 1, maxx)
-                maxy = libtcod.random_get_int(None, miny + bsp_min_room_size - 1, maxy)
+            if random_fill:
+                minx = libtcod.random_get_int(None, minx, maxx - min_size + 1)
+                miny = libtcod.random_get_int(None, miny, maxy - min_size + 1)
+                maxx = libtcod.random_get_int(None, minx + min_size - 1, maxx)
+                maxy = libtcod.random_get_int(None, miny + min_size - 1, maxy)
             # resize the node to fit the room
             node.x = minx
             node.y = miny
@@ -117,10 +109,10 @@ class BSPGenerator:
             # dig the room
             for x in range(minx, maxx + 1):
                 for y in range(miny, maxy + 1):
-                    self.map[Pos(x, y)].clear()
+                    self.map[Pos(x, y)].make_floor()
         else:
             # resize the node to fit its sons
-            for i in range(bsp_tunnels): 
+            for i in range(tunnels): 
                 left = libtcod.bsp_left(node)
                 right = libtcod.bsp_right(node)
                 node.x = min(left.x, right.x)
@@ -128,13 +120,18 @@ class BSPGenerator:
                 node.w = max(left.x + left.w, right.x + right.w) - node.x
                 node.h = max(left.y + left.h, right.y + right.h) - node.y
                 self.create_corridor(node, left, right)
-        return True
+    def split(self, depth, min_size, maxHRatio = 2, maxVRatio = 2):
+        libtcod.bsp_split_recursive(self.bsp, 0, depth,
+                                    min_size +1,
+                                    min_size +1, maxHRatio, maxVRatio)
+        bsp_nodes = []
+        def build_list(node, _):
+            bsp_nodes.append(node)
+            return True
+        libtcod.bsp_traverse_inverted_level_order(self.bsp, build_list)
+
+        return bsp_nodes
+
     def fill(self):
-        bsp = libtcod.bsp_new_with_size(1, 1, self.map.size.w - 2, self.map.size.h - 2)
-        libtcod.bsp_split_recursive(bsp, 0, bsp_depth,
-                                    bsp_min_room_size +1,
-                                    bsp_min_room_size +1, 2, 2)
-
-        libtcod.bsp_traverse_inverted_level_order(bsp, lambda node, dat: self.traverse_node(node,dat) )
-
-        libtcod.bsp_delete(bsp)
+        nodes = self.split(8, 9)
+        for node in nodes: self.fill_node(node)

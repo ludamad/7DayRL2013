@@ -13,7 +13,7 @@ def clear_tile(tile):
     tile.block_sight = False
 
 def tunnel(map, p1, p2):
-    map.apply_to_line( lambda map, xy: map[xy].clear() , p1, p2 )
+    map.apply_to_line( lambda map, xy: map[xy].make_floor() , p1, p2 )
 
 # Allows iteration of nearby squares
 def nearby(map, xy):

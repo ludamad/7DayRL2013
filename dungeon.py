@@ -67,7 +67,7 @@ class DungeonMap:
         fov = self.world.fov
 
         # For debug purposes, show the screen
-        SHOW_ALL = console.is_key_pressed(libtcod.KEY_SHIFT)
+        SHOW_ALL = console.is_key_pressed(libtcod.KEY_DELETE)
         if WAS_SHOW_ALL: 
             fulldraw = True
         if fulldraw:
@@ -171,12 +171,9 @@ class World:
         from globals import LEVEL_SIZE
 
         while idx >= len(self.levels):
-            new_map = DungeonMap(self, LEVEL_SIZE)
-            generate_connected_map(new_map)
-            level = DungeonLevel(self, new_map, idx)
-            generate_features(level)
+            import levels
 
-            self.levels.append( level )
+            self.levels.append( levels.generate_level(self, idx) )
 
         return self.levels[idx]
 
@@ -195,8 +192,6 @@ class World:
         elif key.vk == libtcod.KEY_CONTROL:
             globals.ASCII_MODE = not globals.ASCII_MODE
             self.draw(True)
-        elif key.vk == libtcod.KEY_DELETE:
-            msgbox("This is a message!")
         elif key.vk == libtcod.KEY_ENTER:
             self.restart()
         else:

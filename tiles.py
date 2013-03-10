@@ -1,6 +1,6 @@
 from colors import *
 import console
-from libtcodpy import Color, KEY_SHIFT, KEY_CONTROL, random_get_int
+from libtcodpy import Color, KEY_SHIFT, KEY_CONTROL, random_get_int, KEY_DELETE
 
 # This is messy! But theres a lot of details to handling both ASCII & tiles (with multiple variants) smoothly.
 # It should just work, focus on the data below.
@@ -61,19 +61,26 @@ class Tile:
         # By default, if a tile is blocked, it also blocks sight
         if block_sight is None: block_sight = blocked
         self.block_sight = block_sight
-        self.variant = random_get_int(0, 0, 10)
         self.type = WALL # Defined below
+        self.variant = random_get_int(0, 0, self.type.num_variants())
 
     def fallback_colors(self):
         return self.type.variant(self.variant).fallback_colors
 
-    def clear(self):
+    def make_floor(self):
         self.block_sight = False
         self.blocked = False
         self.type = FLOOR # Defined below
+        self.variant = random_get_int(0, 0, self.type.num_variants())
+
+    def make_diggable(self):
+        self.block_sight = True
+        self.blocked = True
+        self.type = DIGGABLE # Defined below
+        self.variant = random_get_int(0, 0, self.type.num_variants())
 
 def draw_tile(tt, num, xy, bg = False):
-    SHOW_ALL = console.is_key_pressed(KEY_SHIFT)
+    SHOW_ALL = console.is_key_pressed(KEY_DELETE)
 
     from globals import world, con, on_screen
 
