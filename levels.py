@@ -59,6 +59,13 @@ def level1(level, bsp, nodes):
                  lambda tile: tile.make_diggable()
     )
 
+    for node in nodes:
+        if libtcod.bsp_is_leaf(node):
+            if rand(0,5) == 1:
+                rect = Rect(node.x, node.y, node.w, node.h)
+                for xy in rect.xy_values():
+                    level.map[xy].make_floor2()
+
 
 #    # Stairs down
 #    for i in range(2):
