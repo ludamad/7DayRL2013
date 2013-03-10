@@ -1,5 +1,6 @@
 
 from gameobject import GameObject
+from geometry import *
 from tiles import *
 import colors
 

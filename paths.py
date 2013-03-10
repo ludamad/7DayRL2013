@@ -6,23 +6,26 @@ from tiles import *
 # Pathfinding class that copies from the game world
 
 class PathFinder:
-    def __init__(self, size, consider_unexplored_blocked = False, allow_digging = False):
+    def __init__(self, size, avoid_solid_objects = False, consider_unexplored_blocked = False, allow_digging = False):
         self.map = libtcod.map_new(size.w, size.h)
         self.path = libtcod.path_new_using_map(self.map)
         self.consider_unexplored_blocked = consider_unexplored_blocked
         self.allow_digging = allow_digging
+        self.avoid_solid_objects = avoid_solid_objects
     
     def __del__(self):
         libtcod.map_delete(self.map)
         libtcod.path_delete(self.path)
         self.map, self.path = None, None
 
-    def compute_path(self, from_xy, to_xy, dungeonmap):
-        for xy in dungeonmap.rect().xy_values():
-            tile = dungeonmap[xy]
+    def compute_path(self, from_xy, to_xy, level):
+        for xy in level.map.rect().xy_values():
+            tile = level.map[xy]
             block_sight, blocked = tile.block_sight, tile.blocked
             if self.allow_digging:
                 blocked = blocked and not tile.type == DIGGABLE
+            if self.avoid_solid_objects and xy != to_xy:
+                blocked = blocked or level.solid_object_at(xy)
             if self.consider_unexplored_blocked:
                 blocked = blocked or not tile.explored
             libtcod.map_set_properties(self.map, xy.x, xy.y, block_sight, not blocked)
@@ -44,10 +47,13 @@ class PathFinder:
             con.put_char_ex(on_screen(xy), ' ', colors.WHITE, colors.YELLOW)
 
 # Returns None if not possible
-def towards(start_xy, to_xy, allow_digging = False):
+def towards(start_xy, to_xy, avoid_solid_objects = False, consider_unexplored_blocked = True, allow_digging = False):
     from globals import world, con
-    path = PathFinder( world.level.size, consider_unexplored_blocked = True, allow_digging = allow_digging )
-    path.compute_path(start_xy, to_xy, world.level.map)
+    path = PathFinder( world.level.size, 
+                       avoid_solid_objects = avoid_solid_objects, 
+                       consider_unexplored_blocked = consider_unexplored_blocked, 
+                       allow_digging = allow_digging )
+    path.compute_path(start_xy, to_xy, world.level)
     if path.size() == 0: 
         return None
     return path.get_node(0)

@@ -9,6 +9,7 @@ import dungeonfeatures
 from gameobject import GameObject
 from resource import Resource
 from tiles import *
+import enemies
 import colors
 
 PLAYER = TileType( 
@@ -23,6 +24,9 @@ class Player(GameObject):
         GameObject.__init__(self, xy, PLAYER)
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
+
+    def attack(self, enemy):
+        enemy.take_damage(10)
 
     def _adjust_view(self):
         PADDING = globals.VIEW_PADDING
@@ -60,7 +64,7 @@ class Player(GameObject):
                 # Transfer from level, but do it next turn
                 new_index = level.level_index + (+1 if obj.stairs_down else -1)
                 new_level = globals.world[new_index]
-                new_level.add(self)
+                new_level.add_to_front(self)
                 new_level.queue_relocation(self, new_level.random_xy() )
                 level.queue_removal(self)
 
@@ -69,8 +73,12 @@ class Player(GameObject):
     def queue_move(self, dx, dy):
         pos = self.xy + Pos(dx, dy)
         map = globals.world.level.map
-        allow_dig = console.is_key_pressed(libtcod.KEY_SHIFT)
+        allow_dig = not console.is_key_pressed(libtcod.KEY_SHIFT)
         if map.valid_xy(pos):
+            for object in globals.world.level.objects_at(pos):
+                if isinstance(object, enemies.Enemy):
+                    self.action = AttackAction(object)
+                    return True
             if (allow_dig and map[pos].type == DIGGABLE) or not map[pos].blocked:
                 self.action = MoveAction(pos)
                 return True
@@ -95,13 +103,15 @@ class Player(GameObject):
             return self.queue_move( -1, -1 )
         elif key.c == ord('u'):
             return self.queue_move( +1, -1 )
+        elif key.vk == libtcod.KEY_SPACE or key.c == ord('.'):
+            return self.queue_move( 0, 0 )
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:
                     obj.waypoint = True
             return False
         if mouse.lbutton:
-            allow_dig = console.is_key_pressed(libtcod.KEY_SHIFT)
+            allow_dig = not console.is_key_pressed(libtcod.KEY_SHIFT)
             map = globals.world.level.map
             mouse_xy = Pos(mouse.cx, mouse.cy)
             if map.valid_xy(mouse_xy) and map[mouse_xy].explored:

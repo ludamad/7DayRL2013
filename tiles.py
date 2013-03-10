@@ -1,6 +1,6 @@
 from colors import *
 import console
-from libtcodpy import Color, KEY_SHIFT, KEY_CONTROL, random_get_int, KEY_DELETE
+from libtcodpy import Color, KEY_SHIFT, KEY_CONTROL, random_get_int, KEY_DELETE, KEY_TAB
 
 # This is messy! But theres a lot of details to handling both ASCII & tiles (with multiple variants) smoothly.
 # It should just work, focus on the data below.
@@ -86,7 +86,7 @@ class Tile:
         self.variant = random_get_int(0, 0, self.type.num_variants())
 
 def draw_tile(tt, num, xy, bg = False):
-    SHOW_ALL = console.is_key_pressed(KEY_DELETE)
+    SHOW_ALL = console.is_key_pressed(KEY_TAB)
 
     from globals import world, con, on_screen
 

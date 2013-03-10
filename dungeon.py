@@ -1,8 +1,8 @@
 from geometry import *
 from generation import generate_map, generate_connected_map, generate_features
+from utils import *
 
 import colors
-import libtcodpy as libtcod
 import player
 import fieldofview
 import paths
@@ -67,7 +67,7 @@ class DungeonMap:
         fov = self.world.fov
 
         # For debug purposes, show the screen
-        SHOW_ALL = console.is_key_pressed(libtcod.KEY_DELETE)
+        SHOW_ALL = console.is_key_pressed(libtcod.KEY_TAB)
         if WAS_SHOW_ALL: 
             fulldraw = True
         if fulldraw:
@@ -91,9 +91,6 @@ class DungeonMap:
 
         WAS_SHOW_ALL = SHOW_ALL
 
-def rand(min,max): 
-    return libtcod.random_get_int(0, min, max)
-
 # Holds a DungeonMap (ie, the tiles) and the game objects
 class DungeonLevel:
     def __init__(self, world, map, index):
@@ -111,6 +108,8 @@ class DungeonLevel:
                 yield obj
     def add(self, object):
         self.objects.append(object)
+    def add_to_front(self, object):
+        self.objects.insert(0, object)
     def remove(self, object):
         self.objects.remove(object)
     def queue_removal(self, object):
@@ -131,9 +130,15 @@ class DungeonLevel:
         self.handle_relocations()
 
         if self.world.player.has_action(key, mouse):
-            for obj in self.objects: obj.step()
+            assert self.world.player.action
+            for obj in list(self.objects): obj.step()
             for obj in self.queued_removals: self.remove(obj)
             self.queued_removals = []
+
+    def solid_object_at(self, xy):
+        return any( obj.solid for obj in self.objects_at(xy))
+    def is_solid(self, xy):
+        return self.map[xy].blocked or self.solid_object_at(xy)
 
     def random_xy(self, func = ( lambda level, xy: not level.map[xy].blocked )):
         rect = self.map.rect()
@@ -154,7 +159,7 @@ class World:
         # Initialize first level
         self.level = self[0]
         self.player = player.Player(self.level.random_xy())
-        self.level.add(self.player)
+        self.level.add_to_front(self.player)
 
     @property
     def view(self):

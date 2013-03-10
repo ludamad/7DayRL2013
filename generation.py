@@ -2,6 +2,7 @@ from geometry import *
 import libtcodpy as libtcod
 from bspgenerator import BSPGenerator
 from dungeonfeatures import Stairs
+from utils import *
 
 def rand(min,max): 
     return libtcod.random_get_int(0, min, max)
@@ -15,13 +16,6 @@ def clear_tile(tile):
 def tunnel(map, p1, p2):
     map.apply_to_line( lambda map, xy: map[xy].make_floor() , p1, p2 )
 
-# Allows iteration of nearby squares
-def nearby(map, xy):
-    for y in range(xy.y-1, xy.y+2):
-        for x in range(xy.x-1, xy.x+2):
-            nearby_xy = Pos(x,y)
-            if map.valid_xy(nearby_xy) and nearby_xy != xy:
-                yield nearby_xy
 
 def apply_donuts(map, points, f = clear_tile):
     for i in range(points):

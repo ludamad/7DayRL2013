@@ -11,6 +11,8 @@ import libtcodpy as libtcod
 from geometry import *
 import dungeonfeatures
 from tiles import *
+import enemies
+from utils import *
 
 class LevelTemplate:
     def __init__(self, handler, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
@@ -30,14 +32,6 @@ def rand(min,max):
 def rand_pos(max_x, max_y):
     return Pos( rand(0, max_x), rand(0, max_y) )
 
-# Allows iteration of nearby squares
-def nearby(map, xy):
-    for y in range(xy.y-1, xy.y+2):
-        for x in range(xy.x-1, xy.x+2):
-            nearby_xy = Pos(x,y)
-            if map.valid_xy(nearby_xy) and nearby_xy != xy:
-                yield nearby_xy
-
 def apply_nearby(map, points, tile_cond, near_cond, mutator):
     for i in range(points):
         while True:
@@ -55,7 +49,7 @@ def level1(level, bsp, nodes):
 
     apply_nearby(level.map, 1000,
                  lambda tile: not tile.blocked, 
-                 lambda tile: tile.type is WALL or tile.type is DIGGABLE,
+                 lambda tile: tile.type == WALL or tile.type == DIGGABLE,
                  lambda tile: tile.make_diggable()
     )
 
@@ -64,8 +58,12 @@ def level1(level, bsp, nodes):
             if rand(0,5) == 1:
                 rect = Rect(node.x, node.y, node.w, node.h)
                 for xy in rect.xy_values():
-                    level.map[xy].make_floor2()
+                    if level.map[xy].type == FLOOR:
+                        level.map[xy].make_floor2()
 
+    for i in range(20):
+        xy = level.random_xy(lambda level,xy: not level.map[xy].blocked and not any( level.objects_at(xy) ))
+        level.add( enemies.ladybug(xy) )
 
 #    # Stairs down
 #    for i in range(2):
