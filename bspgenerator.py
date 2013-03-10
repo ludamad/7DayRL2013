@@ -25,19 +25,6 @@ class BSPGenerator:
         apply_function = lambda map, xy: map[xy].clear()
         stop_condition = lambda map, xy: not map[xy].blocked if stop_blocked else None
         self.map.apply_to_line(apply_function, p1, p2, delta, stop_condition)
-#        if not delta:
-#            delta = Pos( cmp(p2.x, p1.x), cmp(p2.y, p1.y ) )
-#
-#        points = []
-#
-#        p = Pos(p1.x, p1.y)
-#        while p2 == None or p - delta != p2:
-#            points.append(p)
-#            p += delta
-#            if not self.map.valid_xy(p): return False
-#            if stop_blocked and not self.map[p].blocked: break
-#
-#        for p in points: self.map[p].clear()
 
     # draw a vertical line
     def vline(self, x, y1, y2):
@@ -117,7 +104,7 @@ class BSPGenerator:
                 maxx -= 1
             if maxy == self.map.size.h - 2:
                 maxy -= 1
-            if bsp_random_room:
+            if libtcod.random_get_int(None, 0,2) == 1:
                 minx = libtcod.random_get_int(None, minx, maxx - bsp_min_room_size + 1)
                 miny = libtcod.random_get_int(None, miny, maxy - bsp_min_room_size + 1)
                 maxx = libtcod.random_get_int(None, minx + bsp_min_room_size - 1, maxx)

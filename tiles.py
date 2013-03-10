@@ -23,7 +23,7 @@ class TileVariant:
     def __init__(self, char = ' ', color = WHITE, fallback = None, bg_color=None):
         self.char = char
 
-        self.colors = ensure_tuple(color)
+        self.colors = ensure_tuple(color, (WHITE, WHITE*0.5))
         self.bg_colors = ensure_tuple(bg_color)
         self.fallback_colors = ensure_tuple(fallback, self.bg_colors)
 
@@ -31,6 +31,7 @@ class TileVariant:
         if self.char == ' ': # Solid tile
             con.put_char_ex(xy, self.char, WHITE, pick(self.colors, visible))
         else:
+            bg_fallback = bg_fallback or (BLACK, BLACK)
             bg_color = pick( self.bg_colors if self.bg_colors else bg_fallback, visible)
             con.put_char_ex(xy, self.char, pick(self.colors, visible), bg_color)
 
@@ -96,13 +97,19 @@ def variant_list(chars, properties):
         variants.append(variant)
     return variants
 
-WALL = TileType(   # ASCII mode
+DIGGABLE = TileType(   # ASCII mode
          { "color" : (LIGHT_RED, DARK_RED) }
         ,          # Tile mode
         variant_list(
-            [ tile(2,3), tile(2,4) , tile(2,4) , tile(2,4) ], 
+            [ tile(1,2)]*5  + [ tile(1,3) , tile(1,4) , tile(2,2) ], 
             { "fallback" : Color(116, 46, 30) }
         )
+)
+
+WALL = TileType(   # ASCII mode
+         { "color" : (WHITE, LIGHT_GRAY) }
+        ,          # Tile mode
+        { "char" : tile(2,3) }
 )
 
 FLOOR = TileType(  # ASCII mode
@@ -111,7 +118,7 @@ FLOOR = TileType(  # ASCII mode
            "bg_color" : (DARK_GRAY, DARKER_GRAY) }
         ,          # Tile mode
         variant_list(
-            [ tile(1,2), tile(1,2), tile(1,3), tile(1,3)] * 2 + [tile(2,2)], 
-            { "fallback" : Color(116, 46, 30) }
+            [ tile(0,1) ] + [ tile(1,1) ]*8, 
+            { "fallback" : Color(190, 101, 58) }
         )
 )
