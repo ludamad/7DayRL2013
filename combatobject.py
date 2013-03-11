@@ -22,8 +22,8 @@ class CombatObject(GameObject):
         GameObject.__init__(self, xy, tiletype)
         self.stats = stats
     def attack(self, enemy):
-        enemy.take_damage(self.stats.attack)
-    def take_damage(self, damage):
+        enemy.take_damage(self, self.stats.attack)
+    def take_damage(self, attacker, damage):
         self.stats.hp = max(0, self.stats.hp - damage)
         if self.stats.hp <= 0:
             self.die()

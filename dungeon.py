@@ -8,6 +8,7 @@ import fieldofview
 import paths
 import console
 import tiles
+import menus
 
 from menus import menu, msgbox
 
@@ -160,6 +161,7 @@ class World:
 
         # Initialize first level
         self.level = self[0]
+        self.messages = menus.Messages(7)
         self.player = player.Player(self.level.random_xy())
         self.level.add_to_front(self.player)
 

@@ -33,9 +33,11 @@ class Player(CombatObject):
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.damage_for_step = 0
-    def take_damage(self, damage):
+    def take_damage(self, attacker, damage):
+        from globals import world
         self.damage_for_step += damage
-        CombatObject.take_damage(self, damage)
+        CombatObject.take_damage(self, attacker, damage)
+        world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' bites you for ' + str(int(damage)) + ' damage!'] )
 
     def die(self):
         from globals import world
@@ -140,14 +142,18 @@ class Player(CombatObject):
         
     def print_stats(self):
         import gui
-        from globals import panel
+        from globals import panel, world
+
         gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARKER_GRAY )
         gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARKER_GRAY )
+
         print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'ANT COLONEL')
-        if self.damage_for_step > 0:
-            print_colored(panel, Pos(3, 6), colors.LIGHT_RED, 'YOU TOOK ' + str(int(self.damage_for_step)) + ' DAMAGE')
+
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')
         print_colored(panel, Pos(23, 1), colors.GOLD, 'I', colors.WHITE, 'nventory')
-        print_colored(panel, Pos(40, 3), colors.GREEN, 'STATUS:')
-        print_colored(panel, Pos(40, 4), colors.PALE_GREEN, 'Looking for a place to settle.')
+
+        world.messages.draw(panel, Pos(35, 0))
+
+#        print_colored(panel, Pos(40, 3), colors.GREEN, 'STATUS:')
+#        print_colored(panel, Pos(40, 4), colors.PALE_GREEN, 'Looking for a place to settle.')

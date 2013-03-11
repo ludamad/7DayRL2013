@@ -11,16 +11,20 @@ from utils import *
 import colors
 
 class Corpse(GameObject):
-    def __init__(self, xy, tiletype, can_be_eaten=True, hp_gain=0):
+    def __init__(self, name, xy, tiletype, can_be_eaten=True, hp_gain=0):
         GameObject.__init__(self, xy, tiletype, solid=False, draw_once_seen = True)
+        self.name = name
         self.time_to_live = 10
         self.can_be_eaten = can_be_eaten
         self.hp_gain = hp_gain
     def step(self):
+        from globals import world
+    
         self.time_to_live -= 1
         for obj in globals.world.level.objects_at(self.xy):
             if isinstance(obj, CombatObject):
                 obj.stats.regen_hp(self.hp_gain)
+                world.messages.add( [colors.GREEN, 'You consume the ' + self.name + ", healing " + str(self.hp_gain) + " HP."] )
                 globals.world.level.queue_removal(self)
                 return
         if self.time_to_live <= 0:
@@ -33,16 +37,22 @@ class EnemyBehaviour:
         self.corpse_heal = corpse_heal
 
 class Enemy(CombatObject):
-    def __init__(self, xy, tiletype, corpsetile, behaviour, stats): 
+    def __init__(self, name, xy, tiletype, corpsetile, behaviour, stats): 
         CombatObject.__init__(self, xy, tiletype, stats)
+        self.name = name
         self.stats = stats
         self.corpse_tile = corpsetile
         self.behaviour = behaviour
         self.following_steps = 0
 
+    def take_damage(self, attacker, damage):
+        from globals import world
+        CombatObject.take_damage(self, attacker, damage)
+        world.messages.add( [colors.BABY_BLUE, 'You bite the ' + self.name + " for " + str(int(damage)) + ' damage!'] )
+
     def die(self):
         globals.world.level.queue_removal(self)
-        globals.world.level.add_to_front(Corpse(self.xy, self.corpse_tile, can_be_eaten = True, hp_gain = self.behaviour.corpse_heal))
+        globals.world.level.add_to_front(Corpse(self.name, self.xy, self.corpse_tile, can_be_eaten = True, hp_gain = self.behaviour.corpse_heal))
     def step(self):
         moved = False
         self.following_steps = max(0, self.following_steps - 1)
@@ -57,7 +67,7 @@ class Enemy(CombatObject):
             # TODO: path to colony
             xy = paths.towards(self.xy, globals.world.player.xy, consider_unexplored_blocked = False, allow_digging = self.behaviour.can_burrow)
             if xy == globals.world.player.xy:
-                globals.world.player.take_damage( self.stats.attack )
+                self.attack(globals.world.player)
                 moved = True
             elif xy and not globals.world.level.solid_object_at(xy):
                 map = globals.world.level.map
@@ -94,6 +104,21 @@ LADYBUG_DEAD_TILE = TileType(    # ASCII mode
          }
 )
 def ladybug(xy):
-    return Enemy(xy, LADYBUG_TILE, LADYBUG_DEAD_TILE, 
-                 EnemyBehaviour(corpse_heal = 10, can_burrow = False, following_steps = 2),
-                 CombatStats(hp = 20, hp_regen = 0, mp = 0, mp_regen = 0, attack = 5))
+    return Enemy(
+             "Ladybug", 
+             xy, 
+             LADYBUG_TILE, 
+             LADYBUG_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 10, 
+                    can_burrow = False, 
+                    following_steps = 2
+             ),
+             CombatStats(
+                    hp = 20, 
+                    hp_regen = 0, 
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 5
+            )
+    )

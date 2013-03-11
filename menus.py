@@ -1,6 +1,8 @@
 import libtcodpy as libtcod
 from geometry import *
+from utils import *
 import console
+import colors
 
 screen = console.Console()
 
@@ -50,3 +52,27 @@ def menu(header, options, width):
 
 def msgbox(text, width=50):
     menu(text, [], width) 
+
+class Message:
+    def __init__(self, message):
+        self.message = message
+        self.occurences = 1
+class Messages:
+    def __init__(self, amount_to_draw):
+        self.messages = []
+        self.amount_to_draw = amount_to_draw
+    def add(self, msg):
+        amount = len(self.messages) 
+        if amount > 0 and self.messages[amount-1].message == msg:
+            self.messages[amount-1].occurences += 1
+        else:
+            self.messages.append(Message(msg))
+            if amount+1 > self.amount_to_draw:
+                del self.messages[0 : amount+1 - self.amount_to_draw]
+    def draw(self, con, xy):
+        for msg in self.messages:
+            contents = msg.message
+            if msg.occurences > 1:
+                contents = contents + [colors.PALE_GREEN,  ' x' + str(msg.occurences)]
+            print_colored(con, xy, *contents)
+            xy += Pos(0, 1)
