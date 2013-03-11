@@ -8,6 +8,7 @@ import fieldofview
 import paths
 import console
 import tiles
+import scents
 
 from menus import menu, msgbox
 
@@ -90,6 +91,13 @@ class DungeonMap:
                 tiles.draw_tile(self[xy].type, self[xy].variant, xy, True)
 
         WAS_SHOW_ALL = SHOW_ALL
+
+class ScentMap:
+    def __init__(self, world, size):
+        self.world = world
+        self.size = size
+        self.map = [ [ scents.Scent(0) for x in range(size.w) ]
+                        for y in range(size.h) ]
 
 # Holds a DungeonMap (ie, the tiles) and the game objects
 class DungeonLevel:
