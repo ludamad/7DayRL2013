@@ -109,7 +109,9 @@ class DungeonLevel:
     def add(self, object):
         self.objects.append(object)
     def add_to_front(self, object):
-        self.objects.insert(0, object)
+        # Hack to always have player be first
+        idx = 0 if self.world.player not in self.objects else self.objects.index(self.world.player)+1
+        self.objects.insert(idx, object)
     def remove(self, object):
         self.objects.remove(object)
     def queue_removal(self, object):

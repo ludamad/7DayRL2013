@@ -52,7 +52,7 @@ def level1(level, bsp, nodes):
                     if level.map[xy].type == FLOOR:
                         level.map[xy].make_floor2()
 
-    for i in range(20):
+    for i in range(50):
         xy = level.random_xy(lambda level,xy: not level.map[xy].blocked and not any( level.objects_at(xy) ))
         level.add( enemies.ladybug(xy) )
 

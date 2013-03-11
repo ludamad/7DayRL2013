@@ -11,19 +11,26 @@ from utils import *
 import colors
 
 class Corpse(GameObject):
-    def __init__(self, xy, tiletype): 
+    def __init__(self, xy, tiletype, can_be_eaten=True, hp_gain=0):
         GameObject.__init__(self, xy, tiletype, solid=False, draw_once_seen = True)
         self.time_to_live = 10
+        self.can_be_eaten = can_be_eaten
+        self.hp_gain = hp_gain
     def step(self):
         self.time_to_live -= 1
+        for obj in globals.world.level.objects_at(self.xy):
+            if isinstance(obj, CombatObject):
+                obj.stats.regen_hp(self.hp_gain)
+                globals.world.level.queue_removal(self)
+                return
         if self.time_to_live <= 0:
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, heal_player=0, can_burrow = True, following_steps = 0):
+    def __init__(self, corpse_heal=0, can_burrow = True, following_steps = 0):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
-        self.heal_player = heal_player
+        self.corpse_heal = corpse_heal
 
 class Enemy(CombatObject):
     def __init__(self, xy, tiletype, corpsetile, behaviour, stats): 
@@ -35,8 +42,7 @@ class Enemy(CombatObject):
 
     def die(self):
         globals.world.level.queue_removal(self)
-        globals.world.level.add_to_front(Corpse(self.xy, self.corpse_tile))
-        globals.world.player.stats.regen_hp(self.behaviour.heal_player)
+        globals.world.level.add_to_front(Corpse(self.xy, self.corpse_tile, can_be_eaten = True, hp_gain = self.behaviour.corpse_heal))
     def step(self):
         moved = False
         self.following_steps = max(0, self.following_steps - 1)
@@ -89,5 +95,5 @@ LADYBUG_DEAD_TILE = TileType(    # ASCII mode
 )
 def ladybug(xy):
     return Enemy(xy, LADYBUG_TILE, LADYBUG_DEAD_TILE, 
-                 EnemyBehaviour(heal_player = 10, can_burrow = False, following_steps = 2),
+                 EnemyBehaviour(corpse_heal = 10, can_burrow = False, following_steps = 2),
                  CombatStats(hp = 20, hp_regen = 0, mp = 0, mp_regen = 0, attack = 5))
