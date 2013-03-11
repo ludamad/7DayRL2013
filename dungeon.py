@@ -96,8 +96,21 @@ class ScentMap:
     def __init__(self, world, size):
         self.world = world
         self.size = size
-        self.map = [ [ scents.Scent(0) for x in range(size.w) ]
+        self.map = [ [ scents.Scents() for x in range(size.w) ]
                         for y in range(size.h) ]
+    def step(self,world):
+        for s in self.map:
+            s.decay()
+        #objects should add and removetheir own scents
+        return
+        
+    def add(self, scent, xy):
+        #take object and it returns scent object?
+        #call radius on it
+        return
+        
+    def radius(self, xy):
+        return
 
 # Holds a DungeonMap (ie, the tiles) and the game objects
 class DungeonLevel:
