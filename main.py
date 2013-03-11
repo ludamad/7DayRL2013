@@ -7,7 +7,7 @@ import colors
 libtcod.sys_set_fps(20)
 
 console.set_custom_font('tiles12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, 16, 23 )
-console.init_root(SCREEN_SIZE + Size(0, 7), 'FooQuest', False, libtcod.RENDERER_SDL)
+console.init_root(SCREEN_SIZE + Size(0, panel.size.h), 'FooQuest', False, libtcod.RENDERER_SDL)
 
 screen = console.Console()
 screen.set_default_foreground(colors.WHITE)
@@ -25,7 +25,7 @@ while not console.is_window_closed():
 
     # Blit it to the screen
     con.blit( make_rect(Pos(0,0), SCREEN_SIZE), screen )
-    panel.blit( make_rect( Pos(0,0), panel.size), screen, Pos(0, 50))
+    panel.blit( make_rect( Pos(0,0), panel.size), screen, Pos(0, SCREEN_SIZE.h))
     screen.flush()
 
 

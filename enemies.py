@@ -20,8 +20,10 @@ class Corpse(GameObject):
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, following_steps = 0):
+    def __init__(self, heal_player=0, can_burrow = True, following_steps = 0):
         self.following_steps = following_steps
+        self.can_burrow = can_burrow
+        self.heal_player = heal_player
 
 class Enemy(CombatObject):
     def __init__(self, xy, tiletype, corpsetile, behaviour, stats): 
@@ -34,6 +36,7 @@ class Enemy(CombatObject):
     def die(self):
         globals.world.level.queue_removal(self)
         globals.world.level.add_to_front(Corpse(self.xy, self.corpse_tile))
+        globals.world.player.stats.regen_hp(self.behaviour.heal_player)
     def step(self):
         moved = False
         self.following_steps = max(0, self.following_steps - 1)
@@ -46,7 +49,7 @@ class Enemy(CombatObject):
             if visible: 
                 self.following_steps = self.behaviour.following_steps
             # TODO: path to colony
-            xy = paths.towards(self.xy, globals.world.player.xy, consider_unexplored_blocked = False, allow_digging = True)
+            xy = paths.towards(self.xy, globals.world.player.xy, consider_unexplored_blocked = False, allow_digging = self.behaviour.can_burrow)
             if xy == globals.world.player.xy:
                 globals.world.player.take_damage( self.stats.attack )
                 moved = True
@@ -86,5 +89,5 @@ LADYBUG_DEAD_TILE = TileType(    # ASCII mode
 )
 def ladybug(xy):
     return Enemy(xy, LADYBUG_TILE, LADYBUG_DEAD_TILE, 
-                 EnemyBehaviour(following_steps = 2),
+                 EnemyBehaviour(heal_player = 10, can_burrow = False, following_steps = 2),
                  CombatStats(hp = 20, hp_regen = 0, mp = 0, mp_regen = 0, attack = 5))

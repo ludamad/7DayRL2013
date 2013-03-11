@@ -1,12 +1,3 @@
-
-#bsp_depth = 8
-#bsp_min_room_size = 9
-## a room fills a random part of the node or the maximum available space ?
-#bsp_random_room = True
-## if true, there is always a wall on north & west side of a room
-#bsp_room_walls = True
-#bsp_tunnels = 4
-
 import libtcodpy as libtcod
 from geometry import *
 import dungeonfeatures

@@ -16,19 +16,8 @@ is_key_pressed    = console_is_key_pressed
 is_fullscreen     = console_is_fullscreen
 set_fullscreen    = console_set_fullscreen
 
-#char_presses = [False for _ in range(255)]
-#
-#def set_char_pressed(chr, value):
-#    if type(chr) == str: chr = ord(chr)
-#    char_presses[chr] = value
-#
-#def is_char_pressed(chr):
-#    if type(chr) == str: chr = ord(chr)
-#    return char_presses[chr]
-#
-#
-#def toggle_fullscreen():
-#    set_fullscreen(is_fullscreen())
+def toggle_fullscreen():
+    set_fullscreen(not is_fullscreen())
 
 # To get the screen console, just use Console()
 # To create a new console, use Console(size)

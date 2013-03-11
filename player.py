@@ -3,6 +3,7 @@ from actions import *
 import globals
 import colors
 from geometry import * 
+from utils import *
 import paths
 
 import dungeonfeatures
@@ -28,7 +29,7 @@ class PlayerStats:
 class Player(CombatObject):
     def __init__(self, xy): 
         CombatObject.__init__(self, xy, PLAYER, 
-                 CombatStats(hp = 100, hp_regen = 0.25, mp = 50, mp_regen = 0.25, attack = 10))
+                 CombatStats(hp = 100, mp = 50, mp_regen = 0.25, attack = 10))
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
 
@@ -130,15 +131,14 @@ class Player(CombatObject):
                     self.action = MoveAction(new_xy)
                     return True
         return False
-
+        
     def print_stats(self):
         import gui
         from globals import panel
         gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARKER_GRAY )
         gui.render_bar( Pos(3,4), 20, "MP", 20, 100, colors.BLUE, colors.DARKER_GRAY )
-        panel.set_default_foreground(colors.BABY_BLUE)
-        panel.print_text( Pos(3, 1), "FOO QUEST")
-        panel.set_default_foreground(colors.YELLOW)
-        panel.print_text( Pos(40, 3), "STATUS:")
-        panel.set_default_foreground(colors.PALE_YELLOW)
-        panel.print_text( Pos(40, 4), "Looking for a place to settle.")
+        print_colored(panel, Pos(3, 1), colors.BABY_BLUE, 'ANT COLONEL')
+        print_colored(panel, Pos(3, 5), colors.LIGHT_RED, 'Press ', colors.BABY_BLUE, 'A ', colors.LIGHT_RED, 'to see your abilities')
+        print_colored(panel, Pos(3, 6), colors.LIGHT_RED, 'Press ', colors.GOLD, 'C ', colors.LIGHT_RED, 'to see controls')
+        print_colored(panel, Pos(40, 3), colors.PALE_YELLOW, 'STATUS:')
+        print_colored(panel, Pos(40, 4), colors.YELLOW, 'Looking for a place to settle.')

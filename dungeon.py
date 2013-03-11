@@ -198,6 +198,8 @@ class World:
             self.draw(True)
         elif key.vk == libtcod.KEY_ENTER:
             self.restart()
+        elif key.c == ord('f'):
+            console.toggle_fullscreen()
         else:
             self.level.step(key, mouse)
             if self.player not in self.level.objects:
