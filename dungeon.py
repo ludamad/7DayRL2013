@@ -10,7 +10,7 @@ import console
 import tiles
 import scents
 
-from menus import menu, msgbox
+from menus import menu, msgbox, Messages
 
 WAS_SHOW_ALL = False
 # Represents dungeon tiles
@@ -168,7 +168,7 @@ class World:
 
         # Initialize first level
         self.level = self[0]
-        self.messages = menus.Messages(7)
+        self.messages = Messages(7)
         self.player = player.Player(self.level.random_xy())
         self.level.add_to_front(self.player)
 
