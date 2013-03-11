@@ -6,7 +6,7 @@ from geometry import *
 import paths
 
 import dungeonfeatures
-from gameobject import GameObject
+from combatobject import CombatStats, CombatObject
 from resource import Resource
 from tiles import *
 import enemies
@@ -16,17 +16,25 @@ PLAYER = TileType(
         # ASCII mode
          { "char" : '@', "color" : colors.YELLOW },
         # Tile mode
-         { "char" : tile(0,0) }
+         { "char" : tile(3,0) }
 )
 
-class Player(GameObject):
+class PlayerStats:
+    def __init__(self, hp, attack):
+        self.hp = hp
+        self.max_hp = hp
+        self.attack = attack
+
+class Player(CombatObject):
     def __init__(self, xy): 
-        GameObject.__init__(self, xy, PLAYER)
+        CombatObject.__init__(self, xy, PLAYER, 
+                 CombatStats(hp = 100, hp_regen = 0.25, mp = 50, mp_regen = 0.25, attack = 10))
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
 
-    def attack(self, enemy):
-        enemy.take_damage(10)
+    def die(self):
+        from globals import world
+        world.restart()
 
     def _adjust_view(self):
         PADDING = globals.VIEW_PADDING
@@ -55,6 +63,8 @@ class Player(GameObject):
 
         self.action.perform(self)
         self.action = None
+
+        self.stats.regen_for_step()
 
         if level.map[self.xy].type == DIGGABLE:
             level.map[self.xy].make_floor()
@@ -124,7 +134,7 @@ class Player(GameObject):
     def print_stats(self):
         import gui
         from globals import panel
-        gui.render_bar( Pos(3,3), 20, "HP", 20, 100, colors.RED, colors.DARKER_GRAY )
+        gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARKER_GRAY )
         gui.render_bar( Pos(3,4), 20, "MP", 20, 100, colors.BLUE, colors.DARKER_GRAY )
         panel.set_default_foreground(colors.BABY_BLUE)
         panel.print_text( Pos(3, 1), "FOO QUEST")
