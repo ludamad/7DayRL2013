@@ -20,22 +20,16 @@ PLAYER = TileType(
          { "char" : tile(3,0) }
 )
 
-class PlayerStats:
-    def __init__(self, hp, attack):
-        self.hp = hp
-        self.max_hp = hp
-        self.attack = attack
-
 class Player(CombatObject):
     def __init__(self, xy): 
         CombatObject.__init__(self, xy, PLAYER, 
                  CombatStats(hp = 100, mp = 50, mp_regen = 0.25, attack = 10))
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
-        self.damage_for_step = 0
+        self.points = 0
+
     def take_damage(self, attacker, damage):
         from globals import world
-        self.damage_for_step += damage
         CombatObject.take_damage(self, attacker, damage)
         world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' bites you for ' + str(int(damage)) + ' damage!'] )
 
@@ -67,7 +61,6 @@ class Player(CombatObject):
     def step(self):
         assert self.action # We shouldn't step unless we have an action
 
-        self.damage_for_step = 0
         level = globals.world.level
 
         self.action.perform(self)
@@ -145,16 +138,18 @@ class Player(CombatObject):
         
     def print_stats(self):
         import gui
-        from globals import panel, world
+        from globals import panel, world, RESOURCES_NEEDED
 
-        gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARKER_GRAY )
-        gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARKER_GRAY )
+        gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARK_GRAY )
+        gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARK_GRAY )
+        gui.render_bar( Pos(3,5), 20, "Points", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
+
+        self.stats.inventory.draw(panel, Pos(25, 4))
 
         print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'ANT COLONEL')
 
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')
-        print_colored(panel, Pos(23, 1), colors.GOLD, 'I', colors.WHITE, 'nventory')
 
         world.messages.draw(panel, Pos(35, 0))
 

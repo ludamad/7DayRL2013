@@ -5,6 +5,7 @@ from tiles import *
 import enemies
 from utils import *
 import resource
+import items
 
 class LevelTemplate:
     def __init__(self, handler, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
@@ -44,7 +45,9 @@ def place_resource(level):
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
                 for i in range(len(xy_region)):
                     level.add( resource.Resource(xy_region[i], i) )
-                break           
+                for xy in make_rect(rxy - Pos(1,1), Size(4,4)).edge_values():
+                    level.add( items.ItemObject(xy, items.HEALING_FOOD) )
+                break
                  
 def level1(level, bsp, nodes):
     for node in nodes: 
@@ -70,7 +73,7 @@ def level1(level, bsp, nodes):
     for i in range(200):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()
-        
+
 
     for i in range(50):
         xy = level.random_xy()

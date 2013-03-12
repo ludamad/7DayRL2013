@@ -61,10 +61,10 @@ class Rect:
 
     def edge_values(self):
         for x in self.x_values(): 
-            yield Pos(x, 0)
+            yield Pos(x, self.y)
             yield Pos(x, self.y + self.h - 1)
         for y in range(self.y+1, self.y-1 + self.h): 
-            yield Pos(0, y)
+            yield Pos(self.x, y)
             yield Pos(self.x + self.w - 1, y)
 
     def top_left(self): return Pos(self.x,self.y)

@@ -1,4 +1,5 @@
 from gameobject import GameObject
+from items import Inventory
 
 class CombatStats:
     def __init__(self, hp=0, hp_regen=0, mp =0, mp_regen = 0, attack = 0):
@@ -9,6 +10,7 @@ class CombatStats:
         self.max_mp = mp
         self.mp_regen = mp_regen
         self.attack = attack
+        self.inventory = Inventory()
     def regen_for_step(self):
         self.regen_hp(self.hp_regen)
         self.regen_mp(self.mp_regen)
@@ -29,3 +31,11 @@ class CombatObject(GameObject):
             self.die()
     def die(self):
         raise "Not implemented!"
+    def add_item(self, item_type):
+        self.stats.inventory.add_item(item_type)
+    def use_item(self, user, item):
+        self.stats.inventory.use_item(user, item)
+    def unequip_item(self, user):
+        self.stats.inventory.unequip_item(user)
+    def equip_item(self, user, itemslot):
+        self.stats.inventory.unequip_item(user, itemslot)

@@ -2,6 +2,7 @@ from geometry import *
 from generation import generate_map, generate_connected_map, generate_features
 from utils import *
 
+import globals
 import colors
 import player
 import fieldofview
@@ -128,6 +129,8 @@ class DungeonLevel:
     def draw(self, fulldraw=False):
         self.map.draw(fulldraw)
         for obj in self.objects: obj.draw()
+        # hack to always draw player:
+        self.world.player.draw()
     def step(self, key, mouse):
         self.handle_relocations()
 
