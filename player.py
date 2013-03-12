@@ -142,15 +142,22 @@ class Player(CombatObject):
         return False
 
     def handle_inventory(self):
+        from globals import game_draw
         items = self.stats.inventory.items
         text = "Which item do you want to use or drop?" if items else "You don't have any items."
         options = []
         for item_slot in items:
-            options.append(item_slot.item_type.summary)
-        opt = menus.menu(text, options, 50)
+            options.append([colors.WHITE, item_slot.item_type.name+" ", colors.PALE_BLUE, item_slot.item_type.summary])
+        opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
         if opt == None:
             return False
-        return self.queue_use_item(items[opt])
+        game_draw()
+        use_or_drop = menus.menu((colors.GOLD, "Use the " + items[opt].item_type.name + ", or drop it ?"), [(colors.LIGHT_GREEN,"Use"), (colors.LIGHT_RED,"Drop")], 50, index_color=colors.YELLOW)
+        if use_or_drop == 0:
+            return self.queue_use_item(items[opt])
+        elif use_or_drop == 1:
+            return self.queue_drop_item(items[opt])
+        return False
 
     def has_action(self, key, mouse):
         assert self.action == None # Did we handle the last action ? 
@@ -176,7 +183,6 @@ class Player(CombatObject):
         elif key.c == ord('i'):
             return self.handle_inventory()
         elif key.c == ord('m'):
-            menus.menu("Hello world!", ["A", "B", "C"], 50)
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:
                     obj.waypoint = True
@@ -201,7 +207,7 @@ class Player(CombatObject):
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')
 
-        world.messages.draw(panel, Pos(35, 0))
+        world.messages.draw(panel, Pos(33, 0))
 
 #        print_colored(panel, Pos(40, 3), colors.GREEN, 'STATUS:')
 #        print_colored(panel, Pos(40, 4), colors.PALE_GREEN, 'Looking for a place to settle.')

@@ -5,7 +5,8 @@ from colors import *
 from utils import *
 
 class ItemType:
-    def __init__(self, summary, tile, use_action, unwield_action=None):
+    def __init__(self, name, summary, tile, use_action, unwield_action=None):
+        self.name = name
         self.use_action = use_action
         self.tile = tile
         self.unwield_action = unwield_action
@@ -65,18 +66,21 @@ class Inventory:
         return None
 
 class ItemObject(GameObject):
-    def __init__(self, xy, item_type=None, on_pickup=None, dropped_this_turn=False):
+    def __init__(self, xy, item_type=None, pickup_description=None, on_pickup=None, dropped_this_turn=False):
         GameObject.__init__(self, xy, item_type.tile, solid=False, draw_once_seen=True)
         self.dropped_this_turn = dropped_this_turn
+        self.item_type = item_type
         if item_type:
+            if not pickup_description:
+                self.pickup_description = (BABY_BLUE, "You pick up the ", WHITE, item_type.name, BABY_BLUE, ".")
             def on_pickup(player, _):
                 player.add_item(item_type)
             self.on_pickup = on_pickup
-            self.is_inv_item = True
         else:
+            self.pickup_description = pickup_description
             self.on_pickup = on_pickup
             self.is_inv_item = False
-            
+
     def step(self):
         from player import Player
         from globals import world
@@ -84,9 +88,13 @@ class ItemObject(GameObject):
         if not self.dropped_this_turn:
             for obj in world.level.objects_at(self.xy):
                 if isinstance(obj, Player):
-                    if not self.is_inv_item or obj.stats.inventory.has_room():
+                    if not self.item_type or obj.stats.inventory.has_room():
                         self.on_pickup(obj, self)
+                        if self.pickup_description:
+                            world.messages.add(self.pickup_description)
                         world.level.queue_removal(self)
+                    else:
+                        world.messages.add([LIGHT_GRAY, "There's a ", BABY_BLUE, self.item_type.name, LIGHT_GRAY, " but you can't hold it."])
                     return
         self.dropped_this_turn = False
             
@@ -99,7 +107,20 @@ def change_maxhp(user, hp):
     user.stats.max_hp += hp
 
 HEALING_FOOD = ItemType(
-        summary = "Food Chunk: Heals 25 HP",
+        name = "Food Chunk",
+        summary = "Heals 25 HP",
+        tile = TileType(
+            # ASCII mode
+             { "char" : 248, "color" : PALE_RED },
+            # Tile mode
+             { "char" : tile(3,1)}
+        ),
+        use_action = lambda inv, user: gain_hp(user, 25)
+)
+
+MANA_CHUNK = ItemType(
+        name = "Food Chunk",
+        summary = "Heals 25 HP",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : PALE_RED },

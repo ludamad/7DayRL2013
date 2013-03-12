@@ -6,14 +6,20 @@ import colors
 
 screen = console.Console()
 
-def menu(header, options, width):
+def _cat_string_parts(header):
+    s=""
+    for i in range(0, len(header), 2):
+        s += header[i+1]
+    return s
+
+def menu(header, options, width, index_color=colors.WHITE):
     from globals import SCREEN_SIZE
 
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
  
     #calculate total height for the header (after auto-wrap) and one line per option
-    header_height = screen.get_height_rect( Rect(0, 0, width, SCREEN_SIZE.h), header)
-    if header == '':
+    header_height = screen.get_height_rect( Rect(0, 0, width, SCREEN_SIZE.h), _cat_string_parts(header))
+    if _cat_string_parts(header) == 0:
         header_height = 0
     height = len(options) + header_height
  
@@ -22,14 +28,16 @@ def menu(header, options, width):
  
     #print the header, with auto-wrap
     window.set_default_foreground(libtcod.white)
-    window.print_rect_ex(Rect(0, 0, width, height), libtcod.BKGND_NONE, libtcod.LEFT, header)
+    
+    window.print_rect_ex(Rect(0, 0, width, height), libtcod.BKGND_NONE, libtcod.LEFT, "")
+    print_colored(window, Pos(0,0), *header)
  
     #print all the options
     y = header_height
     index = 1
     for option_text in options:
-        text = '(' + str(index) + ') ' + option_text
-        window.print_ex(Pos(0, y), libtcod.BKGND_NONE, libtcod.LEFT, text)
+        print_colored(window, Pos(0,y), index_color, str(index) + " ", *option_text)
+
         y += 1
         index += 1
  
@@ -42,6 +50,8 @@ def menu(header, options, width):
     screen.flush()
     while True:
         key = console.wait_for_keypress(True)
+        if not key.pressed:
+            continue
      
         #convert the ASCII code to an index; if it corresponds to an option, return it
         if key.c == ord('0'):
@@ -50,8 +60,9 @@ def menu(header, options, width):
             index = key.c - ord('1')
         if index >= 0 and index < len(options): 
             return index
-        elif key.c != ord('i'):
-            return None
+        return None
+#        elif key.c != ord('i'):
+#            return None
 
 def msgbox(text, width=50):
     menu(text, [], width) 
@@ -76,6 +87,6 @@ class Messages:
         for msg in self.messages:
             contents = msg.message
             if msg.occurences > 1:
-                contents = contents + [colors.PALE_GREEN,  ' x' + str(msg.occurences)]
+                contents = list(contents) + [colors.PALE_GREEN,  ' x' + str(msg.occurences)]
             print_colored(con, xy, *contents)
             xy += Pos(0, 1)

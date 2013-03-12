@@ -14,6 +14,7 @@ DARKER_RED = Color(25, 0, 0)
 MUTED_GREEN = Color(50, 255, 50)
 PALE_GREEN = Color(180, 255, 180)
 GREEN = Color(0, 255, 0)
+LIGHT_GREEN = Color(50, 255, 50)
 DARK_GREEN = Color(0, 100, 0)
 
 LIGHT_BLUE = Color(50, 50, 255)
