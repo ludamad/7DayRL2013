@@ -99,7 +99,7 @@ def change_maxhp(user, hp):
     user.stats.max_hp += hp
 
 HEALING_FOOD = ItemType(
-        summary = "Heals 25 HP",
+        summary = "Food Chunk: Heals 25 HP",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : PALE_RED },

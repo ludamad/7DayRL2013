@@ -5,6 +5,7 @@ import colors
 from geometry import * 
 from utils import *
 import paths
+import menus
 
 import dungeonfeatures
 from combatobject import CombatStats, CombatObject
@@ -140,6 +141,17 @@ class Player(CombatObject):
                     return self.queue_drop_item(item_slot)
         return False
 
+    def handle_inventory(self):
+        items = self.stats.inventory.items
+        text = "Which item do you want to use or drop?" if items else "You don't have any items."
+        options = []
+        for item_slot in items:
+            options.append(item_slot.item_type.summary)
+        opt = menus.menu(text, options, 50)
+        if opt == None:
+            return False
+        return self.queue_use_item(items[opt])
+
     def has_action(self, key, mouse):
         assert self.action == None # Did we handle the last action ? 
 
@@ -161,7 +173,10 @@ class Player(CombatObject):
             return self.queue_move( +1, -1 )
         elif key.vk == libtcod.KEY_SPACE or key.c == ord('.'):
             return self.queue_move( 0, 0 )
+        elif key.c == ord('i'):
+            return self.handle_inventory()
         elif key.c == ord('m'):
+            menus.menu("Hello world!", ["A", "B", "C"], 50)
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:
                     obj.waypoint = True

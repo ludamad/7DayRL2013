@@ -26,12 +26,12 @@ def menu(header, options, width):
  
     #print all the options
     y = header_height
-    letter_index = ord('a')
+    index = 1
     for option_text in options:
-        text = '(' + chr(letter_index) + ') ' + option_text
-        window.print_ex(window, Pos(0, y), libtcod.BKGND_NONE, libtcod.LEFT, text)
+        text = '(' + str(index) + ') ' + option_text
+        window.print_ex(Pos(0, y), libtcod.BKGND_NONE, libtcod.LEFT, text)
         y += 1
-        letter_index += 1
+        index += 1
  
     #blit the contents of "window" to the root console
     x = SCREEN_SIZE.w/2 - width/2
@@ -40,15 +40,18 @@ def menu(header, options, width):
  
     #present the root console to the player and wait for a key-press
     screen.flush()
-    key = console.wait_for_keypress(True)
- 
-    if key.vk == libtcod.KEY_ENTER and key.lalt:  #(special case) Alt+Enter: toggle fullscreen
-        console.toggle_fullscreen()
- 
-    #convert the ASCII code to an index; if it corresponds to an option, return it
-    index = key.c - ord('a')
-    if index >= 0 and index < len(options): return index
-    return None
+    while True:
+        key = console.wait_for_keypress(True)
+     
+        #convert the ASCII code to an index; if it corresponds to an option, return it
+        if key.c == ord('0'):
+            index = 10
+        else:
+            index = key.c - ord('1')
+        if index >= 0 and index < len(options): 
+            return index
+        elif key.c != ord('i'):
+            return None
 
 def msgbox(text, width=50):
     menu(text, [], width) 
