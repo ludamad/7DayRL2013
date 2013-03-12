@@ -7,7 +7,7 @@ import colors
 
 APPLE = TileType(
         # ASCII mode
-         { "char" : 'A', "color" : colors.PALE_RED },
+         { "char" : 247, "color" : colors.PALE_RED },
         # Tile mode        
         variant_list(
             [ tile(3,2), tile(4,2), tile(3,3), tile(4,3) ], {}

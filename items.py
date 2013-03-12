@@ -85,7 +85,7 @@ HEALING_FOOD = ItemType(
         summary = "Heals 25 HP",
         tile = TileType(
             # ASCII mode
-             { "char" : '@', "color" : PALE_RED },
+             { "char" : 248, "color" : PALE_RED },
             # Tile mode
              { "char" : tile(3,1)}
         ),
