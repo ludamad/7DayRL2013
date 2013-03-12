@@ -7,6 +7,8 @@ class ScentMaps:
         self.resourcemap = ScentMap(size)
     def step(self):
         self.trailmap.decay()
+    def mark(self,xy):
+        self.trailmap.add(xy, 5)
 
 class ScentMap:
     def __init__(self, size):
@@ -14,6 +16,7 @@ class ScentMap:
         self.map = [ [ 0 for x in range(size.w) ]
                         for y in range(size.h) ]
         self.decayrate = 1
+        self.maxstrength = 15
     def rect(self):
         return make_rect( Pos(0,0), self.size )
     
@@ -24,6 +27,11 @@ class ScentMap:
     # To allow for map[xy] = a
     def __setitem__(self, xy, strength):
         self.map[ xy.y ][ xy.x ] = strength
+
+    def add(self, xy, strength):
+        self[xy] = self[xy] + strength
+        if self[xy] > self.maxstrength:
+            self[xy] = self.maxstrength
 
     def decay(self):
         for xy in self.rect().xy_values():

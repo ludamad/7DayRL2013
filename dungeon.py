@@ -8,7 +8,6 @@ import fieldofview
 import paths
 import console
 import tiles
-import scents
 
 from menus import menu, msgbox, Messages
 
