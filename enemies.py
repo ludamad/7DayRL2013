@@ -31,10 +31,11 @@ class Corpse(GameObject):
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, corpse_heal=0, can_burrow = True, following_steps = 0):
+    def __init__(self, corpse_heal=0, can_burrow = True, following_steps = 0, pause_chance = 1.0/8):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
         self.corpse_heal = corpse_heal
+        self.pause_chance = pause_chance
 
 class Enemy(CombatObject):
     def __init__(self, name, xy, tiletype, corpsetile, behaviour, stats): 
@@ -56,7 +57,7 @@ class Enemy(CombatObject):
     def step(self):
         moved = False
         self.following_steps = max(0, self.following_steps - 1)
-        if rand(0, 8) == 0: 
+        if rand(0, 100)/100.0 < self.behaviour.pause_chance: 
             return #Random chance of not moving
 
         # Move towards player
@@ -112,11 +113,48 @@ def ladybug(xy):
              EnemyBehaviour(
                     corpse_heal = 10, 
                     can_burrow = False, 
-                    following_steps = 2
+                    following_steps = 2,
+                    pause_chance = 1/8.0
              ),
              CombatStats(
                     hp = 20, 
                     hp_regen = 0, 
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 5
+            )
+    )
+
+ANT_TILE = TileType(    # ASCII mode
+         { "char" : 'a',
+           "color" : colors.PURPLE
+         },                 # Tile mode
+         { "char" : tile(0,0)
+         }
+)
+
+ANT_DEAD_TILE = TileType(    # ASCII mode
+         { "char" : '%', 
+           "color" : colors.PURPLE
+         },                     # Tile mode
+         { "char" : tile(0,6)
+         }
+)
+def ant(xy):
+    return Enemy(
+             "Ant",
+             xy, 
+             ANT_TILE, 
+             ANT_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 5,
+                    can_burrow = True, 
+                    following_steps = 2,
+                    pause_chance = 0.0
+             ),
+             CombatStats(
+                    hp = 10,
+                    hp_regen = 0,
                     mp = 0, 
                     mp_regen = 0, 
                     attack = 5

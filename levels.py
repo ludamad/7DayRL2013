@@ -36,7 +36,7 @@ def apply_nearby(map, points, tile_cond, near_cond, mutator):
 def _free_square(level, xy):
     return not level.map[xy].blocked and not any(level.objects_at(xy))
 
-def place_resource(level): 
+def place_resource(level, food_chance = 0.2):
     while True:
             rxy = level.random_xy()
             xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]
@@ -46,7 +46,8 @@ def place_resource(level):
                 for i in range(len(xy_region)):
                     level.add( resource.Resource(xy_region[i], i) )
                 for xy in make_rect(rxy - Pos(1,1), Size(4,4)).edge_values():
-                    level.add( items.ItemObject(xy, items.HEALING_FOOD) )
+                    if rand(0,100) / 100.0 <= food_chance:
+                        level.add( items.ItemObject(xy, items.HEALING_FOOD) )
                 break
                  
 def level1(level, bsp, nodes):
@@ -75,7 +76,11 @@ def level1(level, bsp, nodes):
         level.map[xy].make_diggable()
 
 
-    for i in range(50):
+    for i in range(25):
+        xy = level.random_xy()
+        level.add( enemies.ant(xy) )
+
+    for i in range(10):
         xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
 

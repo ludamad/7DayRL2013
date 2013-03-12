@@ -152,7 +152,7 @@ class Player(CombatObject):
         text = "Which item do you want to use or drop?" if items else "You don't have any items."
         options = []
         for item_slot in items:
-            options.append([colors.WHITE, item_slot.item_type.name+" ", colors.PALE_BLUE, item_slot.item_type.summary])
+            options.append([colors.MUTED_GREEN, item_slot.item_type.name+" ", colors.YELLOW, item_slot.item_type.summary])
         opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
         if opt == None:
             return False

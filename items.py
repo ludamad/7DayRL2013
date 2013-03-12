@@ -49,10 +49,10 @@ class Inventory:
 
     def draw(self, con, xy):
         for i in range(self.max_items):
-            draw_xy = xy + Pos( i%5, i%2 )
+            draw_xy = xy + Pos( i%5,(i%2+i%5)%2 )
             
             print_colored(con, xy - Pos(0,1), GOLD, 'I', WHITE, 'tems')
-            color = [Color(0, 30, 0), Color(0,70,0)][(i%2+i%5)%2]
+            color = [Color(0, 30, 0), Color(0,70,0)][i%2]
             con.put_char_ex(draw_xy, ' ', color, color)
             if i < len(self.items):
                 tt = self.items[i].item_type.tile
