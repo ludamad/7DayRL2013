@@ -46,6 +46,10 @@ class Player(CombatObject):
     def die(self):
         from globals import world
         world.restart()
+        
+    def trail(self):
+        from globals import world
+        globals.world.level.scents.trail(self.xy)
 
     def _adjust_view(self):
         PADDING = globals.VIEW_PADDING

@@ -4,6 +4,8 @@ class MoveAction:
     def __init__(self, xy): 
         self.destination = xy
     def perform(self, actor):   
+        #trail immediately before leaving a square
+        actor.trail();
         actor.xy = self.destination
 
 class AttackAction:

@@ -101,8 +101,11 @@ level_templates = [ LEVEL_1 ]
 def generate_level(world, num):
     from globals import LEVEL_SIZE
     from dungeon import DungeonMap, DungeonLevel
+    from scents import ScentMaps
     new_map = DungeonMap(world, LEVEL_SIZE)
-    level = DungeonLevel(world, new_map, num)
+    scent_map = ScentMaps(world, LEVEL_SIZE)
+    level = DungeonLevel(world, new_map, scent_map, num)
+
 
     level_templates[num].generate(level)
 

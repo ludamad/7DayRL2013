@@ -1,15 +1,16 @@
-from globals import world
 from geometry import *
 
 class ScentMaps:
-    def __init__(self, size):
+    def __init__(self, world, size):
         self.trailmap = ScentMap(size)
         self.resourcemap = ScentMap(size)
         self.avoidmap = ScentMap(size)
     def step(self):
         self.trailmap.decay()
-    def mark(self,xy):
+    def trail(self,xy):
         self.trailmap.add(xy, 5)
+    def avoid(self,xy):
+        self.avoidmap.add(xy, 5)
     def add(self,xy):
         self.resourcemap.radius(xy, 5)
     def remove(self,xy):

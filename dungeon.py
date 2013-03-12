@@ -94,9 +94,10 @@ class DungeonMap:
 
 # Holds a DungeonMap (ie, the tiles) and the game objects
 class DungeonLevel:
-    def __init__(self, world, map, index):
+    def __init__(self, world, map, scent_map, index):
         self.world = world
         self.map = map
+        self.scents = scent_map
         self.objects = []
         self.queued_removals = []
         self.queued_relocations = []
