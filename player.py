@@ -129,14 +129,15 @@ class Player(CombatObject):
                 if type(obj) == Resource:
                     obj.waypoint = True
             return False
-        if mouse.lbutton:
-            allow_dig = not console.is_key_pressed(libtcod.KEY_SHIFT)
+        if mouse.lbutton or mouse.rbutton:
+            allow_dig = mouse.rbutton
             map = globals.world.level.map
             mouse_xy = Pos(mouse.cx, mouse.cy)
             if map.valid_xy(mouse_xy) and map[mouse_xy].explored:
-                new_xy = paths.towards( self.xy, mouse_xy, allow_dig )
+                new_xy = paths.towards( self.xy, mouse_xy, avoid_solid_objects = True, allow_digging = allow_dig )
                 if new_xy:
-                    self.action = MoveAction(new_xy)
+                    rel_xy = new_xy - self.xy
+                    self.queue_move(rel_xy.x, rel_xy.y)
                     return True
         return False
         

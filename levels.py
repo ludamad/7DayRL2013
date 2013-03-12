@@ -4,6 +4,7 @@ import dungeonfeatures
 from tiles import *
 import enemies
 from utils import *
+import resource
 
 class LevelTemplate:
     def __init__(self, handler, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
@@ -53,8 +54,18 @@ def level1(level, bsp, nodes):
                         level.map[xy].make_floor2()
 
     for i in range(50):
-        xy = level.random_xy(lambda level,xy: not level.map[xy].blocked and not any( level.objects_at(xy) ))
+        xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
+
+    for i in range(5):
+        while True:
+            rxy = level.random_xy()
+            xy_near = [ rxy + Pos(x,y) for y in [0,1] for x in [0,1] ]
+            valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
+            if valid:
+                for i in range(len(xy_near)):
+                    level.add( resource.Resource(xy_near[i], i) )
+                break
 
 #    # Stairs down
 #    for i in range(2):

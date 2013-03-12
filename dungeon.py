@@ -142,7 +142,9 @@ class DungeonLevel:
     def is_solid(self, xy):
         return self.map[xy].blocked or self.solid_object_at(xy)
 
-    def random_xy(self, func = ( lambda level, xy: not level.map[xy].blocked )):
+    def random_xy(self, func = None):
+        if func == None:
+            func = lambda level, xy: not level.map[xy].blocked and not self.solid_object_at(xy)
         rect = self.map.rect()
         while True:
             xy = Pos( rand(0, self.map.size.w-1), rand(0, self.map.size.h-1) )
