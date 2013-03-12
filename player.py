@@ -98,7 +98,9 @@ class Player(CombatObject):
                 if isinstance(object, enemies.Enemy):
                     self.action = AttackAction(object)
                     return True
-            if (allow_dig and map[pos].type == DIGGABLE) or not map[pos].blocked:
+            solid_obj = globals.world.level.solid_object_at(pos) and not (dx,dy) == (0,0)
+            tile_walkable = (allow_dig and map[pos].type == DIGGABLE) or not map[pos].blocked
+            if not solid_obj and tile_walkable:
                 self.action = MoveAction(pos)
                 return True
         return False

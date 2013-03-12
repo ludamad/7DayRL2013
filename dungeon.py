@@ -148,7 +148,7 @@ class DungeonLevel:
         rect = self.map.rect()
         while True:
             xy = Pos( rand(0, self.map.size.w-1), rand(0, self.map.size.h-1) )
-            if func and func(self, xy):
+            if func(self, xy):
                 return xy
 
 # Stores the game world.

@@ -28,19 +28,33 @@ def apply_nearby(map, points, tile_cond, near_cond, mutator):
     for i in range(points):
         while True:
             xy = rand_pos(map.size.w - 1, map.size.h - 1)
-            if tile_cond(map[xy]) and any( near_cond(map[nxy]) for nxy in nearby(map, xy) ):
+            if tile_cond(xy) and any( near_cond(map[nxy]) for nxy in nearby(map, xy) ):
                 mutator(map[xy])
                 break
 
 def _free_square(level, xy):
     return not level.map[xy].blocked and not any(level.objects_at(xy))
 
+def place_resource(level): 
+    while True:
+            rxy = level.random_xy()
+            xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]
+            valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
+            if valid:
+                xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
+                for i in range(len(xy_region)):
+                    level.add( resource.Resource(xy_region[i], i) )
+                break           
+                 
 def level1(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 
-    apply_nearby(level.map, 1000,
-                 lambda tile: not tile.blocked, 
+    for i in range(5):
+        place_resource(level)
+
+    apply_nearby(level.map, 1100,
+                 lambda xy: not level.is_solid(xy),
                  lambda tile: tile.type == WALL or tile.type == DIGGABLE,
                  lambda tile: tile.make_diggable()
     )
@@ -53,19 +67,15 @@ def level1(level, bsp, nodes):
                     if level.map[xy].type == FLOOR:
                         level.map[xy].make_floor2()
 
+    for i in range(200):
+        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
+        level.map[xy].make_diggable()
+        
+
     for i in range(50):
         xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
 
-    for i in range(5):
-        while True:
-            rxy = level.random_xy()
-            xy_near = [ rxy + Pos(x,y) for y in [0,1] for x in [0,1] ]
-            valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
-            if valid:
-                for i in range(len(xy_near)):
-                    level.add( resource.Resource(xy_near[i], i) )
-                break
 
 #    # Stairs down
 #    for i in range(2):
