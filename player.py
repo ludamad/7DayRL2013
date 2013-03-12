@@ -23,6 +23,13 @@ PLAYER = TileType(
 
 INVENTORY_LOCATION_IN_PANEL = Pos(25, 4)
 
+def _get_mouse_item_slot(player, mouse):
+    from globals import SCREEN_SIZE
+    mouse_xy = Pos(mouse.cx, mouse.cy)
+    xy = mouse_xy - Pos(0, SCREEN_SIZE.h) - INVENTORY_LOCATION_IN_PANEL
+    return player.stats.inventory.find_clicked_item(xy)
+
+
 class Player(CombatObject):
     def __init__(self, xy): 
         CombatObject.__init__(self, xy, PLAYER, 
@@ -131,9 +138,7 @@ class Player(CombatObject):
         if (mouse.lbutton or mouse.rbutton) and map.valid_xy(mouse_xy):
             return self.queue_click_move(mouse)
         elif mouse.lbutton_pressed or mouse.rbutton_pressed:
-            from globals import SCREEN_SIZE
-            xy = mouse_xy - Pos(0, SCREEN_SIZE.h) - INVENTORY_LOCATION_IN_PANEL
-            item_slot = self.stats.inventory.find_clicked_item(xy)
+            item_slot = _get_mouse_item_slot(self, mouse)
             if item_slot:
                 if mouse.lbutton_pressed:
                     return self.queue_use_item(item_slot)
@@ -159,29 +164,66 @@ class Player(CombatObject):
             return self.queue_drop_item(items[opt])
         return False
 
+    def handle_controls(self):
+        controls = [ colors.GREEN, "Arrow key ",
+                    colors.WHITE, "movement accepted, but cannot do diagonals\n", colors.WHITE, '\n']
+        controls += [colors.GREEN, "'.'", colors.WHITE, " or ", colors.GREEN, "5", colors.WHITE, ' to wait a turn\n', colors.WHITE, '\n']
+        controls += [ colors.LIGHT_RED, "Movement with 'vi' keys:\n",
+
+                     colors.GREEN, " H", colors.WHITE, ": left", 
+                     colors.GREEN, "    L", colors.WHITE, ": right", 
+                     colors.GREEN, "    J", colors.WHITE, ": down", 
+                     colors.GREEN, "      K", colors.WHITE, ": up\n",
+
+                     colors.GREEN, " Y", colors.WHITE, ": up-left", 
+                     colors.GREEN, " U", colors.WHITE, ": up-right", 
+                     colors.GREEN, " B", colors.WHITE, ": down-left", 
+                     colors.GREEN, " N", colors.WHITE, ": down-right\n"]
+
+        controls += [ colors.LIGHT_RED, "Movement with num-pad:\n",
+
+                     colors.GREEN, " 4", colors.WHITE, ": left", 
+                     colors.GREEN, "    6", colors.WHITE, ": right", 
+                     colors.GREEN, "    2", colors.WHITE, ": down", 
+                     colors.GREEN, "      8", colors.WHITE, ": up\n",
+
+                     colors.GREEN, " 7", colors.WHITE, ": up-left", 
+                     colors.GREEN, " 9", colors.WHITE, ": up-right", 
+                     colors.GREEN, " 1", colors.WHITE, ": down-left", 
+                     colors.GREEN, " 3", colors.WHITE, ": down-right\n", colors.WHITE, '\n']
+        controls += [ colors.GREEN, "Left click ", colors.WHITE, "to move to location\n"]
+        controls += [ colors.GREEN, "Right click ", colors.WHITE, "to move to location but avoid digging\n", colors.WHITE, '\n']
+        controls += [ colors.GREEN, "I ", colors.WHITE, "for inventory\n"]
+        controls += [ colors.GREEN, "A ", colors.WHITE, "for abilities\n"]
+        controls += [ colors.GREEN, "C ", colors.WHITE, "for this menu (controls)\n"]
+        menus.msgbox(controls, width=60)
+        return False
+
     def has_action(self, key, mouse):
         assert self.action == None # Did we handle the last action ? 
 
-        if key.vk == libtcod.KEY_UP or key.c == ord('k'):
+        if key.vk == libtcod.KEY_UP or key.c == ord('k') or key.vk == libtcod.KEY_KP8 or key.c == ord('8'):
             return self.queue_move( 0, -1 )
-        elif key.vk == libtcod.KEY_DOWN or key.c == ord('j'):
+        elif key.vk == libtcod.KEY_DOWN or key.c == ord('j') or key.vk == libtcod.KEY_KP2 or key.c == ord('2'):
             return self.queue_move( 0, +1 )
-        elif key.vk == libtcod.KEY_LEFT or key.c == ord('h'):
+        elif key.vk == libtcod.KEY_LEFT or key.c == ord('h') or key.vk == libtcod.KEY_KP4 or key.c == ord('4'):
             return self.queue_move( -1, 0 )
-        elif key.vk == libtcod.KEY_RIGHT or key.c == ord('l'):
+        elif key.vk == libtcod.KEY_RIGHT or key.c == ord('l') or key.vk == libtcod.KEY_KP6 or key.c == ord('6'):
             return self.queue_move( +1, 0 )
-        elif key.c == ord('b'):
+        elif key.c == ord('b') or key.vk == libtcod.KEY_KP1 or key.c == ord('1'):
             return self.queue_move( -1, +1 )
-        elif key.c == ord('n'):
+        elif key.c == ord('n') or key.vk == libtcod.KEY_KP3 or key.c == ord('3'):
             return self.queue_move( +1, +1 )
-        elif key.c == ord('y'):
+        elif key.c == ord('y') or key.vk == libtcod.KEY_KP7 or key.c == ord('7'):
             return self.queue_move( -1, -1 )
-        elif key.c == ord('u'):
+        elif key.c == ord('u') or key.vk == libtcod.KEY_KP9 or key.c == ord('9'):
             return self.queue_move( +1, -1 )
-        elif key.vk == libtcod.KEY_SPACE or key.c == ord('.'):
+        elif key.vk == libtcod.KEY_SPACE or key.c == ord('.') or key.vk == libtcod.KEY_KP5 or key.c == ord('5'):
             return self.queue_move( 0, 0 )
         elif key.c == ord('i'):
             return self.handle_inventory()
+        elif key.c == ord('c'):
+            return self.handle_controls()
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:
@@ -201,13 +243,21 @@ class Player(CombatObject):
         gui.render_bar( Pos(3,5), 20, "Points", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
 
         self.stats.inventory.draw(panel, INVENTORY_LOCATION_IN_PANEL)
+        item_slot = _get_mouse_item_slot(self, libtcod.mouse_get_status())
 
         print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'ANT COLONEL')
 
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')
 
-        world.messages.draw(panel, Pos(33, 0))
+        if not item_slot:
+            world.messages.draw(panel, Pos(33, 0))
+        else:
+            print_colored(panel, Pos(33, 0), colors.MUTED_GREEN, item_slot.item_type.name)
+            print_colored(panel, Pos(34, 1), colors.YELLOW, item_slot.item_type.summary)
+            print_colored(panel, Pos(34, 3), colors.BABY_BLUE, "Left click to use")
+            print_colored(panel, Pos(34, 4), colors.WHITE, "Right click to drop")
+
 
 #        print_colored(panel, Pos(40, 3), colors.GREEN, 'STATUS:')
 #        print_colored(panel, Pos(40, 4), colors.PALE_GREEN, 'Looking for a place to settle.')
