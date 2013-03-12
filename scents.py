@@ -1,30 +1,20 @@
+from geometry import *
 
-
-class Scents:
-    def __init__(self):
-        #map type of scent to the scent object
-        self.scents = {}
-    def add(self,type,scent):
-        if self.scents[type]:
-            self.scents[type].add(scent)
-        else:
-            self.scents[type] = scent
-    def decay(self):
-        for s in self.scents:
-            s.decay()
-        
-
-class Scent:
-    def __init__(self):
-        self.strength = 0
-        self.radius = 0
-        self.decay = 0
-    def add(self,scent):
-        self.strength = self.strength + scent.strength
-        self.radius = max(self.radius, scent.radius)
-        self.decay = (self.decay + scent.decay) / 2.0        
-    def decay(self):
-        self.strength = self.strength - self.decay
-        if self.strength < 0:
-            self.strength = 0
+class ScentMap:
+    def __init__(self, world, size):
+        self.world = world
+        self.size = size
+        self.trailmap = [ [ 0 for x in range(size.w) ]
+                        for y in range(size.h) ]
+        self.resmap = [ [ 0 for x in range(size.w) ]
+                        for y in range(size.h) ]
+        self.decay = 1
+    def rect(self):
+        return make_rect( Pos(0,0), self.size )
+    def step(self,world):
+        self.decay(self.trailmap)        
+    def decay(self, map):
+        for i in self.rect():
+            if map[i] >= self.decay:
+                map[i] = map[i] - self.decay
         
