@@ -23,9 +23,15 @@ class Inventory:
     def add_item(self, item):
         self.items.append(ItemSlot(item))
 
-    def use_item(self, user, itemslot):
-        self.items.remove(itemslot)
-        itemslot.item_type.use_action(self, user)
+    def use_item(self, user, item_slot):
+        self.items.remove(item_slot)
+        item_slot.item_type.use_action(self, user)
+
+    def drop_item(self, user, item_slot):
+        from globals import world
+        self.items.remove(item_slot)
+        itemobject = ItemObject(user.xy, item_slot.item_type, dropped_this_turn=True)
+        world.level.add(itemobject)
 
     def has_room(self):
         return len(self.items) < self.max_items
@@ -35,12 +41,13 @@ class Inventory:
             self.equipped.unwield_action(self, user)
             self.equipped = None
 
-    def equip_item(self, user, itemslot):
-        self.items.remove(itemslot)
+    def equip_item(self, user, item_slot):
+        self.items.remove(item_slot)
         self.unequip_item(user)
-        self.equipped = itemslot.item_type
-    def draw(self, con, xy, max_slots=10):
-        for i in range(max_slots):
+        self.equipped = item_slot.item_type
+
+    def draw(self, con, xy):
+        for i in range(self.max_items):
             draw_xy = xy + Pos( i%5, i%2 )
             
             print_colored(con, xy - Pos(0,1), GOLD, 'I', WHITE, 'tems')
@@ -50,9 +57,17 @@ class Inventory:
                 tt = self.items[i].item_type.tile
                 tt.variant(0).draw( con, draw_xy, True, color)
 
+    def find_clicked_item(self, xy):
+        for i in range(len(self.items)):
+            slot_xy = Pos( i%5, i%2 )
+            if slot_xy == xy:
+                return self.items[i]
+        return None
+
 class ItemObject(GameObject):
-    def __init__(self, xy, item_type=None, on_pickup=None):
+    def __init__(self, xy, item_type=None, on_pickup=None, dropped_this_turn=False):
         GameObject.__init__(self, xy, item_type.tile, solid=False, draw_once_seen=True)
+        self.dropped_this_turn = dropped_this_turn
         if item_type:
             def on_pickup(player, _):
                 player.add_item(item_type)
@@ -66,12 +81,14 @@ class ItemObject(GameObject):
         from player import Player
         from globals import world
 
-        for obj in world.level.objects_at(self.xy):
-            if isinstance(obj, Player):
-                if not self.is_inv_item or obj.stats.inventory.has_room():
-                    self.on_pickup(obj, self)
-                    world.level.queue_removal(self)
-                return
+        if not self.dropped_this_turn:
+            for obj in world.level.objects_at(self.xy):
+                if isinstance(obj, Player):
+                    if not self.is_inv_item or obj.stats.inventory.has_room():
+                        self.on_pickup(obj, self)
+                        world.level.queue_removal(self)
+                    return
+        self.dropped_this_turn = False
             
 # HERE BE ITEM DATA
 
@@ -89,5 +106,5 @@ HEALING_FOOD = ItemType(
             # Tile mode
              { "char" : tile(3,1)}
         ),
-        use_action = lambda user, inv: gain_hp(user, 25)
+        use_action = lambda inv, user: gain_hp(user, 25)
 )

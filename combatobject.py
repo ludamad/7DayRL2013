@@ -33,8 +33,10 @@ class CombatObject(GameObject):
         raise "Not implemented!"
     def add_item(self, item_type):
         self.stats.inventory.add_item(item_type)
-    def use_item(self, user, item):
-        self.stats.inventory.use_item(user, item)
+    def use_item(self, item_slot):
+        self.stats.inventory.use_item(self, item_slot)
+    def drop_item(self, item_slot):
+        self.stats.inventory.drop_item(self, item_slot)
     def unequip_item(self, user):
         self.stats.inventory.unequip_item(user)
     def equip_item(self, user, itemslot):

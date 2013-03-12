@@ -20,6 +20,8 @@ PLAYER = TileType(
          { "char" : tile(3,0) }
 )
 
+INVENTORY_LOCATION_IN_PANEL = Pos(25, 4)
+
 class Player(CombatObject):
     def __init__(self, xy): 
         CombatObject.__init__(self, xy, PLAYER, 
@@ -98,6 +100,46 @@ class Player(CombatObject):
                 return True
         return False
 
+    def queue_use_item(self, item_slot):
+        self.action = UseItemAction(item_slot)
+        return True
+
+    def queue_drop_item(self, item_slot):
+        from globals import world
+        from items import ItemObject
+        if not any( isinstance(obj, ItemObject) for obj in world.level.objects_at(self.xy) ):
+            self.action = DropItemAction(item_slot)
+            return True
+        return False
+
+    def queue_click_move(self, mouse):
+        allow_dig = mouse.rbutton
+        map = globals.world.level.map
+        mouse_xy = Pos(mouse.cx, mouse.cy)
+        if map[mouse_xy].explored:
+            new_xy = paths.towards( self.xy, mouse_xy, avoid_solid_objects = True, allow_digging = allow_dig )
+            if new_xy:
+                rel_xy = new_xy - self.xy
+                self.queue_move(rel_xy.x, rel_xy.y)
+                return True
+        return False
+
+    def handle_clicks(self, mouse):
+        map = globals.world.level.map
+        mouse_xy = Pos(mouse.cx, mouse.cy)
+        if (mouse.lbutton or mouse.rbutton) and map.valid_xy(mouse_xy):
+            return self.queue_click_move(mouse)
+        elif mouse.lbutton_pressed or mouse.rbutton_pressed:
+            from globals import SCREEN_SIZE
+            xy = mouse_xy - Pos(0, SCREEN_SIZE.h) - INVENTORY_LOCATION_IN_PANEL
+            item_slot = self.stats.inventory.find_clicked_item(xy)
+            if item_slot:
+                if mouse.lbutton_pressed:
+                    return self.queue_use_item(item_slot)
+                elif mouse.rbutton_pressed:
+                    return self.queue_drop_item(item_slot)
+        return False
+
     def has_action(self, key, mouse):
         assert self.action == None # Did we handle the last action ? 
 
@@ -124,16 +166,9 @@ class Player(CombatObject):
                 if type(obj) == Resource:
                     obj.waypoint = True
             return False
-        if mouse.lbutton or mouse.rbutton:
-            allow_dig = mouse.rbutton
-            map = globals.world.level.map
-            mouse_xy = Pos(mouse.cx, mouse.cy)
-            if map.valid_xy(mouse_xy) and map[mouse_xy].explored:
-                new_xy = paths.towards( self.xy, mouse_xy, avoid_solid_objects = True, allow_digging = allow_dig )
-                if new_xy:
-                    rel_xy = new_xy - self.xy
-                    self.queue_move(rel_xy.x, rel_xy.y)
-                    return True
+        elif self.handle_clicks(mouse):
+            return True
+
         return False
         
     def print_stats(self):
@@ -144,7 +179,7 @@ class Player(CombatObject):
         gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARK_GRAY )
         gui.render_bar( Pos(3,5), 20, "Points", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
 
-        self.stats.inventory.draw(panel, Pos(25, 4))
+        self.stats.inventory.draw(panel, INVENTORY_LOCATION_IN_PANEL)
 
         print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'ANT COLONEL')
 
