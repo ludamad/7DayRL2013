@@ -84,6 +84,10 @@ def level1(level, bsp, nodes):
         xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
 
+    for i in range(15):
+        xy = level.random_xy()
+        level.add( enemies.roach(xy) )
+
 
 #    # Stairs down
 #    for i in range(2):

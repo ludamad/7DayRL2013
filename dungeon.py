@@ -198,6 +198,7 @@ class World:
         mouse = libtcod.Mouse()
 
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+        key.c = ord( chr(key.c).lower() )
 
         if key.vk == libtcod.KEY_ESCAPE:
             exit()

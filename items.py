@@ -108,14 +108,14 @@ def change_maxhp(user, hp):
 
 HEALING_FOOD = ItemType(
         name = "Food Chunk",
-        summary = "Heals 25 HP",
+        summary = "Heals 10 HP",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : PALE_RED },
             # Tile mode
              { "char" : tile(3,1)}
         ),
-        use_action = lambda inv, user: gain_hp(user, 25)
+        use_action = lambda inv, user: gain_hp(user, 10)
 )
 
 MANA_CHUNK = ItemType(

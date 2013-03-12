@@ -31,10 +31,12 @@ class Corpse(GameObject):
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, corpse_heal=0, can_burrow = True, following_steps = 0, pause_chance = 1.0/8):
+    def __init__(self, corpse_heal=0, can_burrow = True, following_steps = 0, sight_distance=8, see_through_walls=False, pause_chance = 1.0/8):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
         self.corpse_heal = corpse_heal
+        self.see_through_walls = see_through_walls
+        self.sight_distance = sight_distance
         self.pause_chance = pause_chance
 
 class Enemy(CombatObject):
@@ -61,7 +63,8 @@ class Enemy(CombatObject):
             return #Random chance of not moving
 
         # Move towards player
-        visible = globals.world.fov.is_visible(self.xy)
+        visible = globals.world.player.xy.distance(self.xy) <= self.behaviour.sight_distance
+        visible = visible and (self.behaviour.see_through_walls or globals.world.fov.is_visible(self.xy))
         if visible or self.following_steps > 0:
             if visible: 
                 self.following_steps = self.behaviour.following_steps
@@ -158,5 +161,43 @@ def ant(xy):
                     mp = 0, 
                     mp_regen = 0, 
                     attack = 5
+            )
+    )
+
+
+ROACH_TILE = TileType(    # ASCII mode
+         { "char" : 'r',
+           "color" : colors.DARK_RED
+         },                 # Tile mode
+         { "char" : tile(4,0)
+         }
+)
+
+ROACH_DEAD_TILE = TileType(    # ASCII mode
+         { "char" : '%', 
+           "color" : colors.DARK_RED
+         },                     # Tile mode
+         { "char" : tile(4,6)
+         }
+)
+def roach(xy):
+    return Enemy(
+             "Roach",
+             xy, 
+             ROACH_TILE, 
+             ROACH_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 20,
+                    can_burrow = True,
+                    following_steps = 1,
+                    pause_chance = 0.25,
+                    sight_distance = 2
+             ),
+             CombatStats(
+                    hp = 20,
+                    hp_regen = 0,
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 10
             )
     )
