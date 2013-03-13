@@ -207,8 +207,8 @@ class World:
         elif key.vk == libtcod.KEY_CONTROL:
             globals.ASCII_MODE = not globals.ASCII_MODE
             self.draw(True)
-        elif key.vk == libtcod.KEY_ENTER:
-            self.restart()
+#        elif key.vk == libtcod.KEY_ENTER:
+#            self.restart()
         elif key.c == ord('f'):
             console.toggle_fullscreen()
         else:

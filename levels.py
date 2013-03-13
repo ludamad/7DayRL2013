@@ -76,15 +76,15 @@ def level1(level, bsp, nodes):
         level.map[xy].make_diggable()
 
 
-    for i in range(25):
+    for i in range(45):
         xy = level.random_xy()
         level.add( enemies.ant(xy) )
 
-    for i in range(10):
+    for i in range(25):
         xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
 
-    for i in range(15):
+    for i in range(25):
         xy = level.random_xy()
         level.add( enemies.roach(xy) )
 

@@ -111,7 +111,7 @@ def ladybug(xy):
              LADYBUG_TILE, 
              LADYBUG_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 10, 
+                    corpse_heal = 8, 
                     can_burrow = False, 
                     following_steps = 2,
                     pause_chance = 1/8.0
@@ -147,13 +147,13 @@ def ant(xy):
              ANT_TILE, 
              ANT_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 5,
+                    corpse_heal = 8,
                     can_burrow = True, 
                     following_steps = 2,
                     pause_chance = 0.0
              ),
              CombatStats(
-                    hp = 10,
+                    hp = 8,
                     hp_regen = 0,
                     mp = 0, 
                     mp_regen = 0, 
@@ -184,7 +184,7 @@ def roach(xy):
              ROACH_TILE, 
              ROACH_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 20,
+                    corpse_heal = 16,
                     can_burrow = True,
                     following_steps = 1,
                     pause_chance = 0.25,

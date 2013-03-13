@@ -34,7 +34,7 @@ def _get_mouse_item_slot(player, mouse):
 class Player(CombatObject):
     def __init__(self, xy): 
         CombatObject.__init__(self, xy, PLAYER, 
-                 CombatStats(hp = 100, mp = 50, mp_regen = 0.25, attack = 10))
+                 CombatStats(hp = 100, mp = 20, mp_regen = 0.5, attack = 10))
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
@@ -122,6 +122,10 @@ class Player(CombatObject):
         self.action = UseItemAction(item_slot)
         return True
 
+    def queue_use_ability(self, ability, target):
+        self.action = UseAbilityAction(ability, target)
+        return True
+
     def queue_drop_item(self, item_slot):
         from globals import world
         from items import ItemObject
@@ -180,11 +184,17 @@ class Player(CombatObject):
         text = "Which mutant ability shall you inflict?"
         options = []
         for ability in abilities:
-            options.append([colors.RED, ability.name+" ", colors.GREEN, ability.summary])
+            can_do = ability.has_prereqs(self)
+            if can_do:
+                options.append([colors.RED, ability.name+" ", colors.GREEN, ability.summary])
+            else:
+                options.append([colors.GRAY, ability.name+" ", colors.DARK_GRAY, ability.summary])
         opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
         if opt != None:
             ability = abilities[opt]
             target = ability.target(self)
+            if target:
+                return self.queue_use_ability(ability, target) 
         return False
 
     def handle_controls(self):

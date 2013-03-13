@@ -2,6 +2,7 @@ import console
 from geometry import *
 from colors import *
 import libtcodpy as libtcod
+from utils import *
 
 class Ability:
     def __init__(self, name, summary, perform_action, can_perform_action = None, target_action = None, mana_cost=0, cooldown=0):
@@ -20,13 +21,28 @@ class Ability:
     def step(self):
         self.remaining_cooldown = max(self.remaining_cooldown - 1, 0)
 
+    def has_cooldown(self):
+        return self.remaining_cooldown > 0
+    def has_prereqs(self, user):
+        can_perform = not self.can_perform_action or self.can_perform_action(user)
+        return not self.has_cooldown() and self.mana_cost <= user.stats.mp and can_perform
+
     def target(self, user):
+        from globals import world
+        if self.mana_cost > user.stats.mp:
+            world.messages.add( [PALE_RED, "Not enough mana to use ", BABY_BLUE, self.name, PALE_RED, "."] )
+            return None
+        if self.has_cooldown():
+            world.messages.add( [PALE_RED, "You must wait before using ", BABY_BLUE, self.name, PALE_RED, " again."] )
+            return None
         if self.can_perform_action and not self.can_perform_action(user):
             return None
         return not self.target_action or self.target_action(user)
 
     def perform(self, user, target):
         self.perform_action(user, target)
+        user.stats.mp = max(0, user.stats.mp - self.mana_cost)
+        self.remaining_cooldown = self.cooldown
 
 class Abilities:
     def __init__(self):
@@ -44,7 +60,18 @@ class Abilities:
 MAX_RADIUS=10
 def choose_location(user, validity_func, radius=None):
     from globals import game_blit, effects, screen, key2direction, world, SCREEN_SIZE
+
+    # Pick random valid
+    
     target_xy = user.xy
+    if radius:
+        valid_candidates = []
+        for xy in make_rect(Pos(0,0), SCREEN_SIZE).xy_values():
+            if xy.distance(user.xy) < radius and validity_func(user, xy):
+                valid_candidates.append(xy)
+        if valid_candidates:
+            target_xy = valid_candidates[rand(0, len(valid_candidates)-1)]
+
     while True:
         game_blit(False)
 
@@ -55,6 +82,7 @@ def choose_location(user, validity_func, radius=None):
             for xy in make_rect(Pos(0,0), SCREEN_SIZE).xy_values():
                 if xy.distance(user.xy) < radius:
                     effects.set_char_background(xy, screen.get_char_background(xy))
+        
         
         effects.blit( make_rect(Pos(0,0), SCREEN_SIZE), screen, Pos(0,0), 0.0, 0.7)
 
@@ -100,8 +128,8 @@ def _damage_enemy_at(user, xy, damage, log_message):
 
     for obj in world.level.objects_at(xy):
         if isinstance(obj, Enemy):
-            world.messages.add(BABY_BLUE, log_message.replace('%%', obj.name))
-            obj.damage(user, damage)
+            world.messages.add( [BABY_BLUE, log_message.replace('%%', obj.name)] )
+            obj.take_damage(user, damage)
             return True
 
 def spit():
@@ -111,7 +139,7 @@ def spit():
         name = 'Spit',
         summary = 'Do 10 damage to an enemy from a short range.',
         perform_action = lambda user, xy: _damage_enemy_at(user, xy, 10, "You spit at the %%!"),
-        target_action = lambda user: _target_object_type(user, 4, Enemy),
+        target_action = lambda user: _target_object_type(user, 3, Enemy),
         mana_cost = 10,
         cooldown = 2
     )
