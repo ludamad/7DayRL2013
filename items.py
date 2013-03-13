@@ -101,15 +101,6 @@ class ItemObject(GameObject):
             
 # HERE BE ITEM DATA
 
-def gain_hp(user, hp):
-    user.stats.regen_hp(hp)
-
-def change_maxhp(user, hp):
-    user.stats.max_hp += hp
-
-def change_attack(user, atk):
-    user.stats.attack += atk
-
 APPLE_CHUNK = ItemType(
         name = "Apple Chunk",
         summary = "Heals 10 HP",
@@ -134,15 +125,11 @@ ORANGE_CHUNK = ItemType(
         use_action = lambda inv, user: gain_hp(user, 25)
 )
 
-_SUGAR_RUSH = StatusType(
-        name = "Sugar Rush", 
-        add_action = lambda user: change_attack(user, 10),
-        remove_action = lambda user: change_attack(user, -10),
-        duration=3+1, # Account for turn that its used in
-)
+from statuses import SUGAR_RUSH
+
 def _use_watermelon(inv, user):
     from globals import world
-    user.add_status(_SUGAR_RUSH)
+    user.add_status(SUGAR_RUSH)
     world.messages.add([GREEN, "You're hyped from sugar!"])
 
 WATERMELON_CHUNK = ItemType(

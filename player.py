@@ -1,19 +1,19 @@
 import libtcodpy as libtcod
-from actions import *
+
 import globals
 import colors
-from geometry import * 
-from utils import *
 import paths
 import menus
-
-import dungeonfeatures
-from combatobject import CombatStats, CombatObject
-from resource import Resource
-from tiles import *
 import enemies
 import abilities
-import colors
+
+from actions import *
+from geometry import * 
+from utils import *
+from tiles import *
+
+from combatobject import CombatStats, CombatObject
+from resource import Resource
 
 PLAYER = TileType( 
         # ASCII mode
@@ -86,19 +86,21 @@ class Player(CombatObject):
         level = globals.world.level
 
         self.action.perform(self)
+
+        globals.world.fov.compute_fov(globals.world.level.map, self.xy, 8)
         self.action = None
 
         if level.map[self.xy].type == DIGGABLE:
             level.map[self.xy].make_floor()
 
-        for obj in level.objects_at(self.xy):
-            if isinstance(obj, dungeonfeatures.Stairs):
-                # Transfer from level, but do it next turn
-                new_index = level.level_index + (+1 if obj.stairs_down else -1)
-                new_level = globals.world[new_index]
-                new_level.add_to_front(self)
-                new_level.queue_relocation(self, new_level.random_xy() )
-                level.queue_removal(self)
+#        for obj in level.objects_at(self.xy):
+#            if isinstance(obj, dungeonfeatures.Stairs):
+#                # Transfer from level, but do it next turn
+#                new_index = level.level_index + (+1 if obj.stairs_down else -1)
+#                new_level = globals.world[new_index]
+#                new_level.add_to_front(self)
+#                new_level.queue_relocation(self, new_level.random_xy() )
+#                level.queue_removal(self)
 
         self._adjust_view()
 
@@ -263,6 +265,8 @@ class Player(CombatObject):
         gui.render_bar( Pos(3,5), 20, "Points", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
 
         self.stats.inventory.draw(panel, INVENTORY_LOCATION_IN_PANEL)
+        self.stats.statuses.draw(panel, Pos(3, 6))
+
         item_slot = _get_mouse_item_slot(self, libtcod.mouse_get_status())
 
         print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'ANT COLONEL')

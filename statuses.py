@@ -1,9 +1,13 @@
+import colors
+from utils import *
+from geometry import *
 
 class StatusType:
-    def __init__(self, name, add_action, remove_action, step_action=None, duration=None, remove_criteria=None):
+    def __init__(self, name, add_action, remove_action, color=colors.GREEN, step_action=None, duration=None, remove_criteria=None):
         self.name = name
         self.add_action = add_action
         self.remove_action = remove_action
+        self.color = color
         self.duration = duration
         self.step_action = step_action
         self.remove_criteria = remove_criteria
@@ -60,3 +64,27 @@ class Statuses:
         return iter(self.statuses)
     def __getitem__(self, idx):
         return self.statuses[idx]
+    def draw(self, con, xy, max_to_draw = 3):
+        i = 0
+        for status in self:
+            if status.type.name:
+                xy = print_colored( con, xy, status.type.color, status.type.name + ' ' )
+                i += 1
+                if i >= max_to_draw: 
+                    break
+
+def gain_hp(user, hp):
+    user.stats.regen_hp(hp)
+
+def change_maxhp(user, hp):
+    user.stats.max_hp += hp
+
+def change_attack(user, atk):
+    user.stats.attack += atk
+
+SUGAR_RUSH = StatusType(
+        name = "Sugar Rush", 
+        add_action = lambda user: change_attack(user, 10),
+        remove_action = lambda user: change_attack(user, -10),
+        duration=3+1, # Account for turn that its used in
+)

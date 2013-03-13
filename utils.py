@@ -26,3 +26,4 @@ def print_colored(con, xy, *parts):
         new_xy += Pos( len(text), 0)
         if text[len(text)-1] == '\n':
             new_xy = Pos(xy.x, new_xy.y+1)
+    return new_xy

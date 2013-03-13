@@ -1,5 +1,5 @@
 from geometry import *
-from generation import generate_map, generate_connected_map, generate_features
+from generation import generate_map, generate_connected_map
 from utils import *
 
 import globals
@@ -124,8 +124,6 @@ class DungeonLevel:
     def handle_relocations(self):
         for obj, xy in self.queued_relocations: obj.xy = xy
         self.queued_relocations = []
-
-        self.world.fov.compute_fov(self.map, self.world.player.xy, 8)
         
     def draw(self, fulldraw=False):
         self.map.draw(fulldraw)
@@ -163,7 +161,7 @@ class World:
 
         self.levels = []
 
-        self.fov = fieldofview.FieldOfView(8)
+        self.fov = None
 
         # Initialize first level
         self.level = self[0]
@@ -201,6 +199,10 @@ class World:
 
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
         key.c = ord( chr(key.c).lower() )
+
+        if not self.fov:
+            self.fov = fieldofview.FieldOfView(8)
+            self.fov.compute_fov(self.level.map, self.player.xy, 8)
 
         if key.vk == libtcod.KEY_ESCAPE:
             if key.shift:

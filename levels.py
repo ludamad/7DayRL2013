@@ -1,11 +1,12 @@
 import libtcodpy as libtcod
-from geometry import *
-import dungeonfeatures
-from tiles import *
+
 import enemies
-from utils import *
 import resource
 import items
+
+from geometry import *
+from tiles import *
+from utils import *
 
 class LevelTemplate:
     def __init__(self, handler, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
@@ -50,18 +51,18 @@ def place_resource(level, item_chance = 0.2):
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
                 type = rand(0, 3)
                 if type == 0: 
-                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK, item_chance)
+                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK, item_chance)
                 elif type == 1:
                     place_resource_of_type(level, rxy, xy_region, resource.orange, items.ORANGE_CHUNK, item_chance)
                 elif type == 2:
-                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK, item_chance)
+                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK, item_chance)
                 break
                  
 def level1(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 
-    for i in range(5):
+    for i in range(4):
         place_resource(level)
 
     apply_nearby(level.map, 1100,
@@ -95,11 +96,6 @@ def level1(level, bsp, nodes):
         xy = level.random_xy()
         level.add( enemies.roach(xy) )
 
-
-#    # Stairs down
-#    for i in range(2):
-#        xy = level.random_xy(_free_square)
-#        level.add( dungeonfeatures.Stairs(xy, stairs_down=True) )
 
 LEVEL_1 = LevelTemplate(level1)
 

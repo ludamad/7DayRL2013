@@ -1,7 +1,6 @@
 from geometry import *
 import libtcodpy as libtcod
 from bspgenerator import BSPGenerator
-from dungeonfeatures import Stairs
 from utils import *
 
 def rand(min,max): 
@@ -61,8 +60,3 @@ def generate_connected_map(map):
 def _free_square(level, xy):
     return not level.map[xy].blocked and not any(level.objects_at(xy))
 
-def generate_features(level):
-    # Stairs down
-    for i in range(2):
-        xy = level.random_xy(_free_square)
-        level.add( Stairs(xy, stairs_down=True) )
