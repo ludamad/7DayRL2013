@@ -135,8 +135,10 @@ class DungeonLevel:
     def step(self, key, mouse):
         self.handle_relocations()
 
+
         if self.world.player.has_action(key, mouse):
             assert self.world.player.action
+            self.scents.step()
             for obj in list(self.objects): obj.step()
             for obj in self.queued_removals: self.remove(obj)
             self.queued_removals = []

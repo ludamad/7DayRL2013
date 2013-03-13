@@ -8,7 +8,10 @@ class ScentMaps:
     def step(self):
         self.trailmap.decay()
     def trail(self,xy):
+        print "trail at x: %i y: %i" % (xy.x, xy.y)
+        print "oldval %i" % self.trailmap[xy]
         self.trailmap.add(xy, 5)
+        print "newval %i" % self.trailmap[xy]
     def avoid(self,xy):
         self.avoidmap.add(xy, 5)
     def add(self,xy):
