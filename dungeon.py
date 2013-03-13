@@ -135,7 +135,6 @@ class DungeonLevel:
     def step(self, key, mouse):
         self.handle_relocations()
 
-
         if self.world.player.has_action(key, mouse):
             assert self.world.player.action
             self.scents.step()

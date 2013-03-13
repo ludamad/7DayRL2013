@@ -25,3 +25,10 @@ class DropItemAction:
         self.item_slot = item_slot
     def perform(self, actor):   
         actor.drop_item(self.item_slot)
+
+class UseAbilityAction:
+    def __init__(self, ability, target): 
+        self.ability = ability
+        self.target = target
+    def perform(self, actor):
+        self.ability.perform(actor, self.target)

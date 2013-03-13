@@ -188,7 +188,7 @@ def roach(xy):
                     can_burrow = True,
                     following_steps = 1,
                     pause_chance = 0.25,
-                    sight_distance = 2
+                    sight_distance = 3.3
              ),
              CombatStats(
                     hp = 20,

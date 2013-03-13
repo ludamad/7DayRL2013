@@ -180,8 +180,11 @@ class Player(CombatObject):
         text = "Which mutant ability shall you inflict?"
         options = []
         for ability in abilities:
-            options.append([colors.MUTED_GREEN, ability.name+" ", colors.YELLOW, ability.summary])
+            options.append([colors.RED, ability.name+" ", colors.GREEN, ability.summary])
         opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
+        if opt != None:
+            ability = abilities[opt]
+            target = ability.target(self)
         return False
 
     def handle_controls(self):

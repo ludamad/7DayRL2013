@@ -15,6 +15,9 @@ con = console.Console(SCREEN_SIZE)
 con.set_default_background(colors.BLACK)
 con.clear()
 
+effects = console.Console(SCREEN_SIZE)
+effects.set_default_background(colors.BLACK)
+
 screen = console.Console()
 screen.set_default_foreground(colors.WHITE)
 
