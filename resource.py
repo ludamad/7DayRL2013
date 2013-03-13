@@ -14,9 +14,43 @@ APPLE = TileType(
         )
 )
 
+ORANGE = TileType(
+        # ASCII mode
+         { "char" : 247, "color" : colors.ORANGE },
+        # Tile mode
+        variant_list(
+            [ tile(5,2), tile(6,2), tile(5,3), tile(6,3) ], {}
+        )
+)
+
+WATERMELON = TileType(
+        # ASCII mode
+         { "char" : 247, "color" : colors.Color(232,34,62) },
+        # Tile mode
+        variant_list(
+            [ tile(3,4), tile(4,4), tile(3,5), tile(4,5) ], {}
+        )
+)
+
 class Resource(GameObject):
-    def __init__(self, xy, variant=0):
-        GameObject.__init__(self, xy, APPLE, solid=True, draw_once_seen=True)
+    def __init__(self, xy, name, type, variant=0):
+        GameObject.__init__(self, xy, type, solid=True, draw_once_seen=True)
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.tile_variant = variant
+        self.name = name
+        self.seen = False
+    def step(self):
+        GameObject.step(self)
+        if not self.seen and globals.world.fov.is_visible(self.xy):
+            globals.world.messages.add([colors.ORANGE, "You find " + self.name + "!"])
+            self.seen = True
+
+def apple(xy, variant):
+    return Resource(xy, "an apple", APPLE, variant)
+
+def orange(xy, variant):
+    return Resource(xy, "an orange", ORANGE, variant)
+
+def watermelon(xy, variant):
+    return Resource(xy, "some watermelon", WATERMELON, variant)

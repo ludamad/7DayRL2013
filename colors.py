@@ -7,6 +7,8 @@ PALE_YELLOW = Color(255, 250, 150)
 
 PINKISH = Color(250, 50, 250)
 
+ORANGE = Color(255, 117, 5)
+
 LIGHT_RED = Color(255, 50, 50)
 PALE_RED = Color(255, 148, 120)
 RED = Color(255, 0, 0)

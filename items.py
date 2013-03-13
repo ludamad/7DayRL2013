@@ -3,6 +3,7 @@ from tiles import *
 from geometry import *
 from colors import *
 from utils import *
+from statuses import *
 
 class ItemType:
     def __init__(self, name, summary, tile, use_action, unwield_action=None):
@@ -106,8 +107,11 @@ def gain_hp(user, hp):
 def change_maxhp(user, hp):
     user.stats.max_hp += hp
 
-HEALING_FOOD = ItemType(
-        name = "Food Chunk",
+def change_attack(user, atk):
+    user.stats.attack += atk
+
+APPLE_CHUNK = ItemType(
+        name = "Apple Chunk",
         summary = "Heals 10 HP",
         tile = TileType(
             # ASCII mode
@@ -118,14 +122,37 @@ HEALING_FOOD = ItemType(
         use_action = lambda inv, user: gain_hp(user, 10)
 )
 
-MANA_CHUNK = ItemType(
-        name = "Food Chunk",
-        summary = "Heals 25 HP",
+ORANGE_CHUNK = ItemType(
+        name = "Orange Chunk",
+        summary = "Regain 25 MP",
         tile = TileType(
             # ASCII mode
-             { "char" : 248, "color" : PALE_RED },
+             { "char" : 248, "color" : ORANGE },
             # Tile mode
-             { "char" : tile(3,1)}
+             { "char" : tile(6,1)}
         ),
         use_action = lambda inv, user: gain_hp(user, 25)
+)
+
+_SUGAR_RUSH = StatusType(
+        name = "Sugar Rush", 
+        add_action = lambda user: change_attack(user, 10),
+        remove_action = lambda user: change_attack(user, -10),
+        duration=3+1, # Account for turn that its used in
+)
+def _use_watermelon(inv, user):
+    from globals import world
+    user.add_status(_SUGAR_RUSH)
+    world.messages.add([GREEN, "You're hyped from sugar!"])
+
+WATERMELON_CHUNK = ItemType(
+        name = "Watermelon Chunk",
+        summary = "Do 10 more bite damage for the next 3 turns.",
+        tile = TileType(
+            # ASCII mode
+             { "char" : 248, "color" : Color(232,34,62) },
+            # Tile mode
+             { "char" : tile(7,7)}
+        ),
+        use_action = _use_watermelon
 )

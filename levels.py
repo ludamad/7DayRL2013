@@ -20,8 +20,6 @@ class LevelTemplate:
         nodes = bsp.split(self.depth, self.min_node_size, self.maxHRatio, self.maxVRatio)
         self.handler(level, bsp, nodes)
 
-def rand(min,max): 
-    return libtcod.random_get_int(0, min, max)
 def rand_pos(max_x, max_y):
     return Pos( rand(0, max_x), rand(0, max_y) )
 
@@ -36,18 +34,27 @@ def apply_nearby(map, points, tile_cond, near_cond, mutator):
 def _free_square(level, xy):
     return not level.map[xy].blocked and not any(level.objects_at(xy))
 
-def place_resource(level, food_chance = 0.2):
+def place_resource_of_type(level, rxy, xy_region, resource_func, item_type, item_chance):                
+    for i in range(len(xy_region)):
+        level.add( resource_func(xy_region[i], i) )
+        for xy in make_rect(rxy - Pos(1,1), Size(4,4)).edge_values():
+            if rand(0,100)/100.0 < item_chance:
+                level.add( items.ItemObject(xy, item_type) )
+
+def place_resource(level, item_chance = 0.2):
     while True:
             rxy = level.random_xy()
             xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]
             valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
             if valid:
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
-                for i in range(len(xy_region)):
-                    level.add( resource.Resource(xy_region[i], i) )
-                for xy in make_rect(rxy - Pos(1,1), Size(4,4)).edge_values():
-                    if rand(0,100) / 100.0 <= food_chance:
-                        level.add( items.ItemObject(xy, items.HEALING_FOOD) )
+                type = rand(0, 3)
+                if type == 0: 
+                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK, item_chance)
+                elif type == 1:
+                    place_resource_of_type(level, rxy, xy_region, resource.orange, items.ORANGE_CHUNK, item_chance)
+                elif type == 2:
+                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK, item_chance)
                 break
                  
 def level1(level, bsp, nodes):
@@ -65,12 +72,12 @@ def level1(level, bsp, nodes):
 
     for node in nodes:
         if libtcod.bsp_is_leaf(node):
-            if rand(0,5) == 1:
+            mutator = Tile.make_floor2 if rand(0,2) == 1 else Tile.make_floor3
+            if rand(0,3) == 1:
                 rect = Rect(node.x, node.y, node.w, node.h)
                 for xy in rect.xy_values():
                     if level.map[xy].type == FLOOR:
-                        level.map[xy].make_floor2()
-
+                        mutator(level.map[xy])
     for i in range(200):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()

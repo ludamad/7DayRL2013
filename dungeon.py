@@ -203,7 +203,10 @@ class World:
         key.c = ord( chr(key.c).lower() )
 
         if key.vk == libtcod.KEY_ESCAPE:
-            exit()
+            if key.shift:
+                exit()
+            else:
+                self.messages.add([colors.GREEN, "Press Shift+Escape to exit."])
         elif key.vk == libtcod.KEY_CONTROL:
             globals.ASCII_MODE = not globals.ASCII_MODE
             self.draw(True)

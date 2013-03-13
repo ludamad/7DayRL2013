@@ -277,7 +277,3 @@ class Player(CombatObject):
             print_colored(panel, Pos(34, 1), colors.YELLOW, item_slot.item_type.summary)
             print_colored(panel, Pos(34, 3), colors.BABY_BLUE, "Left click to use")
             print_colored(panel, Pos(34, 4), colors.WHITE, "Right click to drop")
-
-
-#        print_colored(panel, Pos(40, 3), colors.GREEN, 'STATUS:')
-#        print_colored(panel, Pos(40, 4), colors.PALE_GREEN, 'Looking for a place to settle.')

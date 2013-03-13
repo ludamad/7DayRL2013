@@ -79,6 +79,12 @@ class Tile:
         self.type = FLOOR2 # Defined below
         self.variant = random_get_int(0, 0, self.type.num_variants())
 
+    def make_floor3(self):
+        self.block_sight = False
+        self.blocked = False
+        self.type = FLOOR3 # Defined below
+        self.variant = random_get_int(0, 0, self.type.num_variants())
+
     def make_diggable(self):
         self.block_sight = True
         self.blocked = True
@@ -146,5 +152,16 @@ FLOOR2 = TileType(  # ASCII mode
         variant_list(
             [ tile(2,4) ],
             { "fallback" : Color(194, 148, 88) }
+        )
+)
+
+FLOOR3 = TileType(  # ASCII mode
+         { "char" : '.', 
+           "color" : (WHITE, LIGHT_GRAY), 
+           "bg_color" :  Color(129, 81, 45) }
+        ,          # Tile mode
+        variant_list(
+            [ tile(1,5), tile(2,5) ],
+            { "fallback" : Color(129, 81, 45) }
         )
 )
