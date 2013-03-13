@@ -4,9 +4,9 @@ from colors import *
 import libtcodpy as libtcod
 
 class Ability:
-    def __init__(self, name, description, perform_action, target_action = None, mana_cost=0, cooldown=0):
+    def __init__(self, name, summary, perform_action, target_action = None, mana_cost=0, cooldown=0):
         self.name = name
-        self.description = description
+        self.summary = summary
 
         self.perform_action = perform_action
         self.target_action = target_action
@@ -39,6 +39,8 @@ class Abilities:
             ability.step()
     def add(self, ability):
         self.abilities.append(ability)
+    def __iter__(self):
+        return iter(self.abilities)
 
 MAX_RADIUS=10
 def choose_location(user, validity_func):
@@ -98,7 +100,7 @@ def spit():
 
     return Ability(
         name = 'Spit',
-        description = 'Damage an enemy from a short range.',
+        summary = 'Do 10 damage to an enemy from a short range.',
         perform_action = lambda user, xy: _damage_enemy_at(user, xy, 10, "You spit at the %%!"),
         target_action = lambda user: _target_object_type(user, 2, Enemy),
         mana_cost = 10,

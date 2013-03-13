@@ -174,23 +174,15 @@ class Player(CombatObject):
             return self.queue_drop_item(items[opt])
         return False
     
-#    def handle_abilities(self):
-#        from globals import game_draw
-#        items = self.stats.inventory.items
-#        text = "Which item do you want to use or drop?" if items else "You don't have any items."
-#        options = []
-#        for item_slot in items:
-#            options.append([colors.MUTED_GREEN, item_slot.item_type.name+" ", colors.YELLOW, item_slot.item_type.summary])
-#        opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
-#        if opt == None:
-#            return False
-#        game_draw()
-#        use_or_drop = menus.menu((colors.GOLD, "Use the " + items[opt].item_type.name + ", or drop it ?"), [(colors.LIGHT_GREEN,"Use"), (colors.LIGHT_RED,"Drop")], 50, index_color=colors.YELLOW)
-#        if use_or_drop == 0:
-#            return self.queue_use_item(items[opt])
-#        elif use_or_drop == 1:
-#            return self.queue_drop_item(items[opt])
-#        return False
+    def handle_abilities(self):
+        from globals import game_draw
+        abilities = self.stats.abilities
+        text = "Which mutant ability shall you inflict?"
+        options = []
+        for ability in abilities:
+            options.append([colors.MUTED_GREEN, ability.name+" ", colors.YELLOW, ability.summary])
+        opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
+        return False
 
     def handle_controls(self):
         controls = [ colors.GREEN, "Arrow key ",
@@ -233,6 +225,12 @@ class Player(CombatObject):
         dir = globals.key2direction(key)
         if dir:
             return self.queue_move(dir[0], dir[1])
+        elif key.c == ord('i'):
+            return self.handle_inventory()
+        elif key.c == ord('c'):
+            return self.handle_controls()
+        elif key.c == ord('a'):
+            return self.handle_abilities()
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:
@@ -242,7 +240,7 @@ class Player(CombatObject):
             return True
 
         return False
-        
+
     def print_stats(self):
         import gui
         from globals import panel, world, RESOURCES_NEEDED
