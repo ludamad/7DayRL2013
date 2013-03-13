@@ -49,7 +49,7 @@ def place_resource(level):
             valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
             if valid:
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
-                type = 0#rand(0, 3)
+                type = rand(0, 3)
                 if type == 0: 
                     place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK)
                 elif type == 1:
@@ -62,7 +62,7 @@ def level1(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 
-    for i in range(40):
+    for i in range(4):
         place_resource(level)
 
     apply_nearby(level.map, 1100,
