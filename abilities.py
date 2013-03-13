@@ -3,6 +3,7 @@ from geometry import *
 from colors import *
 import libtcodpy as libtcod
 from utils import *
+from tiles import tile
 
 class Ability:
     def __init__(self, name, summary, perform_action, can_perform_action = None, target_action = None, mana_cost=0, cooldown=0):
@@ -57,13 +58,15 @@ class Abilities:
     def __getitem__(self, idx):
         return self.abilities[idx]
 
-def draw_pointer_func(char ='*', good_color=YELLOW, bad_color=RED, radius = 0):
+def draw_pointer_func(char =('*','*'), good_color=YELLOW, bad_color=RED, radius = 0):
     def _draw_pointer(con, xy, valid):
         con.set_default_background(LIGHT_GRAY)
-        con.set_default_foreground(good_color if valid else bad_color)
+        from globals import ASCII_MODE
+        color = ( WHITE if not ASCII_MODE else good_color) if valid else bad_color
+        con.set_default_foreground(color)
         points = [ xy + Pos(x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
         for pxy in points:
-            con.put_char(pxy, char, libtcod.BKGND_MULTIPLY)
+            con.put_char(pxy, char[0] if ASCII_MODE else char[1], libtcod.BKGND_MULTIPLY)
 
     return _draw_pointer
 
@@ -77,7 +80,7 @@ def _line_no_solid(from_xy, to_xy):
     return True
 
 MAX_RADIUS=10
-def choose_location(user, validity_func, radius=None, guess_target = True, draw_pointer=draw_pointer_func() ):
+def choose_location(user, validity_func, radius=None, fail_message=None, guess_target = True, draw_pointer=draw_pointer_func() ):
     from globals import game_blit, effects, screen, key2direction, world, SCREEN_SIZE
 
     # Pick random valid
@@ -114,8 +117,12 @@ def choose_location(user, validity_func, radius=None, guess_target = True, draw_
         dir = key2direction(key)
 
         new_xy = target_xy
-        if valid and key.vk == libtcod.KEY_ENTER:
-            return target_xy
+        if key.vk == libtcod.KEY_ENTER:
+            if valid:
+                return target_xy
+            elif fail_message: 
+                fail_message(target_xy)
+                
         elif dir:
             new_xy = target_xy + Pos(dir[0], dir[1])
         elif key.pressed:
@@ -123,23 +130,39 @@ def choose_location(user, validity_func, radius=None, guess_target = True, draw_
         elif mouse.lbutton_pressed:
             new_xy = Pos(mouse.cx, mouse.cy)
             print new_xy
-            if valid and new_xy == target_xy:
-                return target_xy
+            if new_xy == target_xy:
+                if valid:
+                    return target_xy
+                elif fail_message: 
+                    fail_message(target_xy)
 
         if world.level.map.valid_xy(new_xy):
             target_xy = new_xy
 
 
-def _target_object_type(user, radius, can_target_through_solids=True, object_type=None, guess_target=True, draw_pointer=draw_pointer_func() ):
+def _target_object_type(user, radius, 
+                        can_target_through_solids=True, object_criteria=None, 
+                        object_type=None, guess_target=True, 
+                        draw_pointer=draw_pointer_func() ):
     from globals import world
 
     def valid_shot(user, xy):
         from globals import world
-        if xy.distance(user.xy) >= radius: return False
-        if not world.fov.is_visible(xy): return False
-        has_object = not object_type or any( isinstance(obj, object_type) for obj in world.level.objects_at(xy) )
-        if not has_object: return False
-        if not can_target_through_solids and not _line_no_solid(user.xy, xy): return False
+
+        if xy.distance(user.xy) >= radius or not world.fov.is_visible(xy): 
+            return False
+
+        has_object = not object_type and not object_criteria
+        for obj in world.level.objects_at(xy):
+            if not object_type or isinstance(obj, object_type):
+                if not object_criteria or object_criteria(obj):
+                    has_object = True
+                    break
+        if not has_object:
+            return False
+        if not can_target_through_solids and not _line_no_solid(user.xy, xy): 
+            return False
+
         return True
 
     return choose_location(user, valid_shot, radius,guess_target=guess_target, draw_pointer=draw_pointer)
@@ -159,6 +182,8 @@ def _damage_at(user, xy, damage, log_message, hurt_self=False, you_damage_messag
                     obj.take_damage(user, damage)
                     break
 
+### COMBAT ABLIITIES ###
+
 def spit():
     from enemies import Enemy
 
@@ -166,7 +191,9 @@ def spit():
         name = 'Spit',
         summary = 'Do 10 damage to an enemy from a short range.',
         perform_action = lambda user, xy: _damage_at(user, xy, 10, "You spit at the %%!"),
-        target_action = lambda user: _target_object_type(user, 3, object_type=Enemy),
+        target_action = lambda user: _target_object_type(user, 3, 
+                                                         object_type=Enemy,
+                                                         draw_pointer = draw_pointer_func( char = ('*', tile(4,8)) ) ),
         mana_cost = 10,
         cooldown = 0
     )
@@ -184,7 +211,7 @@ def acid_splash():
         target_action = lambda user: _target_object_type(user, 5, 
                                                          guess_target=False,
                                                          can_target_through_solids = False, 
-                                                         draw_pointer = draw_pointer_func(radius=1)),
+                                                         draw_pointer = draw_pointer_func(radius=1, char = ('*', tile(5,8)) )),
         mana_cost = 30,
         cooldown = 5
     )
@@ -196,10 +223,39 @@ def mutant_thorns():
         name = 'Thorns',
         summary = 'Do 20 damage to an enemy from a distance.',
         perform_action = lambda user, xy: _damage_at(user, xy, 20, "You impale the %%!", 
-                                                        radius=1),
+                                                        radius=0),
         target_action = lambda user: _target_object_type(user, 5, 
+                                                         object_type=Enemy,
                                                          can_target_through_solids = False,
-                                                         draw_pointer = draw_pointer_func(char='^')),
+                                                         draw_pointer = draw_pointer_func(char=('^', '^') )),
         mana_cost = 25,
         cooldown = 3
+    )
+
+### NON COMBAT ABLIITIES ###
+
+
+
+def call_ants():
+    from enemies import Enemy
+    from workerants import WorkerAntHole, WorkerAnt
+
+    def _spawn_ant_worker(user, xy):
+        from globals import world
+        world.messages.add( [PALE_RED, "The ants come marching!"] )
+
+    def _ant_hole_criteria(anthole):
+        return not anthole.spawning
+
+    return Ability(
+        name = 'Call Ants',
+        summary = 'Call forth ants from an ant-hole. They will harvest fruit.',
+        perform_action = _spawn_ant_worker,
+        target_action = lambda user: _target_object_type(user, 5,
+                                                         object_criteria=_ant_hole_criteria,
+                                                         object_type=WorkerAntHole,
+                                                         can_target_through_solids = False,
+                                                         draw_pointer = draw_pointer_func(char=('a', tile(8,8)) )),
+        mana_cost = 5,
+        cooldown = 5
     )

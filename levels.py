@@ -3,6 +3,7 @@ import libtcodpy as libtcod
 import enemies
 import resource
 import items
+import workerants
 
 from geometry import *
 from tiles import *
@@ -57,7 +58,17 @@ def place_resource(level):
                 elif type == 2:
                     place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK)
                 break
-                 
+
+def place_ant_holes(level, amount, min_dist = 7, max_dist = 13):
+    for i in range(10):
+        while True:
+            xy = level.random_xy()
+            res = filter(lambda obj: isinstance(obj, resource.Resource), level.objects )
+            dist_to_resource = min( *( xy.distance(r.xy) for r in res ) )
+            if dist_to_resource >= min_dist and dist_to_resource <= max_dist:
+                level.add( workerants.WorkerAntHole(xy) )
+                break
+
 def level1(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
@@ -79,12 +90,14 @@ def level1(level, bsp, nodes):
                 for xy in rect.xy_values():
                     if level.map[xy].type == FLOOR:
                         mutator(level.map[xy])
+
+    place_ant_holes(level, 10)
+
     for i in range(200):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()
 
-
-    for i in range(45):
+    for i in range(65):
         xy = level.random_xy()
         level.add( enemies.ant(xy) )
 
@@ -96,8 +109,12 @@ def level1(level, bsp, nodes):
         xy = level.random_xy()
         level.add( enemies.roach(xy) )
 
+    for i in range(25):
+        xy = level.random_xy()
+        level.add( enemies.roach(xy) )
 
-LEVEL_1 = LevelTemplate(level1)
+
+LEVEL_1 = LevelTemplate(level1, min_node_size=6)
 
 level_templates = [ LEVEL_1 ]
 

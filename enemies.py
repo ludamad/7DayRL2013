@@ -136,17 +136,17 @@ def ladybug(xy):
 
 ANT_TILE = TileType(    # ASCII mode
          { "char" : 'a',
-           "color" : colors.PURPLE
+           "color" : colors.RED
          },                 # Tile mode
-         { "char" : tile(0,0)
+         { "char" : tile(1,0)
          }
 )
 
 ANT_DEAD_TILE = TileType(    # ASCII mode
          { "char" : '%', 
-           "color" : colors.PURPLE
+           "color" : colors.RED
          },                     # Tile mode
-         { "char" : tile(0,6)
+         { "char" : tile(1,6)
          }
 )
 
@@ -191,6 +191,44 @@ ROACH_DEAD_TILE = TileType(    # ASCII mode
 def roach(xy):
     return Enemy(
              "Roach",
+             xy,
+             ROACH_TILE, 
+             ROACH_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 16,
+                    corpse_mana = 4,
+                    can_burrow = True,
+                    following_steps = 1,
+                    pause_chance = 0.25,
+                    sight_distance = 3.3
+             ),
+             CombatStats(
+                    hp = 20,
+                    hp_regen = 0,
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 10
+            )
+    )
+
+ROACH_TILE = TileType(    # ASCII mode
+         { "char" : 'b',
+           "color" : colors.Color(123,57,59)
+         },                 # Tile mode
+         { "char" : tile(4,0)
+         }
+)
+
+ROACH_DEAD_TILE = TileType(    # ASCII mode
+         { "char" : '%', 
+           "color" : colors.Color(123,57,59)
+         },                     # Tile mode
+         { "char" : tile(4,6)
+         }
+)
+def beetle(xy):
+    return Enemy(
+             "Beetle",
              xy,
              ROACH_TILE, 
              ROACH_DEAD_TILE, 

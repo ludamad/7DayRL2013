@@ -38,6 +38,7 @@ class Player(CombatObject):
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
+        self.stats.abilities.add( abilities.call_ants() )
         self.stats.abilities.add( abilities.spit() )
         self.stats.abilities.add( abilities.acid_splash() )
         self.stats.abilities.add( abilities.mutant_thorns() )
@@ -194,10 +195,10 @@ class Player(CombatObject):
             can_do = ability.has_prereqs(self)
             if can_do:
                 options.append([colors.BABY_BLUE, str(ability.mana_cost) + " MP ", 
-                                colors.RED, ability.name+" ", 
+                                colors.YELLOW, ability.name+" ", 
                                 colors.GREEN, ability.summary])
             else:
-                options.append([colors.GRAY if self.stats.mp > ability.mana_cost else colors.RED, str(ability.mana_cost) + " MP ", 
+                options.append([colors.BABY_BLUE if self.stats.mp > ability.mana_cost else colors.GRAY, str(ability.mana_cost) + " MP ", 
                                 colors.GRAY, ability.name+" ", 
                                 colors.DARK_GRAY, ability.summary])
         opt = menus.menu((colors.GOLD, text), options, 65, index_color=colors.YELLOW)
@@ -271,7 +272,7 @@ class Player(CombatObject):
 
         gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARK_GRAY )
         gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARK_GRAY )
-        gui.render_bar( Pos(3,5), 20, "Points", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
+        gui.render_bar( Pos(3,5), 20, "Harvest", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
 
         self.stats.inventory.draw(panel, INVENTORY_LOCATION_IN_PANEL)
         self.stats.statuses.draw(panel, Pos(3, 6))
