@@ -19,11 +19,11 @@ class CombatStats:
         self.abilities = Abilities()
         self.statuses = Statuses()
 
-    def step(self):
+    def step(self, owner):
         self.regen_hp(self.hp_regen)
         self.regen_mp(self.mp_regen)
         self.abilities.step()
-        self.statuses.step()
+        self.statuses.step(owner)
 
     def regen_hp(self, amount):
         self.hp = min(self.hp+amount, self.max_hp)

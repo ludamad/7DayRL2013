@@ -21,8 +21,8 @@ class Status:
         self.type.remove_action(owner)
         self.removed = True
     def step(self, owner):
-        if not self.removed and self.step_action:
-            self.step_action(owner)
+        if not self.removed and self.type.step_action:
+            self.type.step_action(owner)
 
         if self.type.remove_criteria and self.type.remove_criteria(owner):
             self.remove(owner)
