@@ -140,6 +140,7 @@ ANT_DEAD_TILE = TileType(    # ASCII mode
          { "char" : tile(0,6)
          }
 )
+
 def ant(xy):
     return Enemy(
              "Ant",
@@ -147,13 +148,13 @@ def ant(xy):
              ANT_TILE, 
              ANT_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 8,
+                    corpse_heal = 4,
                     can_burrow = True, 
                     following_steps = 2,
                     pause_chance = 0.0
              ),
              CombatStats(
-                    hp = 8,
+                    hp = 10,
                     hp_regen = 0,
                     mp = 0, 
                     mp_regen = 0, 
