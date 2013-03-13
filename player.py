@@ -12,6 +12,7 @@ from combatobject import CombatStats, CombatObject
 from resource import Resource
 from tiles import *
 import enemies
+import abilities
 import colors
 
 PLAYER = TileType( 
@@ -37,7 +38,12 @@ class Player(CombatObject):
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
+        self.stats.abilities.add( abilities.spit() )
 
+    def attack(self, target):
+        from globals import world
+        world.messages.add( [colors.BABY_BLUE, 'You bite the ' + target.name + " for " + str(int(self.stats.attack)) + ' damage!'] )
+        target.take_damage(self, self.stats.attack)
     def take_damage(self, attacker, damage):
         from globals import world
         CombatObject.take_damage(self, attacker, damage)
@@ -75,12 +81,12 @@ class Player(CombatObject):
     def step(self):
         assert self.action # We shouldn't step unless we have an action
 
+        CombatObject.step(self)
+
         level = globals.world.level
 
         self.action.perform(self)
         self.action = None
-
-        self.stats.regen_for_step()
 
         if level.map[self.xy].type == DIGGABLE:
             level.map[self.xy].make_floor()
@@ -167,6 +173,24 @@ class Player(CombatObject):
         elif use_or_drop == 1:
             return self.queue_drop_item(items[opt])
         return False
+    
+#    def handle_abilities(self):
+#        from globals import game_draw
+#        items = self.stats.inventory.items
+#        text = "Which item do you want to use or drop?" if items else "You don't have any items."
+#        options = []
+#        for item_slot in items:
+#            options.append([colors.MUTED_GREEN, item_slot.item_type.name+" ", colors.YELLOW, item_slot.item_type.summary])
+#        opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
+#        if opt == None:
+#            return False
+#        game_draw()
+#        use_or_drop = menus.menu((colors.GOLD, "Use the " + items[opt].item_type.name + ", or drop it ?"), [(colors.LIGHT_GREEN,"Use"), (colors.LIGHT_RED,"Drop")], 50, index_color=colors.YELLOW)
+#        if use_or_drop == 0:
+#            return self.queue_use_item(items[opt])
+#        elif use_or_drop == 1:
+#            return self.queue_drop_item(items[opt])
+#        return False
 
     def handle_controls(self):
         controls = [ colors.GREEN, "Arrow key ",
@@ -196,7 +220,7 @@ class Player(CombatObject):
                      colors.GREEN, " 1", colors.WHITE, ": down-left", 
                      colors.GREEN, " 3", colors.WHITE, ": down-right\n", colors.WHITE, '\n']
         controls += [ colors.GREEN, "Left click ", colors.WHITE, "to move to location\n"]
-        controls += [ colors.GREEN, "Right click ", colors.WHITE, "to move to location but avoid digging\n", colors.WHITE, '\n']
+        controls += [ colors.GREEN, "Right click ", colors.WHITE, "to move and dig to location\n", colors.WHITE, '\n']
         controls += [ colors.GREEN, "I ", colors.WHITE, "for inventory\n"]
         controls += [ colors.GREEN, "A ", colors.WHITE, "for abilities\n"]
         controls += [ colors.GREEN, "C ", colors.WHITE, "for this menu (controls)\n"]
@@ -206,28 +230,9 @@ class Player(CombatObject):
     def has_action(self, key, mouse):
         assert self.action == None # Did we handle the last action ? 
 
-        if key.vk == libtcod.KEY_UP or key.c == ord('k') or key.vk == libtcod.KEY_KP8 or key.c == ord('8'):
-            return self.queue_move( 0, -1 )
-        elif key.vk == libtcod.KEY_DOWN or key.c == ord('j') or key.vk == libtcod.KEY_KP2 or key.c == ord('2'):
-            return self.queue_move( 0, +1 )
-        elif key.vk == libtcod.KEY_LEFT or key.c == ord('h') or key.vk == libtcod.KEY_KP4 or key.c == ord('4'):
-            return self.queue_move( -1, 0 )
-        elif key.vk == libtcod.KEY_RIGHT or key.c == ord('l') or key.vk == libtcod.KEY_KP6 or key.c == ord('6'):
-            return self.queue_move( +1, 0 )
-        elif key.c == ord('b') or key.vk == libtcod.KEY_KP1 or key.c == ord('1'):
-            return self.queue_move( -1, +1 )
-        elif key.c == ord('n') or key.vk == libtcod.KEY_KP3 or key.c == ord('3'):
-            return self.queue_move( +1, +1 )
-        elif key.c == ord('y') or key.vk == libtcod.KEY_KP7 or key.c == ord('7'):
-            return self.queue_move( -1, -1 )
-        elif key.c == ord('u') or key.vk == libtcod.KEY_KP9 or key.c == ord('9'):
-            return self.queue_move( +1, -1 )
-        elif key.vk == libtcod.KEY_SPACE or key.c == ord('.') or key.vk == libtcod.KEY_KP5 or key.c == ord('5'):
-            return self.queue_move( 0, 0 )
-        elif key.c == ord('i'):
-            return self.handle_inventory()
-        elif key.c == ord('c'):
-            return self.handle_controls()
+        dir = globals.key2direction(key)
+        if dir:
+            return self.queue_move(dir[0], dir[1])
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:

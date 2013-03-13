@@ -5,6 +5,8 @@ YELLOW = Color(255, 255, 0)
 MUTED_YELLOW = Color(255, 250, 70)
 PALE_YELLOW = Color(255, 250, 150)
 
+PINKISH = Color(250, 50, 250)
+
 LIGHT_RED = Color(255, 50, 50)
 PALE_RED = Color(255, 148, 120)
 RED = Color(255, 0, 0)

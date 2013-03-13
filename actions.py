@@ -11,7 +11,7 @@ class MoveAction:
 class AttackAction:
     def __init__(self, target): 
         self.target = target
-    def perform(self, actor):   
+    def perform(self, actor):
         actor.attack(self.target)
 
 class UseItemAction:

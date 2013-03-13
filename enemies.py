@@ -48,15 +48,12 @@ class Enemy(CombatObject):
         self.behaviour = behaviour
         self.following_steps = 0
 
-    def take_damage(self, attacker, damage):
-        from globals import world
-        CombatObject.take_damage(self, attacker, damage)
-        world.messages.add( [colors.BABY_BLUE, 'You bite the ' + self.name + " for " + str(int(damage)) + ' damage!'] )
-
     def die(self):
         globals.world.level.queue_removal(self)
         globals.world.level.add_to_front(Corpse(self.name, self.xy, self.corpse_tile, can_be_eaten = True, hp_gain = self.behaviour.corpse_heal))
     def step(self):
+        CombatObject.step(self)
+
         moved = False
         self.following_steps = max(0, self.following_steps - 1)
         if rand(0, 100)/100.0 < self.behaviour.pause_chance: 
@@ -167,7 +164,7 @@ def ant(xy):
 
 ROACH_TILE = TileType(    # ASCII mode
          { "char" : 'r',
-           "color" : colors.DARK_RED
+           "color" : colors.PINKISH
          },                 # Tile mode
          { "char" : tile(4,0)
          }
@@ -175,7 +172,7 @@ ROACH_TILE = TileType(    # ASCII mode
 
 ROACH_DEAD_TILE = TileType(    # ASCII mode
          { "char" : '%', 
-           "color" : colors.DARK_RED
+           "color" : colors.PINKISH
          },                     # Tile mode
          { "char" : tile(4,6)
          }
@@ -183,7 +180,7 @@ ROACH_DEAD_TILE = TileType(    # ASCII mode
 def roach(xy):
     return Enemy(
              "Roach",
-             xy, 
+             xy,
              ROACH_TILE, 
              ROACH_DEAD_TILE, 
              EnemyBehaviour(
