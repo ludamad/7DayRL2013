@@ -11,12 +11,13 @@ from utils import *
 import colors
 
 class Corpse(GameObject):
-    def __init__(self, name, xy, tiletype, can_be_eaten=True, hp_gain=0):
+    def __init__(self, name, xy, tiletype, can_be_eaten=True, hp_gain=0, mp_gain=0):
         GameObject.__init__(self, xy, tiletype, solid=False, draw_once_seen = True)
         self.name = name
         self.time_to_live = 10
         self.can_be_eaten = can_be_eaten
         self.hp_gain = hp_gain
+        self.mp_gain = mp_gain
     def step(self):
         from globals import world
     
@@ -24,17 +25,21 @@ class Corpse(GameObject):
         for obj in globals.world.level.objects_at(self.xy):
             if isinstance(obj, CombatObject):
                 obj.stats.regen_hp(self.hp_gain)
-                world.messages.add( [colors.GREEN, 'You consume the ' + self.name + ", healing " + str(self.hp_gain) + " HP."] )
+                obj.stats.regen_mp(self.mp_gain)
+                msg = [colors.GREEN, 'You consume the ' + self.name + ", gaining " + str(self.hp_gain) + " HP"]
+                msg[1] += ", " + str(self.mp_gain) + " MP." if self.mp_gain > 0 else "."
+                world.messages.add( msg )
                 globals.world.level.queue_removal(self)
                 return
         if self.time_to_live <= 0:
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, corpse_heal=0, can_burrow = True, following_steps = 0, sight_distance=8, see_through_walls=False, pause_chance = 1.0/8):
+    def __init__(self, corpse_heal=0, corpse_mana=0, can_burrow = True, following_steps = 0, sight_distance=8, see_through_walls=False, pause_chance = 1.0/8):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
         self.corpse_heal = corpse_heal
+        self.corpse_mana = corpse_mana
         self.see_through_walls = see_through_walls
         self.sight_distance = sight_distance
         self.pause_chance = pause_chance
@@ -50,7 +55,10 @@ class Enemy(CombatObject):
 
     def die(self):
         globals.world.level.queue_removal(self)
-        globals.world.level.add_to_front(Corpse(self.name, self.xy, self.corpse_tile, can_be_eaten = True, hp_gain = self.behaviour.corpse_heal))
+        globals.world.level.add_to_front(Corpse(self.name, self.xy, self.corpse_tile, 
+                                                can_be_eaten = True, 
+                                                mp_gain = self.behaviour.corpse_mana, 
+                                                hp_gain = self.behaviour.corpse_heal))
     def step(self):
         CombatObject.step(self)
 
@@ -111,7 +119,8 @@ def ladybug(xy):
              LADYBUG_TILE, 
              LADYBUG_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 8, 
+                    corpse_heal = 8,
+                    corpse_mana = 2, 
                     can_burrow = False, 
                     following_steps = 2,
                     pause_chance = 1/8.0
@@ -149,6 +158,7 @@ def ant(xy):
              ANT_DEAD_TILE, 
              EnemyBehaviour(
                     corpse_heal = 4,
+                    corpse_mana = 1,
                     can_burrow = True, 
                     following_steps = 2,
                     pause_chance = 0.0
@@ -186,6 +196,7 @@ def roach(xy):
              ROACH_DEAD_TILE, 
              EnemyBehaviour(
                     corpse_heal = 16,
+                    corpse_mana = 4,
                     can_burrow = True,
                     following_steps = 1,
                     pause_chance = 0.25,

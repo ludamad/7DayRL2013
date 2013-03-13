@@ -34,12 +34,13 @@ def _get_mouse_item_slot(player, mouse):
 class Player(CombatObject):
     def __init__(self, xy): 
         CombatObject.__init__(self, xy, PLAYER, 
-                 CombatStats(hp = 100, mp = 20, mp_regen = 0.5, attack = 10))
+                 CombatStats(hp = 100, mp = 50, mp_regen = 0.5, attack = 10))
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
         self.stats.abilities.add( abilities.spit() )
         self.stats.abilities.add( abilities.acid_splash() )
+        self.stats.abilities.add( abilities.mutant_thorns() )
 
     def attack(self, target):
         from globals import world
@@ -47,8 +48,11 @@ class Player(CombatObject):
         target.take_damage(self, self.stats.attack)
     def take_damage(self, attacker, damage):
         from globals import world
+        from enemies import Enemy
+
         CombatObject.take_damage(self, attacker, damage)
-        world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' bites you for ' + str(int(damage)) + ' damage!'] )
+        if isinstance(attacker, Enemy):
+            world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' bites you for ' + str(int(damage)) + ' damage!'] )
 
     def die(self):
         from globals import world
@@ -189,10 +193,14 @@ class Player(CombatObject):
         for ability in abilities:
             can_do = ability.has_prereqs(self)
             if can_do:
-                options.append([colors.RED, ability.name+" ", colors.GREEN, ability.summary])
+                options.append([colors.BABY_BLUE, str(ability.mana_cost) + " MP ", 
+                                colors.RED, ability.name+" ", 
+                                colors.GREEN, ability.summary])
             else:
-                options.append([colors.GRAY, ability.name+" ", colors.DARK_GRAY, ability.summary])
-        opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
+                options.append([colors.GRAY if self.stats.mp > ability.mana_cost else colors.RED, str(ability.mana_cost) + " MP ", 
+                                colors.GRAY, ability.name+" ", 
+                                colors.DARK_GRAY, ability.summary])
+        opt = menus.menu((colors.GOLD, text), options, 65, index_color=colors.YELLOW)
         if opt != None:
             ability = abilities[opt]
             target = ability.target(self)
