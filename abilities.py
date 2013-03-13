@@ -57,8 +57,27 @@ class Abilities:
     def __getitem__(self, idx):
         return self.abilities[idx]
 
+def draw_pointer_func(char ='*', good_color=YELLOW, bad_color=RED, radius = 0):
+    def _draw_pointer(con, xy, valid):
+        con.set_default_background(LIGHT_GRAY)
+        con.set_default_foreground(good_color if valid else bad_color)
+        points = [ xy + Pos(x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
+        for pxy in points:
+            con.put_char(pxy, char, libtcod.BKGND_MULTIPLY)
+
+    return _draw_pointer
+
+def _line_no_solid(from_xy, to_xy):
+    from globals import world
+
+    libtcod.line_init(from_xy.x, from_xy.y, to_xy.x, to_xy.y)
+    for x, y in libtcod.line_iter():
+        if world.level.map[Pos(x,y)].blocked:
+            return False
+    return True
+
 MAX_RADIUS=10
-def choose_location(user, validity_func, radius=None):
+def choose_location(user, validity_func, radius=None, draw_pointer=draw_pointer_func() ):
     from globals import game_blit, effects, screen, key2direction, world, SCREEN_SIZE
 
     # Pick random valid
@@ -86,9 +105,7 @@ def choose_location(user, validity_func, radius=None):
         
         effects.blit( make_rect(Pos(0,0), SCREEN_SIZE), screen, Pos(0,0), 0.0, 0.7)
 
-        screen.set_default_background(LIGHT_GRAY)
-        screen.set_default_foreground(YELLOW if valid else RED)
-        screen.put_char(target_xy, '*', libtcod.BKGND_MULTIPLY)
+        draw_pointer(screen, target_xy, valid)
         screen.flush()
 
         key, mouse = libtcod.Key(), libtcod.Mouse()
@@ -113,7 +130,7 @@ def choose_location(user, validity_func, radius=None):
             target_xy = new_xy
 
 
-def _target_object_type(user, radius, object_type):
+def _target_object_type(user, radius, object_type, draw_pointer=draw_pointer_func() ):
     from globals import world
 
     def valid_shot(user, xy):
@@ -123,17 +140,19 @@ def _target_object_type(user, radius, object_type):
         has_enemy = any( isinstance(obj, object_type) for obj in world.level.objects_at(xy) )
         return has_enemy
 
-    return choose_location(user, valid_shot, radius)
+    return choose_location(user, valid_shot, radius, draw_pointer=draw_pointer)
 
-def _damage_enemy_at(user, xy, damage, log_message):
+def _damage_enemy_at(user, xy, damage, log_message, radius=0):
     from globals import world
     from enemies import Enemy
 
-    for obj in world.level.objects_at(xy):
-        if isinstance(obj, Enemy):
-            world.messages.add( [BABY_BLUE, log_message.replace('%%', obj.name)] )
-            obj.take_damage(user, damage)
-            return True
+    points = [ xy + Pos(x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
+    for pxy in points:
+        for obj in world.level.objects_at(pxy):
+            if isinstance(obj, Enemy):
+                world.messages.add( [BABY_BLUE, log_message.replace('%%', obj.name)] )
+                obj.take_damage(user, damage)
+                break
 
 def spit():
     from enemies import Enemy
@@ -145,4 +164,16 @@ def spit():
         target_action = lambda user: _target_object_type(user, 3, Enemy),
         mana_cost = 10,
         cooldown = 2
+    )
+
+def acid_splash():
+    from enemies import Enemy
+
+    return Ability(
+        name = 'Acid Ball',
+        summary = 'Do 10 damage to enemies in a radius.',
+        perform_action = lambda user, xy: _damage_enemy_at(user, xy, 10, "You splash the %% with acid!", radius=1),
+        target_action = lambda user: _target_object_type(user, 3, Enemy, draw_pointer = draw_pointer_func(radius=1)),
+        mana_cost = 5,
+        cooldown = 0
     )

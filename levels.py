@@ -35,34 +35,34 @@ def apply_nearby(map, points, tile_cond, near_cond, mutator):
 def _free_square(level, xy):
     return not level.map[xy].blocked and not any(level.objects_at(xy))
 
-def place_resource_of_type(level, rxy, xy_region, resource_func, item_type, item_chance):                
+def place_resource_of_type(level, rxy, xy_region, resource_func, item_type):
     for i in range(len(xy_region)):
         level.add( resource_func(xy_region[i], i) )
         edges = list( make_rect(rxy - Pos(1,1), Size(4,4)).edge_values() )
-    item_xy = edges[ rand(0,len(edges)) ]
+    item_xy = edges[ rand(0,len(edges)-1) ]
     level.add( items.ItemObject(item_xy, item_type) )
 
-def place_resource(level, item_chance = 0.05):
+def place_resource(level):
     while True:
             rxy = level.random_xy()
             xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]
             valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
             if valid:
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
-                type = rand(0, 3)
+                type = 0#rand(0, 3)
                 if type == 0: 
-                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK, item_chance)
+                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK)
                 elif type == 1:
-                    place_resource_of_type(level, rxy, xy_region, resource.orange, items.ORANGE_CHUNK, item_chance)
+                    place_resource_of_type(level, rxy, xy_region, resource.orange, items.ORANGE_CHUNK)
                 elif type == 2:
-                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK, item_chance)
+                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK)
                 break
                  
 def level1(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 
-    for i in range(4):
+    for i in range(40):
         place_resource(level)
 
     apply_nearby(level.map, 1100,

@@ -39,6 +39,7 @@ class Player(CombatObject):
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
         self.stats.abilities.add( abilities.spit() )
+        self.stats.abilities.add( abilities.acid_splash() )
 
     def attack(self, target):
         from globals import world
@@ -169,7 +170,7 @@ class Player(CombatObject):
         options = []
         for item_slot in items:
             options.append([colors.MUTED_GREEN, item_slot.item_type.name+" ", colors.YELLOW, item_slot.item_type.summary])
-        opt = menus.menu((colors.GOLD, text), options, 50, index_color=colors.YELLOW)
+        opt = menus.menu((colors.GOLD, text), options, 70, index_color=colors.YELLOW)
         if opt == None:
             return False
         game_draw()
