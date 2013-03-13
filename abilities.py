@@ -117,8 +117,11 @@ def _target_object_type(user, radius, object_type):
     from globals import world
 
     def valid_shot(user, xy):
+        from globals import world
+        if xy.distance(user.xy) >= radius: return False
+        if not world.fov.is_visible(xy): return False
         has_enemy = any( isinstance(obj, object_type) for obj in world.level.objects_at(xy) )
-        return xy.distance(user.xy) < radius and has_enemy
+        return has_enemy
 
     return choose_location(user, valid_shot, radius)
 
