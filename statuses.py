@@ -44,9 +44,9 @@ class Statuses:
             if status.type == status_type:
                 return status
         return None
-    def step(self):
+    def step(self, owner):
         for status in self: 
-            status.step()
+            status.step(owner)
         self.statuses = filter(lambda status: not status.removed, self.statuses)
     def add_status(self, owner, status_type):
         status = self.has_status(status_type)

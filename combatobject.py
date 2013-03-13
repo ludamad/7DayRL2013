@@ -42,7 +42,7 @@ class CombatObject(GameObject):
         if self.stats.hp <= 0:
             self.die()
     def step(self):
-        self.stats.step()
+        self.stats.step(self)
     def die(self):
         raise "Not implemented!"
 
