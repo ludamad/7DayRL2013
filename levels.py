@@ -38,11 +38,11 @@ def _free_square(level, xy):
 def place_resource_of_type(level, rxy, xy_region, resource_func, item_type, item_chance):                
     for i in range(len(xy_region)):
         level.add( resource_func(xy_region[i], i) )
-        for xy in make_rect(rxy - Pos(1,1), Size(4,4)).edge_values():
-            if rand(0,100)/100.0 < item_chance:
-                level.add( items.ItemObject(xy, item_type) )
+        edges = list( make_rect(rxy - Pos(1,1), Size(4,4)).edge_values() )
+    item_xy = edges[ rand(0,len(edges)) ]
+    level.add( items.ItemObject(item_xy, item_type) )
 
-def place_resource(level, item_chance = 0.2):
+def place_resource(level, item_chance = 0.05):
     while True:
             rxy = level.random_xy()
             xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]

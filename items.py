@@ -103,26 +103,26 @@ class ItemObject(GameObject):
 
 APPLE_CHUNK = ItemType(
         name = "Apple Chunk",
-        summary = "Heals 10 HP",
+        summary = "Heals 15 HP",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : PALE_RED },
             # Tile mode
              { "char" : tile(3,1)}
         ),
-        use_action = lambda inv, user: gain_hp(user, 10)
+        use_action = lambda inv, user: gain_hp(user, 15)
 )
 
 ORANGE_CHUNK = ItemType(
         name = "Orange Chunk",
-        summary = "Regain 25 MP",
+        summary = "Regains 25 MP",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : ORANGE },
             # Tile mode
              { "char" : tile(6,1)}
         ),
-        use_action = lambda inv, user: gain_hp(user, 25)
+        use_action = lambda inv, user: gain_mp(user, 25)
 )
 
 from statuses import SUGAR_RUSH

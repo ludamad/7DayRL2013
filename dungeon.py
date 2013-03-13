@@ -162,7 +162,7 @@ class World:
         self.levels = []
 
         self.fov = None
-
+    
         # Initialize first level
         self.level = self[0]
         self.messages = Messages(7)
@@ -177,6 +177,7 @@ class World:
         from globals import con
         con.clear()
         self.__init__()
+        self.step()
 
     # Gets or generates a level
     def __getitem__(self, idx):
