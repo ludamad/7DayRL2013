@@ -3,9 +3,16 @@ from geometry import *
 class MoveAction:
     def __init__(self, xy): 
         self.destination = xy
-    def perform(self, actor):   
+    def perform(self, actor):
+        from workerants import WorkerAnt
+        from globals import world
+
         #trail immediately before leaving a square
         actor.trail();
+        for obj in world.level.objects_at(self.destination):
+            if isinstance(obj, WorkerAnt):
+                obj.xy = actor.xy
+
         actor.xy = self.destination
 
 class AttackAction:

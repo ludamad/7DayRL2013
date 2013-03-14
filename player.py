@@ -106,7 +106,18 @@ class Player(CombatObject):
 
         self._adjust_view()
 
+    def goto_next_level(self):
+        level = globals.world.level
+        # Transfer from level, but do it next turn
+        new_index = level.level_index + 1
+        new_level = globals.world[new_index]
+        new_level.add_to_front(self)
+        new_level.queue_relocation(self, new_level.random_xy() )
+        level.queue_removal(self)
+
     def queue_move(self, dx, dy):
+        from workerants import WorkerAnt
+
         pos = self.xy + Pos(dx, dy)
         map = globals.world.level.map
         allow_dig = not console.is_key_pressed(libtcod.KEY_SHIFT)
@@ -115,12 +126,23 @@ class Player(CombatObject):
                 if isinstance(object, enemies.Enemy):
                     self.action = AttackAction(object)
                     return True
-            solid_obj = globals.world.level.solid_object_at(pos) and not (dx,dy) == (0,0)
+            whitelist = lambda o: isinstance(o, Player) or isinstance(o, WorkerAnt)
+            solid_obj = globals.world.level.solid_object_at(pos, whitelist=whitelist)
             tile_walkable = (allow_dig and map[pos].type == DIGGABLE) or not map[pos].blocked
             if not solid_obj and tile_walkable:
                 self.action = MoveAction(pos)
                 return True
         return False
+
+    def add_harvest_points(self, points):
+        from globals import RESOURCES_NEEDED
+        self.points += points
+        if self.points >= RESOURCES_NEEDED:
+            menus.msgbox((colors.BABY_BLUE, "You have harvested enough to feed this sector!\n", 
+                          colors.BABY_BLUE, "You have been promoted to ", colors.YELLOW, "GENERAL",
+                          colors.BABY_BLUE,". Your skills are required in a more dangerous sector."))
+            self.points = 0
+            self.goto_next_level()
 
     def queue_use_item(self, item_slot):
         self.action = UseItemAction(item_slot)

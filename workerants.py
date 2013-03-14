@@ -1,32 +1,33 @@
 import colors
+import libtcodpy as libtcod
 
 from combatobject import CombatObject, CombatStats
 from gameobject import GameObject
 
+import resource
 from geometry import *
 from utils import *
 from tiles import *
 
-WORKER_ANT_TILE = TileType(    # ASCII mode
-         { "char" : 'a',
-           "color" : colors.PURPLE
-         },                 # Tile mode
-         { "char" : tile(0,0)
-         }
+WORKER_ANT_TILE = TileType(    
+         { "char" : 'a', "color" : colors.PURPLE }, # ASCII mode
+         { "char" : tile(0,0) }  # Tile mode
 )
+_CARRYING_ASCII = { "char" : 'a', "color" : colors.GREEN }
 
-WORKER_ANT_DEAD_TILE = TileType(    # ASCII mode
-         { "char" : '%', 
-           "color" : colors.PURPLE
-         },                     # Tile mode
-         { "char" : tile(0,6)
-         }
+WORKER_ANT_WITH_APPLE_TILE      = TileType(_CARRYING_ASCII, { "char" : tile(4,7) } )
+WORKER_ANT_WITH_ORANGE_TILE     = TileType(_CARRYING_ASCII, { "char" : tile(5,7) } )
+WORKER_ANT_WITH_WATERMELON_TILE = TileType(_CARRYING_ASCII, { "char" : tile(6,7) } )
+
+WORKER_ANT_DEAD_TILE = TileType(
+         { "char" : '%',  "color" : colors.PURPLE }, # ASCII mode
+         { "char" : tile(0,6) } # Tile mode
 )
 
 WORKER_ANT_CANIBALISM_HP_GAIN = 4
 WORKER_ANT_CANIBALISM_MP_GAIN = 1
-WORKER_ANT_MAX_HISTORY = 5
-WORKER_ANT_HISTORY_PENALTY = 20
+WORKER_ANT_MAX_HISTORY = 30
+WORKER_ANT_HISTORY_PENALTY = 30
 
 class WorkerAnt(CombatObject):
     def __init__(self, xy):
@@ -40,28 +41,75 @@ class WorkerAnt(CombatObject):
 
         CombatObject.__init__(self, xy, WORKER_ANT_TILE, stats)
         self.past_squares = [] # Weigh these lower
+        self.carrying = False
 
     def move(self, xy):
         self.trail()
-        self.past_squares.append(xy)
-        if len(self.past_squares) > WORKER_ANT_MAX_HISTORY:
-            del self.past_squares[0 : len(self.past_squares) - WORKER_ANT_MAX_HISTORY]
+
+        # Add to location history
+        if not self.carrying:
+            # Update location in history if exists
+            self.past_squares.append(xy)
+            if len(self.past_squares) > WORKER_ANT_MAX_HISTORY:
+                del self.past_squares[0 : len(self.past_squares) - WORKER_ANT_MAX_HISTORY]
         self.xy = xy
+
+    def pickup(self, obj):
+        if not obj.take(): return
+        self.trail()
+        if obj.tile_type == resource.APPLE: 
+            self.tile_type = WORKER_ANT_WITH_APPLE_TILE
+        elif obj.tile_type == resource.ORANGE: 
+            self.tile_type = WORKER_ANT_WITH_ORANGE_TILE
+        elif obj.tile_type == resource.WATERMELON: 
+            self.tile_type = WORKER_ANT_WITH_WATERMELON_TILE
+        self.carrying = True
+
+    def dropoff(self):
+        from globals import world
+        self.tile_type = WORKER_ANT_TILE
+        world.player.add_harvest_points(10)
+        self.carrying = False
+
+    def handle_pickups_and_dropoffs(self, xy_near):
+        from globals import world
+        if not self.carrying:
+            for xy in xy_near:
+                for obj in world.level.objects_at(xy):
+                    if isinstance(obj, resource.Resource) and obj.resources_left > 0:
+                        self.pickup(obj)
+                        return
+        if self.carrying:
+            for xy in xy_near:
+                for obj in world.level.objects_at(xy):
+                    if isinstance(obj, WorkerAntHole):
+                        self.dropoff()
+                        return
 
     def step(self):
         from globals import world
         CombatObject.step(self)
-        xy_near = make_rect(self.xy - Pos(1,1), Size(3,3)).edge_values()
+        xy_near = list( make_rect(self.xy - Pos(1,1), Size(3,3)).edge_values() )
+        self.handle_pickups_and_dropoffs(xy_near)
+
         valid = filter(lambda xy: world.level.map.valid_xy(xy) and not world.level.is_solid(xy), xy_near)
 
         if valid == []: 
             return
 
-        weights = [ world.level.scents.trailmap[xy] + rand(0,10) for xy in valid]
+        libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
+        weights = [ world.level.scents.trailmap[xy] + rand(-30, +30) for xy in valid]
+        libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):
             if valid[i] in self.past_squares:
-                weights[i] -= WORKER_ANT_HISTORY_PENALTY
+                amount = sum( filter(lambda xy: xy == valid[i], self.past_squares) )
+                amount = math.sqrt(amount)
+                place = self.past_squares.index(valid[i])
+                if self.carrying: # Retrace our steps
+                    weights[i] += WORKER_ANT_HISTORY_PENALTY*amount+ place
+                else:
+                    weights[i] -= WORKER_ANT_HISTORY_PENALTY*amount + place
 
         max_idx = weights.index(max(weights))
         self.move( valid[max_idx] )

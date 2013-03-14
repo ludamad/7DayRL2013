@@ -104,9 +104,7 @@ class DungeonLevel:
     @property
     def size(self): return self.map.size
     def objects_at(self, xy):
-        for obj in self.objects:
-            if obj.xy == xy:
-                yield obj
+        return filter(lambda obj: obj.xy == xy, self.objects)
     def add(self, object):
         self.objects.append(object)
     def add_to_front(self, object):
@@ -146,8 +144,8 @@ class DungeonLevel:
             for obj in self.queued_removals: self.remove(obj)
             self.queued_removals = []
 
-    def solid_object_at(self, xy):
-        return any( obj.solid for obj in self.objects_at(xy))
+    def solid_object_at(self, xy, whitelist = None):
+        return any( obj.solid and (not whitelist or not whitelist(obj) ) for obj in self.objects_at(xy))
     def is_solid(self, xy):
         return self.map[xy].blocked or self.solid_object_at(xy)
 

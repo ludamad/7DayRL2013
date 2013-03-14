@@ -51,4 +51,5 @@ class ScentMap:
         for xy in self.rect().xy_values():
             if self[xy] >= self.decayrate:
                 self[xy] = self[xy] - self.decayrate
-        
+
+

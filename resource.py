@@ -39,7 +39,18 @@ class Resource(GameObject):
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.tile_variant = variant
         self.name = name
+        self.resources_left = 3
         self.seen = False
+    # Takes a resource, returns false if all have already been taken
+    def take(self):
+        from globals import world
+        if self.resources_left <= 0:
+            return False
+        self.resources_left -= 1
+        if self.resources_left <= 0:
+            world.level.queue_removal(self)
+        return True
+
     def step(self):
         GameObject.step(self)
         if not self.seen and globals.world.fov.is_visible(self.xy):

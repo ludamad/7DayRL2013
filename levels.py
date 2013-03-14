@@ -120,7 +120,7 @@ def level1(level, bsp, nodes):
 
 LEVEL_1 = LevelTemplate(level1, min_node_size=6)
 
-level_templates = [ LEVEL_1 ]
+level_templates = [ LEVEL_1 ] * 5
 
 def generate_level(world, num):
     from globals import LEVEL_SIZE
