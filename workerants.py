@@ -1,7 +1,7 @@
 import colors
 import libtcodpy as libtcod
 
-from combatobject import CombatObject, CombatStats
+from combatobject import CombatObject, CombatStats, TEAM_PLAYER
 from gameobject import GameObject
 
 import resource
@@ -26,8 +26,9 @@ WORKER_ANT_DEAD_TILE = TileType(
 
 WORKER_ANT_CANIBALISM_HP_GAIN = 4
 WORKER_ANT_CANIBALISM_MP_GAIN = 1
-WORKER_ANT_MAX_HISTORY = 30
+WORKER_ANT_MAX_HISTORY = 20
 WORKER_ANT_HISTORY_PENALTY = 30
+WORKER_ANT_TURNS_BEFORE_BURROW = 100
 
 class WorkerAnt(CombatObject):
     def __init__(self, xy):
@@ -39,9 +40,10 @@ class WorkerAnt(CombatObject):
             attack = 0
         )
 
-        CombatObject.__init__(self, xy, WORKER_ANT_TILE, stats)
+        CombatObject.__init__(self, xy, WORKER_ANT_TILE, stats, team = TEAM_PLAYER)
         self.past_squares = [] # Weigh these lower
         self.carrying = False
+        self.turns = 0
 
     def move(self, xy):
         self.trail()
@@ -65,13 +67,18 @@ class WorkerAnt(CombatObject):
             self.tile_type = WORKER_ANT_WITH_WATERMELON_TILE
         self.carrying = True
 
-    def dropoff(self):
+    def back2hole(self):
         from globals import world
-        self.tile_type = WORKER_ANT_TILE
-        world.player.add_harvest_points(10)
-        self.carrying = False
+        if self.carrying:
+            self.tile_type = WORKER_ANT_TILE
+            world.player.add_harvest_points(10)
+            world.messages.add([colors.BABY_BLUE, "Your worker ant delivers delicious fruit harvest!"])
+        else:
+            world.messages.add([colors.GRAY, "Your tired ant returns to the anthole."])
+        world.level.queue_removal(self)
+ 
 
-    def handle_pickups_and_dropoffs(self, xy_near):
+    def handle_pickups_and_returns(self, xy_near):
         from globals import world
         if not self.carrying:
             for xy in xy_near:
@@ -79,18 +86,19 @@ class WorkerAnt(CombatObject):
                     if isinstance(obj, resource.Resource) and obj.resources_left > 0:
                         self.pickup(obj)
                         return
-        if self.carrying:
+        if self.carrying or self.turns >= WORKER_ANT_TURNS_BEFORE_BURROW:
             for xy in xy_near:
                 for obj in world.level.objects_at(xy):
                     if isinstance(obj, WorkerAntHole):
-                        self.dropoff()
+                        self.back2hole()
                         return
 
     def step(self):
         from globals import world
         CombatObject.step(self)
+        self.turns += 1
         xy_near = list( make_rect(self.xy - Pos(1,1), Size(3,3)).edge_values() )
-        self.handle_pickups_and_dropoffs(xy_near)
+        self.handle_pickups_and_returns(xy_near)
 
         valid = filter(lambda xy: world.level.map.valid_xy(xy) and not world.level.is_solid(xy), xy_near)
 
@@ -98,18 +106,18 @@ class WorkerAnt(CombatObject):
             return
 
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
-        weights = [ world.level.scents.trailmap[xy] + rand(-30, +30) for xy in valid]
+        randomness = 30
+        weights = [ world.level.scents.trailmap[xy] + rand(-randomness, +randomness) for xy in valid]
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):
             if valid[i] in self.past_squares:
-                amount = sum( filter(lambda xy: xy == valid[i], self.past_squares) )
-                amount = math.sqrt(amount)
-                place = self.past_squares.index(valid[i])
+                amount = len( filter(lambda xy: xy == valid[i], self.past_squares) )
+                bonus = 0 if amount <= 1 else 10
                 if self.carrying: # Retrace our steps
-                    weights[i] += WORKER_ANT_HISTORY_PENALTY*amount+ place
+                    weights[i] += WORKER_ANT_HISTORY_PENALTY + bonus
                 else:
-                    weights[i] -= WORKER_ANT_HISTORY_PENALTY*amount + place
+                    weights[i] -= WORKER_ANT_HISTORY_PENALTY + bonus
 
         max_idx = weights.index(max(weights))
         self.move( valid[max_idx] )
@@ -135,7 +143,7 @@ SPAWNING_WORKER_ANT_HOLE = TileType(    # ASCII mode
            "color" : colors.GREEN
          },                     # Tile mode
          { "char" : tile(2,1),
-          "color" : colors.GREEN
+          "color" : colors.PALE_GREEN
          }
 )
 
@@ -143,9 +151,13 @@ class WorkerAntHole(GameObject):
     def __init__(self, xy):
         GameObject.__init__(self, xy, WORKER_ANT_HOLE, solid = False, draw_once_seen = True)
         self.spawning = False
+        self.spawns_left = 0
+        self.spawns_timer = 0
 
     def start_spawning(self):
         self.spawning = True
+        self.spawns_left = 4
+        self.spawns_timer = 5
         self.tile_type= SPAWNING_WORKER_ANT_HOLE
 
     def step(self):
@@ -153,8 +165,13 @@ class WorkerAntHole(GameObject):
 
         GameObject.step(self)
         if self.spawning:
-            if not world.level.solid_object_at(self.xy):
+            self.spawns_timer = max(0, self.spawns_timer - 1)
+            if self.spawns_timer <= 0 and not world.level.solid_object_at(self.xy):
                 world.level.add( WorkerAnt(self.xy) )
-                self.spawning = False
-                self.tile_type = WORKER_ANT_HOLE
-        
+                self.spawns_left -= 1
+                if self.spawns_left <= 0:
+                    self.spawning = False
+                    self.tile_type = WORKER_ANT_HOLE
+                else:
+                    self.spawns_timer = 5
+

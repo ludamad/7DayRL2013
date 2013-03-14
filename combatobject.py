@@ -3,6 +3,9 @@ from items import Inventory
 from abilities import Abilities
 from statuses import Statuses
 
+TEAM_PLAYER = 0
+TEAM_ENEMY = 1
+
 class CombatStats:
     def __init__(self, hp=0, hp_regen=0, mp =0, mp_regen = 0, attack = 0):
         self.hp = hp
@@ -32,7 +35,7 @@ class CombatStats:
         self.mp = min(self.mp+amount, self.max_mp)
 
 class CombatObject(GameObject):
-    def __init__(self, xy, tiletype, stats): 
+    def __init__(self, xy, tiletype, stats, team= TEAM_ENEMY): 
         GameObject.__init__(self, xy, tiletype)
         self.stats = stats
     def attack(self, enemy):

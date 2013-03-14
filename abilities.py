@@ -254,11 +254,10 @@ def call_ants():
         name = 'Call Ants',
         summary = 'Call forth harvesting ants from an ant-hole.',
         perform_action = _spawn_ant_worker,
-        target_action = lambda user: _target_object_type(user, 5,
+        target_action = lambda user: _target_object_type(user, 9,
                                                          object_criteria=_ant_hole_criteria,
                                                          object_type=WorkerAntHole,
-                                                         can_target_through_solids = False,
                                                          draw_pointer = draw_pointer_func(char=('a', tile(8,8)) )),
         mana_cost = 5,
-        cooldown = 0
+        cooldown = 35
     )

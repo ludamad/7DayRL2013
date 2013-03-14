@@ -12,7 +12,7 @@ from geometry import *
 from utils import *
 from tiles import *
 
-from combatobject import CombatStats, CombatObject
+from combatobject import CombatStats, CombatObject, TEAM_PLAYER
 from resource import Resource
 
 PLAYER = TileType( 
@@ -32,9 +32,10 @@ def _get_mouse_item_slot(player, mouse):
 
 
 class Player(CombatObject):
-    def __init__(self, xy): 
-        CombatObject.__init__(self, xy, PLAYER, 
-                 CombatStats(hp = 100, mp = 50, mp_regen = 0.5, attack = 10))
+    def __init__(self, xy):
+        stats = CombatStats(hp = 100, mp = 50, mp_regen = 0.5, attack = 10)
+        CombatObject.__init__(self, xy, PLAYER, stats, team = TEAM_PLAYER)
+
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
@@ -95,15 +96,6 @@ class Player(CombatObject):
         if level.map[self.xy].type == DIGGABLE:
             level.map[self.xy].make_floor()
 
-#        for obj in level.objects_at(self.xy):
-#            if isinstance(obj, dungeonfeatures.Stairs):
-#                # Transfer from level, but do it next turn
-#                new_index = level.level_index + (+1 if obj.stairs_down else -1)
-#                new_level = globals.world[new_index]
-#                new_level.add_to_front(self)
-#                new_level.queue_relocation(self, new_level.random_xy() )
-#                level.queue_removal(self)
-
         self._adjust_view()
 
     def goto_next_level(self):
@@ -114,6 +106,7 @@ class Player(CombatObject):
         new_level.add_to_front(self)
         new_level.queue_relocation(self, new_level.random_xy() )
         level.queue_removal(self)
+        globals.game_draw()
 
     def queue_move(self, dx, dy):
         from workerants import WorkerAnt
