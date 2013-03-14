@@ -50,7 +50,7 @@ def place_resource(level):
             valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
             if valid:
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
-                type = rand(0, 3)
+                type = rand(0, 2)
                 if type == 0: 
                     place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK)
                 elif type == 1:
@@ -60,9 +60,9 @@ def place_resource(level):
                 break
 
 def place_ant_holes(level, amount, min_dist = 7, max_dist = 13):
-    for i in range(10):
+    for i in range(amount):
         while True:
-            xy = level.random_xy()
+            xy = level.random_xy(lambda level, xy: not level.map[xy].blocked and not any(level.objects_at(xy)))
             res = filter(lambda obj: isinstance(obj, resource.Resource), level.objects )
             dist_to_resource = min( *( xy.distance(r.xy) for r in res ) )
             if dist_to_resource >= min_dist and dist_to_resource <= max_dist:
@@ -91,31 +91,31 @@ def level1(level, bsp, nodes):
                     if level.map[xy].type == FLOOR:
                         mutator(level.map[xy])
 
-    place_ant_holes(level, 10)
-
-    for i in range(200):
-        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
-        level.map[xy].make_diggable()
-
-    for i in range(65):
-        xy = level.random_xy()
-        level.add( enemies.ant(xy) )
-
-    for i in range(25):
-        xy = level.random_xy()
-        level.add( enemies.ladybug(xy) )
-
-    for i in range(25):
-        xy = level.random_xy()
-        level.add( enemies.roach(xy) )
-
-    for i in range(25):
-        xy = level.random_xy()
-        level.add( enemies.roach(xy) )
-
-    for i in range(7):
-        xy = level.random_xy()
-        level.add( enemies.beetle(xy) )
+    place_ant_holes(level, 25)
+#
+#    for i in range(200):
+#        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
+#        level.map[xy].make_diggable()
+#
+#    for i in range(65):
+#        xy = level.random_xy()
+#        level.add( enemies.ant(xy) )
+#
+#    for i in range(25):
+#        xy = level.random_xy()
+#        level.add( enemies.ladybug(xy) )
+#
+#    for i in range(25):
+#        xy = level.random_xy()
+#        level.add( enemies.roach(xy) )
+#
+#    for i in range(25):
+#        xy = level.random_xy()
+#        level.add( enemies.roach(xy) )
+#
+#    for i in range(7):
+#        xy = level.random_xy()
+#        level.add( enemies.beetle(xy) )
 
 
 LEVEL_1 = LevelTemplate(level1, min_node_size=6)
@@ -126,6 +126,7 @@ def generate_level(world, num):
     from globals import LEVEL_SIZE
     from dungeon import DungeonMap, DungeonLevel
     from scents import ScentMaps
+
     new_map = DungeonMap(world, LEVEL_SIZE)
     scent_map = ScentMaps(world, LEVEL_SIZE)
     level = DungeonLevel(world, new_map, scent_map, num)

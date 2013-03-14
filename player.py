@@ -58,10 +58,6 @@ class Player(CombatObject):
     def die(self):
         from globals import world
         world.restart()
-        
-    def trail(self):
-        from globals import world
-        globals.world.level.scents.trail(self.xy)
 
     def _adjust_view(self):
         PADDING = globals.VIEW_PADDING
@@ -195,8 +191,8 @@ class Player(CombatObject):
             can_do = ability.has_prereqs(self)
             if can_do:
                 options.append([colors.BABY_BLUE, str(ability.mana_cost) + " MP ", 
-                                colors.YELLOW, ability.name+" ", 
-                                colors.GREEN, ability.summary])
+                                colors.LIGHT_GREEN, ability.name+" ", 
+                                colors.WHITE, ability.summary])
             else:
                 options.append([colors.BABY_BLUE if self.stats.mp > ability.mana_cost else colors.GRAY, str(ability.mana_cost) + " MP ", 
                                 colors.GRAY, ability.name+" ", 

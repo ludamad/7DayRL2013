@@ -53,6 +53,10 @@ class CombatObject(GameObject):
     def add_status(self, status_type):
         self.stats.statuses.add_status(self, status_type)
 
+    def trail(self):
+        from globals import world
+        world.level.scents.trail(self.xy)
+
     def add_item(self, item_type):
         self.stats.inventory.add_item(item_type)
     def use_item(self, item_slot):

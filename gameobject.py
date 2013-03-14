@@ -18,4 +18,4 @@ class GameObject:
 
         visible = world.fov.is_visible(self.xy) or console.is_key_pressed(libtcod.KEY_TAB)
         if visible or (world.level.map[self.xy].explored and self.draw_once_seen):
-            tiles.draw_tile( self.tile_type, self.tile_variant, on_screen(self.xy) )
+            tiles.draw_tile( self.tile_type, self.tile_variant, self.xy)

@@ -61,7 +61,6 @@ class DungeonMap:
         from globals import on_screen, con
 
         global WAS_SHOW_ALL
-        visible_area = make_rect( Pos(0,0), self.size )
 
         player_xy = self.world.player.xy
         view = self.world.view
@@ -114,6 +113,13 @@ class DungeonLevel:
         # Hack to always have player be first
         idx = 0 if self.world.player not in self.objects else self.objects.index(self.world.player)+1
         self.objects.insert(idx, object)
+    # For corpses... yeah
+    def add_to_front_of_combatobjects(self, object):
+        from combatobject import CombatObject
+        for i in reversed( range( len(self.objects) ) ):
+            if isinstance( self.objects[i], CombatObject):
+                self.objects.insert(i+1, object)
+                return
     def remove(self, object):
         self.objects.remove(object)
     def queue_removal(self, object):

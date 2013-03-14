@@ -61,12 +61,12 @@ class Abilities:
 def draw_pointer_func(char =('*','*'), good_color=YELLOW, bad_color=RED, radius = 0):
     def _draw_pointer(con, xy, valid):
         con.set_default_background(LIGHT_GRAY)
-        from globals import ASCII_MODE
+        from globals import ASCII_MODE, on_screen
         color = ( WHITE if not ASCII_MODE else good_color) if valid else bad_color
         con.set_default_foreground(color)
         points = [ xy + Pos(x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
         for pxy in points:
-            con.put_char(pxy, char[0] if ASCII_MODE else char[1], libtcod.BKGND_MULTIPLY)
+            con.put_char(on_screen(pxy), char[0] if ASCII_MODE else char[1], libtcod.BKGND_MULTIPLY)
 
     return _draw_pointer
 
@@ -81,14 +81,14 @@ def _line_no_solid(from_xy, to_xy):
 
 MAX_RADIUS=10
 def choose_location(user, validity_func, radius=None, fail_message=None, guess_target = True, draw_pointer=draw_pointer_func() ):
-    from globals import game_blit, effects, screen, key2direction, world, SCREEN_SIZE
+    from globals import game_blit, effects, screen, key2direction, world, SCREEN_SIZE, on_screen
 
     # Pick random valid
     
     target_xy = user.xy
     if guess_target:
         valid_candidates = []
-        for xy in make_rect(Pos(0,0), SCREEN_SIZE).xy_values():
+        for xy in make_rect(Pos(0,0), world.level.size).xy_values():
             if xy.distance(user.xy) < radius and validity_func(user, xy):
                 valid_candidates.append(xy)
         if valid_candidates:
@@ -101,11 +101,10 @@ def choose_location(user, validity_func, radius=None, fail_message=None, guess_t
 
         effects.clear()
         if radius:
-            for xy in make_rect(Pos(0,0), SCREEN_SIZE).xy_values():
+            for xy in world.view.xy_values():
                 if xy.distance(user.xy) < radius:
-                    effects.set_char_background(xy, screen.get_char_background(xy))
-        
-        
+                    effects.set_char_background(on_screen(xy), screen.get_char_background(xy))
+
         effects.blit( make_rect(Pos(0,0), SCREEN_SIZE), screen, Pos(0,0), 0.0, 0.7)
 
         draw_pointer(screen, target_xy, valid)
@@ -227,7 +226,7 @@ def mutant_thorns():
         target_action = lambda user: _target_object_type(user, 5, 
                                                          object_type=Enemy,
                                                          can_target_through_solids = False,
-                                                         draw_pointer = draw_pointer_func(char=('^', '^') )),
+                                                         draw_pointer = draw_pointer_func(bad_color=ORANGE, char=('^', tile(8,7)) )),
         mana_cost = 25,
         cooldown = 3
     )
@@ -261,5 +260,5 @@ def call_ants():
                                                          can_target_through_solids = False,
                                                          draw_pointer = draw_pointer_func(char=('a', tile(8,8)) )),
         mana_cost = 5,
-        cooldown = 5
+        cooldown = 0
     )

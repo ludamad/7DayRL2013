@@ -5,7 +5,7 @@ import console
 import colors
 
 VIEW_PADDING = 10
-SCREEN_SIZE = Size(80, 43)
+SCREEN_SIZE = Size(80, 35)
 LEVEL_SIZE = SCREEN_SIZE
 RESOURCES_NEEDED = 100
 

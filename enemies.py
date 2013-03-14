@@ -55,10 +55,13 @@ class Enemy(CombatObject):
 
     def die(self):
         globals.world.level.queue_removal(self)
-        globals.world.level.add_to_front(Corpse(self.name, self.xy, self.corpse_tile, 
-                                                can_be_eaten = True, 
-                                                mp_gain = self.behaviour.corpse_mana, 
-                                                hp_gain = self.behaviour.corpse_heal))
+        corpse = Corpse(
+            self.name, self.xy, self.corpse_tile, 
+            can_be_eaten = True, 
+            mp_gain = self.behaviour.corpse_mana, 
+            hp_gain = self.behaviour.corpse_heal
+        )
+        globals.world.level.add_to_front_of_combatobjects(corpse)
     def step(self):
         CombatObject.step(self)
 
@@ -212,7 +215,7 @@ def roach(xy):
     )
 
 BEETLE_TILE = TileType(    # ASCII mode
-         { "char" : 'b',
+         { "char" : 'B',
            "color" : colors.Color(123,57,59)
          },                 # Tile mode
          { "char" : tile(3,7)

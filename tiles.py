@@ -165,3 +165,4 @@ FLOOR3 = TileType(  # ASCII mode
             { "fallback" : Color(129, 81, 45) }
         )
 )
+
