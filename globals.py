@@ -21,6 +21,20 @@ effects.set_default_background(colors.BLACK)
 screen = console.Console()
 screen.set_default_foreground(colors.WHITE)
 
+INTRO_IMAGE = libtcod.image_load("intro.png")
+DEFEAT_IMAGE = libtcod.image_load("defeat.png")
+VICTORY_IMAGE = libtcod.image_load("victory.png")
+
+def intro_screen():
+    while True:
+        libtcod.image_blit_rect(INTRO_IMAGE, 0, 0,0, -1,-1, 1)
+        screen.flush()
+        key = libtcod.console_check_for_keypress()
+        if key.vk == libtcod.KEY_ENTER:
+            screen.clear()
+            screen.flush()
+            return
+
 ASCII_MODE = False
 
 panel = console.Console( Size(SCREEN_SIZE.w, 7) )

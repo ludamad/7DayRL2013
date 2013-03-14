@@ -94,6 +94,7 @@ class DungeonMap:
 # Holds a DungeonMap (ie, the tiles) and the game objects
 class DungeonLevel:
     def __init__(self, world, map, scent_map, index):
+        from enemyspawner import EnemySpawner
         self.world = world
         self.map = map
         self.scents = scent_map
@@ -101,6 +102,8 @@ class DungeonLevel:
         self.queued_removals = []
         self.queued_relocations = []
         self.level_index = index
+        self.enemy_spawner = EnemySpawner() # Default spawner
+
     @property
     def size(self): return self.map.size
     def objects_at(self, xy):
@@ -128,7 +131,13 @@ class DungeonLevel:
     def handle_relocations(self):
         for obj, xy in self.queued_relocations: obj.xy = xy
         self.queued_relocations = []
-        
+
+    def objects_of_type(self, object_type):
+        return filter(lambda obj: isinstance(obj, object_type), self.objects)
+
+    def objects_of_type_at(self, xy, object_type):
+        return filter(lambda obj: obj.xy == xy and isinstance(obj, object_type), self.objects)
+
     def draw(self, fulldraw=False):
         self.map.draw(fulldraw)
         for obj in self.objects: obj.draw()
@@ -143,6 +152,7 @@ class DungeonLevel:
             for obj in list(self.objects): obj.step()
             for obj in self.queued_removals: self.remove(obj)
             self.queued_removals = []
+            self.enemy_spawner.step()
 
     def solid_object_at(self, xy, whitelist = None):
         return any( obj.solid and (not whitelist or not whitelist(obj) ) for obj in self.objects_at(xy))

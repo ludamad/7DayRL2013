@@ -64,7 +64,7 @@ def place_ant_holes(level, amount, min_dist = 7, max_dist = 13):
         while True:
             xy = level.random_xy(lambda level, xy: not level.map[xy].blocked and not any(level.objects_at(xy)))
             res = filter(lambda obj: isinstance(obj, resource.Resource), level.objects )
-            dist_to_resource = min( *( xy.distance(r.xy) for r in res ) )
+            dist_to_resource = min( [ xy.distance(r.xy) for r in res ] )
             if dist_to_resource >= min_dist and dist_to_resource <= max_dist:
                 level.add( workerants.WorkerAntHole(xy) )
                 break
@@ -101,15 +101,11 @@ def level1(level, bsp, nodes):
         xy = level.random_xy()
         level.add( enemies.ant(xy) )
 
-    for i in range(25):
+    for i in range(35):
         xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
 
-    for i in range(25):
-        xy = level.random_xy()
-        level.add( enemies.roach(xy) )
-
-    for i in range(25):
+    for i in range(35):
         xy = level.random_xy()
         level.add( enemies.roach(xy) )
 
@@ -130,7 +126,6 @@ def generate_level(world, num):
     new_map = DungeonMap(world, LEVEL_SIZE)
     scent_map = ScentMaps(world, LEVEL_SIZE)
     level = DungeonLevel(world, new_map, scent_map, num)
-
 
     level_templates[num].generate(level)
 

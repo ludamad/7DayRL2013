@@ -11,6 +11,7 @@ console.init_root(SCREEN_SIZE + Size(0, panel.size.h), 'FooQuest', False, libtco
 
 #libtcod.console_set_keyboard_repeat(30, 30)
 
+intro_screen()
 while not console.is_window_closed():
     world.step()
     game_draw()

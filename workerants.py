@@ -72,7 +72,7 @@ class WorkerAnt(CombatObject):
         if self.carrying:
             self.tile_type = WORKER_ANT_TILE
             world.player.add_harvest_points(10)
-            world.messages.add([colors.BABY_BLUE, "Your worker ant delivers delicious fruit harvest!"])
+            world.messages.add([colors.BABY_BLUE, "Your worker ant delivers some harvest!"])
         else:
             world.messages.add([colors.GRAY, "Your tired ant returns to the anthole."])
         world.level.queue_removal(self)

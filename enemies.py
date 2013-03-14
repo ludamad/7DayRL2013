@@ -35,9 +35,10 @@ class Corpse(GameObject):
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, corpse_heal=0, corpse_mana=0, can_burrow = True, following_steps = 0, sight_distance=8, see_through_walls=False, pause_chance = 1.0/8):
+    def __init__(self, corpse_heal=0, corpse_mana=0, can_burrow = True, can_wander_burrow = False, following_steps = 0, sight_distance=8, see_through_walls=False, pause_chance = 1.0/8):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
+        self.can_wander_burrow = can_wander_burrow
         self.corpse_heal = corpse_heal
         self.corpse_mana = corpse_mana
         self.see_through_walls = see_through_walls
@@ -62,6 +63,13 @@ class Enemy(CombatObject):
             hp_gain = self.behaviour.corpse_heal
         )
         globals.world.level.add_to_front_of_combatobjects(corpse)
+    def move(self, xy):
+        map = globals.world.level.map
+        if map[xy].type == DIGGABLE:
+            # Swap tiles when digging through
+            map[xy], map[self.xy] = map[self.xy], map[xy]
+        self.xy = xy
+
     def step(self):
         CombatObject.step(self)
 
@@ -82,19 +90,16 @@ class Enemy(CombatObject):
                 self.attack(globals.world.player)
                 moved = True
             elif xy and not globals.world.level.solid_object_at(xy):
-                map = globals.world.level.map
-                if map[xy].type == DIGGABLE:
-                    # Swap tiles when digging through
-                    map[xy], map[self.xy] = map[self.xy], map[xy]
-                self.xy = xy
+                self.move(xy)
                 moved = True
 
         # Wander
         if not moved:
             level = globals.world.level
-            xy = random_nearby(level, self.xy, lambda xy: not level.is_solid(xy) )
+            criteria = lambda xy: not level.is_solid(xy) or (self.behaviour.can_wander_burrow and level.map[xy].type == DIGGABLE)
+            xy = random_nearby(level, self.xy, criteria)
             if xy:
-                self.xy = xy
+                self.move(xy)
                 moved = True
 
     def draw(self):
@@ -164,6 +169,7 @@ def ant(xy):
                     corpse_mana = 1,
                     can_burrow = True, 
                     following_steps = 2,
+                    can_wander_burrow = True,
                     pause_chance = 0.0
              ),
              CombatStats(
@@ -178,7 +184,7 @@ def ant(xy):
 
 ROACH_TILE = TileType(    # ASCII mode
          { "char" : 'r',
-           "color" : colors.PINKISH
+           "color" : colors.ORANGE
          },                 # Tile mode
          { "char" : tile(4,0)
          }
@@ -186,7 +192,7 @@ ROACH_TILE = TileType(    # ASCII mode
 
 ROACH_DEAD_TILE = TileType(    # ASCII mode
          { "char" : '%', 
-           "color" : colors.PINKISH
+           "color" : colors.ORANGE
          },                     # Tile mode
          { "char" : tile(4,6)
          }

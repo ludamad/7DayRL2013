@@ -228,7 +228,7 @@ def mutant_thorns():
                                                          can_target_through_solids = False,
                                                          draw_pointer = draw_pointer_func(bad_color=ORANGE, char=('^', tile(8,7)) )),
         mana_cost = 25,
-        cooldown = 3
+        cooldown = 10
     )
 
 ### NON COMBAT ABLIITIES ###
