@@ -113,6 +113,10 @@ def level1(level, bsp, nodes):
         xy = level.random_xy()
         level.add( enemies.roach(xy) )
 
+    for i in range(7):
+        xy = level.random_xy()
+        level.add( enemies.beetle(xy) )
+
 
 LEVEL_1 = LevelTemplate(level1, min_node_size=6)
 

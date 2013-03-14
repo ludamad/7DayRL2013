@@ -211,40 +211,40 @@ def roach(xy):
             )
     )
 
-ROACH_TILE = TileType(    # ASCII mode
+BEETLE_TILE = TileType(    # ASCII mode
          { "char" : 'b',
            "color" : colors.Color(123,57,59)
          },                 # Tile mode
-         { "char" : tile(4,0)
+         { "char" : tile(3,7)
          }
 )
 
-ROACH_DEAD_TILE = TileType(    # ASCII mode
+BEETLE_DEAD_TILE = TileType(    # ASCII mode
          { "char" : '%', 
            "color" : colors.Color(123,57,59)
          },                     # Tile mode
-         { "char" : tile(4,6)
+         { "char" : tile(3,8)
          }
 )
 def beetle(xy):
     return Enemy(
              "Beetle",
              xy,
-             ROACH_TILE, 
-             ROACH_DEAD_TILE, 
+             BEETLE_TILE, 
+             BEETLE_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 16,
-                    corpse_mana = 4,
+                    corpse_heal = 25,
+                    corpse_mana = 10,
                     can_burrow = True,
-                    following_steps = 1,
+                    following_steps = 2,
                     pause_chance = 0.25,
-                    sight_distance = 3.3
+                    sight_distance = 5.3
              ),
              CombatStats(
-                    hp = 20,
+                    hp = 50,
                     hp_regen = 0,
                     mp = 0, 
                     mp_regen = 0, 
-                    attack = 10
+                    attack = 20
             )
     )

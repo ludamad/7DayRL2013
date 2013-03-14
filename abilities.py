@@ -242,6 +242,10 @@ def call_ants():
 
     def _spawn_ant_worker(user, xy):
         from globals import world
+        for obj in world.level.objects_at(xy):
+            if isinstance(obj, WorkerAntHole):
+                obj.start_spawning()
+                break
         world.messages.add( [PALE_RED, "The ants come marching!"] )
 
     def _ant_hole_criteria(anthole):
@@ -249,7 +253,7 @@ def call_ants():
 
     return Ability(
         name = 'Call Ants',
-        summary = 'Call forth ants from an ant-hole. They will harvest fruit.',
+        summary = 'Call forth harvesting ants from an ant-hole.',
         perform_action = _spawn_ant_worker,
         target_action = lambda user: _target_object_type(user, 5,
                                                          object_criteria=_ant_hole_criteria,
