@@ -92,30 +92,30 @@ def level1(level, bsp, nodes):
                         mutator(level.map[xy])
 
     place_ant_holes(level, 25)
-#
-#    for i in range(200):
-#        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
-#        level.map[xy].make_diggable()
-#
-#    for i in range(65):
-#        xy = level.random_xy()
-#        level.add( enemies.ant(xy) )
-#
-#    for i in range(25):
-#        xy = level.random_xy()
-#        level.add( enemies.ladybug(xy) )
-#
-#    for i in range(25):
-#        xy = level.random_xy()
-#        level.add( enemies.roach(xy) )
-#
-#    for i in range(25):
-#        xy = level.random_xy()
-#        level.add( enemies.roach(xy) )
-#
-#    for i in range(7):
-#        xy = level.random_xy()
-#        level.add( enemies.beetle(xy) )
+
+    for i in range(200):
+        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
+        level.map[xy].make_diggable()
+
+    for i in range(65):
+        xy = level.random_xy()
+        level.add( enemies.ant(xy) )
+
+    for i in range(25):
+        xy = level.random_xy()
+        level.add( enemies.ladybug(xy) )
+
+    for i in range(25):
+        xy = level.random_xy()
+        level.add( enemies.roach(xy) )
+
+    for i in range(25):
+        xy = level.random_xy()
+        level.add( enemies.roach(xy) )
+
+    for i in range(7):
+        xy = level.random_xy()
+        level.add( enemies.beetle(xy) )
 
 
 LEVEL_1 = LevelTemplate(level1, min_node_size=6)
