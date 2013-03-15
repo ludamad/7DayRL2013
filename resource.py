@@ -41,6 +41,8 @@ class Resource(GameObject):
         self.name = name
         self.resources_left = resources_left
         self.seen = False
+    def apply_scent(self, scents):
+        scents.apply_scent_towards(self.xy, 15)
     # Takes a resource, returns false if all have already been taken
     def take(self):
         from globals import world

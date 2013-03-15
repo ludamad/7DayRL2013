@@ -7,8 +7,6 @@ class MoveAction:
         from workerants import WorkerAnt
         from globals import world
 
-        #trail immediately before leaving a square
-        actor.trail(self.destination);
         for obj in world.level.objects_at(self.destination):
             if isinstance(obj, WorkerAnt):
                 obj.xy = actor.xy

@@ -27,7 +27,7 @@ WORKER_ANT_DEAD_TILE = TileType(
 WORKER_ANT_CANIBALISM_HP_GAIN = 4
 WORKER_ANT_CANIBALISM_MP_GAIN = 1
 WORKER_ANT_MAX_HISTORY = 20
-WORKER_ANT_HISTORY_PENALTY = 30
+WORKER_ANT_HISTORY_PENALTY = 10
 WORKER_ANT_TURNS_BEFORE_BURROW = 100
 
 class WorkerAnt(CombatObject):
@@ -56,13 +56,15 @@ class WorkerAnt(CombatObject):
             world.messages.add( [colors.RED, 'The ' + attacker.name + ' bites your worker ant for ' + str(int(damage)) + ' damage!'] )
 
     def move(self, xy):
-        self.trail(xy)
-
+        from globals import world
         # Add to location history
         # Update location in history if exists
         self.past_squares.append(xy)
         if len(self.past_squares) > WORKER_ANT_MAX_HISTORY:
             del self.past_squares[0 : len(self.past_squares) - WORKER_ANT_MAX_HISTORY]
+        for obj in world.level.objects_at(xy):
+            if isinstance(obj, WorkerAnt):
+                obj.xy = self.xy
         self.xy = xy
 
     def pickup(self, obj):
@@ -109,20 +111,30 @@ class WorkerAnt(CombatObject):
         xy_near = list( make_rect(self.xy - Pos(1,1), Size(3,3)).edge_values() )
         self.handle_pickups_and_returns(xy_near)
 
-        valid = filter(lambda xy: world.level.map.valid_xy(xy) and not world.level.is_solid(xy), xy_near)
+        valid = []
+        for xy in xy_near:
+            if world.level.map.valid_xy(xy):
+                worker_ants = world.level.objects_of_type_at(xy, WorkerAnt)
+                valid_ant = False
+                for ant in worker_ants:
+                    if self.carrying and not ant.carrying:
+                        valid_ant = True
+                        break
+                if not world.level.is_solid(xy) or valid_ant:
+                    valid.append(xy)
 
         if valid == []: 
             return
 
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
-        randomness = 0
+        randomness = 10
         weights = [ world.level.scents.get_scent_strength(self.xy, xy, not self.carrying) + rand(-randomness, +randomness) for xy in valid]
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):
             if valid[i] in self.past_squares:
                 amount = len( filter(lambda xy: xy == valid[i], self.past_squares) )
-                weights[i] -= WORKER_ANT_HISTORY_PENALTY + 10*amount
+                weights[i] -= WORKER_ANT_HISTORY_PENALTY + 5*amount
 
         max_idx = weights.index(max(weights))
         self.move( valid[max_idx] )
@@ -168,6 +180,9 @@ class WorkerAntHole(GameObject):
         self.spawns_left = 4
         self.spawns_timer = 5
         self.tile_type= SPAWNING_WORKER_ANT_HOLE
+
+    def apply_scent(self, scents):
+        scents.apply_scent_return(self.xy, 50)
 
     def step(self):
         from globals import world

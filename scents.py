@@ -3,7 +3,7 @@ from geometry import *
 class ScentMaps:
     def __init__(self, world, size):
         self.towards_map = ScentMap(size) # eg, resources attract
-        self.away_map = ScentMap(size) # eg, ant colony attracts
+        self.return_map = ScentMap(size) # eg, ant colony attracts
 
         self.left = ScentMap(size)
         self.right = ScentMap(size)
@@ -19,26 +19,26 @@ class ScentMaps:
         for obj in world.level.objects:
             obj.apply_scent(self)
 
-    def trail(self, from_xy, to_xy):
-        delta = to_xy - from_xy
+    def trail(self, from_xy, to_xy, going_towards):
+        delta = (to_xy - from_xy) * (+1 if going_towards else -1)
         if delta.x < 0: self.left.add(to_xy, 5)
         if delta.x > 0: self.right.add(to_xy, 5)
         if delta.y < 0: self.up.add(to_xy, 5)
         if delta.y > 0: self.down.add(to_xy, 5)
                 
     def apply_scent(self, xy, strength, radius=3):
-        self.add_towards(xy, strength, radius)
-        self.add_away(xy, strength, radius)
+        self.apply_scent_towards(xy, strength, radius)
+        self.apply_scent_return(xy, strength, radius)
 
     def apply_scent_towards(self, xy, strength, radius=3):
         self.towards_map.apply_scent(xy, strength, radius)
 
-    def apply_scent_away(self, xy, strength, radius=3):
-        self.away_map.apply_scent(xy, strength, radius)
+    def apply_scent_return(self, xy, strength, radius=3):
+        self.return_map.apply_scent(xy, strength, radius)
 
     def get_scent_strength(self, from_xy, to_xy, going_towards):
         scent = 0
-        delta = (to_xy - from_xy)
+        delta = (to_xy - from_xy) if going_towards else (from_xy - to_xy)
 
         if delta.x < 0: scent+=self.left[to_xy]
         if delta.x > 0: scent+=self.right[to_xy]
@@ -46,7 +46,7 @@ class ScentMaps:
         if delta.y > 0: scent+=self.down[to_xy]
 
         if going_towards: scent+=self.towards_map[to_xy]
-        else: scent+=self.away_map[to_xy]
+        else: scent+=self.return_map[to_xy]
 
         return scent
         
@@ -80,9 +80,10 @@ class ScentMap:
 
     def apply_scent(self, xy, strength, radius):
         points = [ (x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
+        strength_decay = (-strength / (radius+1))
         for x,y in points:
-            dist = max( abs(x), abs(y) ) * cmp(strength, 0) * 2
-            self.map[ xy.y ][ xy.x ] += dist + strength
+            dist = max( abs(x), abs(y) ) * strength_decay
+            self.map[ xy.y+y ][ xy.x+x ] += dist + strength
 
     def decay(self):
         for xy in self.rect().xy_values():
