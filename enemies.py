@@ -5,7 +5,7 @@ from geometry import *
 import paths
 
 from gameobject import GameObject
-from combatobject import CombatStats, CombatObject
+from combatobject import CombatStats, CombatObject, TEAM_ENEMY, TEAM_PLAYER
 from tiles import *
 from utils import *
 import colors
@@ -24,10 +24,15 @@ class Corpse(GameObject):
         self.time_to_live -= 1
         for obj in globals.world.level.objects_at(self.xy):
             if isinstance(obj, CombatObject):
+                if not world.level.is_alive(obj):
+                    continue
                 obj.stats.regen_hp(self.hp_gain)
                 obj.stats.regen_mp(self.mp_gain)
-                msg = [colors.GREEN, 'You consume the ' + self.name + ", gaining " + str(self.hp_gain) + " HP"]
-                msg[1] += ", " + str(self.mp_gain) + " MP." if self.mp_gain > 0 else "."
+                if obj == globals.world.player:
+                    msg = [colors.GREEN, 'You consume the ' + self.name + ", gaining " + str(self.hp_gain) + " HP"]
+                    msg[1] += ", " + str(self.mp_gain) + " MP." if self.mp_gain > 0 else "."
+                else:
+                    msg = [colors.GRAY, 'The '+ obj.name +' consumes the ' + self.name + "!"]
                 world.messages.add( msg )
                 globals.world.level.queue_removal(self)
                 return
@@ -35,13 +40,14 @@ class Corpse(GameObject):
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, corpse_heal=0, corpse_mana=0, can_burrow = True, can_wander_burrow = False, following_steps = 0, sight_distance=8, see_through_walls=False, pause_chance = 1.0/8):
+    def __init__(self, corpse_heal=0, corpse_mana=0, attack_range=1, can_fly=False, can_burrow = True, wander_burrow_chance = 0.0, following_steps = 0, sight_distance=8, pause_chance = 1.0/8):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
-        self.can_wander_burrow = can_wander_burrow
+        self.attack_range = attack_range
+        self.wander_burrow_chance = wander_burrow_chance
         self.corpse_heal = corpse_heal
         self.corpse_mana = corpse_mana
-        self.see_through_walls = see_through_walls
+        self.can_fly = can_fly
         self.sight_distance = sight_distance
         self.pause_chance = pause_chance
 
@@ -53,6 +59,7 @@ class Enemy(CombatObject):
         self.corpse_tile = corpsetile
         self.behaviour = behaviour
         self.following_steps = 0
+        self.following_object = None
 
     def die(self):
         globals.world.level.queue_removal(self)
@@ -63,40 +70,90 @@ class Enemy(CombatObject):
             hp_gain = self.behaviour.corpse_heal
         )
         globals.world.level.add_to_front_of_combatobjects(corpse)
+
     def move(self, xy):
         map = globals.world.level.map
-        if map[xy].type == DIGGABLE:
+        if not self.behaviour.can_fly and map[xy].type == DIGGABLE:
             # Swap tiles when digging through
-            map[xy], map[self.xy] = map[self.xy], map[xy]
+            map[xy].swap(map[self.xy])
         self.xy = xy
 
+    def _line_to(self, obj):
+        map = globals.world.level.map
+        for x, y in libtcod.line_iter(self.xy.x, self.xy.y, obj.xy.x, obj.xy.y):
+            if map[Pos(x,y)].blocked:
+                return False
+        return True
+    def _is_target_visible(self, obj, allow_follow=True):
+        if allow_follow and self.following_object == obj:
+            return True
+        if obj.xy.distance(self.xy) > self.behaviour.sight_distance:
+            return False
+        if self.behaviour.can_fly:
+            return True
+        if obj == globals.world.player:
+            return globals.world.fov.is_visible(self.xy)
+        return self._line_to(obj)
+
+    def _find_target(self):
+        from globals import world
+        mindist = self.behaviour.sight_distance+1
+        minobj = None
+        for obj in world.level.objects:
+            if not isinstance(obj, CombatObject): continue
+            if obj.team == self.team: continue
+            if not self._is_target_visible(self, obj): continue
+
+            dist = obj.xy.distance(self.xy)
+            if dist < mindist:
+                mindist = dist
+                minobj = obj
+        return minobj
+
+    def _try_to_attack(self, target):
+        diff = self.xy - target.xy
+        sqr_dist = max(abs(diff.x), abs(diff.y))
+        if sqr_dist > self.behaviour.attack_range:
+            return False
+        if self.behaviour.attack_range == 1 or self._line_to(target):
+            self.attack(target)
+            return True
+        return False
+
     def step(self):
+        from globals import world
+        if not world.level.is_alive(self):
+            return
+
         CombatObject.step(self)
 
         moved = False
         self.following_steps = max(0, self.following_steps - 1)
+        if self.following_steps == 0:
+            self.following_object = None
+
         if rand(0, 100)/100.0 < self.behaviour.pause_chance: 
             return #Random chance of not moving
 
-        # Move towards player
-        visible = globals.world.player.xy.distance(self.xy) <= self.behaviour.sight_distance
-        visible = visible and (self.behaviour.see_through_walls or globals.world.fov.is_visible(self.xy))
-        if visible or self.following_steps > 0:
-            if visible: 
+        # Move towards hostile CombatObject (different 'team', enemies can be player-aligned due to spells)
+        target = self._find_target()
+        if target:
+            if self._is_target_visible(target, False):
                 self.following_steps = self.behaviour.following_steps
-            # TODO: path to colony
-            xy = paths.towards(self.xy, globals.world.player.xy, consider_unexplored_blocked = False, allow_digging = self.behaviour.can_burrow)
-            if xy == globals.world.player.xy:
-                self.attack(globals.world.player)
-                moved = True
-            elif xy and not globals.world.level.solid_object_at(xy):
-                self.move(xy)
-                moved = True
+                self.following_object = target
+                if self._try_to_attack(target):
+                    moved = True
+                else:
+                    xy = paths.towards(self.xy, target.xy, avoid_solid_objects = True, consider_unexplored_blocked = False, allow_digging = self.behaviour.can_burrow)
+                    if xy:
+                        self.move(xy)
+                        moved = True
 
         # Wander
         if not moved:
             level = globals.world.level
-            criteria = lambda xy: not level.is_solid(xy) or (self.behaviour.can_wander_burrow and level.map[xy].type == DIGGABLE)
+            can_wander_burrow = (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
+            criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
             xy = random_nearby(level, self.xy, criteria)
             if xy:
                 self.move(xy)
@@ -130,6 +187,7 @@ def ladybug(xy):
                     corpse_heal = 8,
                     corpse_mana = 2, 
                     can_burrow = False, 
+                    wander_burrow_chance = 0.01,
                     following_steps = 2,
                     pause_chance = 1/8.0
              ),
@@ -169,7 +227,7 @@ def ant(xy):
                     corpse_mana = 1,
                     can_burrow = True, 
                     following_steps = 2,
-                    can_wander_burrow = True,
+                    wander_burrow_chance = 0.5,
                     pause_chance = 0.0
              ),
              CombatStats(
@@ -208,6 +266,7 @@ def roach(xy):
                     corpse_mana = 4,
                     can_burrow = True,
                     following_steps = 1,
+                    wander_burrow_chance = 0.1,
                     pause_chance = 0.25,
                     sight_distance = 3.3
              ),
@@ -245,6 +304,7 @@ def beetle(xy):
                     corpse_heal = 25,
                     corpse_mana = 10,
                     can_burrow = True,
+                    wander_burrow_chance = 0.02,
                     following_steps = 2,
                     pause_chance = 0.25,
                     sight_distance = 5.3

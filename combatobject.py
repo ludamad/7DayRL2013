@@ -37,6 +37,7 @@ class CombatStats:
 class CombatObject(GameObject):
     def __init__(self, xy, tiletype, stats, team= TEAM_ENEMY): 
         GameObject.__init__(self, xy, tiletype)
+        self.team = team
         self.stats = stats
     def attack(self, enemy):
         enemy.take_damage(self, self.stats.attack)

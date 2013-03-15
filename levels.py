@@ -101,15 +101,15 @@ def level1(level, bsp, nodes):
         xy = level.random_xy()
         level.add( enemies.ant(xy) )
 
-    for i in range(35):
+    for i in range(25):
         xy = level.random_xy()
         level.add( enemies.ladybug(xy) )
 
-    for i in range(35):
+    for i in range(15):
         xy = level.random_xy()
         level.add( enemies.roach(xy) )
 
-    for i in range(7):
+    for i in range(3):
         xy = level.random_xy()
         level.add( enemies.beetle(xy) )
 

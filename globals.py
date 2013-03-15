@@ -26,14 +26,21 @@ DEFEAT_IMAGE = libtcod.image_load("defeat.png")
 VICTORY_IMAGE = libtcod.image_load("victory.png")
 
 def intro_screen():
+    from utils import print_colored
+
     while True:
         libtcod.image_blit_rect(INTRO_IMAGE, 0, 0,0, -1,-1, 1)
+        print_colored(screen, Pos(35, 4), colors.LIGHT_GRAY, "ANT COLONEL")
+        print_colored(screen, Pos(30, 30), colors.WHITE, "PRESS ENTER TO START!")
         screen.flush()
-        key = libtcod.console_check_for_keypress()
+        key, mouse = libtcod.Key(), libtcod.Mouse()
+        libtcod.sys_check_for_event(libtcod.EVENT_ANY, key, mouse)
         if key.vk == libtcod.KEY_ENTER:
             screen.clear()
             screen.flush()
             return
+        elif key.vk == libtcod.KEY_ESCAPE or libtcod.console_is_window_closed():
+            exit()
 
 ASCII_MODE = False
 

@@ -27,3 +27,7 @@ def print_colored(con, xy, *parts):
         if text[len(text)-1] == '\n':
             new_xy = Pos(xy.x, new_xy.y+1)
     return new_xy
+
+def step_towards(from_xy, to_xy):
+    libtcod.line_init(from_xy.x, from_xy.y, to_xy.x, to_xy.y)
+    return Pos( *libtcod.line_step() )

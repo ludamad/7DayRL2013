@@ -43,7 +43,16 @@ class WorkerAnt(CombatObject):
         CombatObject.__init__(self, xy, WORKER_ANT_TILE, stats, team = TEAM_PLAYER)
         self.past_squares = [] # Weigh these lower
         self.carrying = False
+        self.name = "Worker Ant"
         self.turns = 0
+
+    def take_damage(self, attacker, damage):
+        from globals import world
+        from enemies import Enemy
+
+        CombatObject.take_damage(self, attacker, damage)
+        if isinstance(attacker, Enemy):
+            world.messages.add( [colors.RED, 'The ' + attacker.name + ' bites your worker ant for ' + str(int(damage)) + ' damage!'] )
 
     def move(self, xy):
         self.trail()
@@ -167,7 +176,8 @@ class WorkerAntHole(GameObject):
         if self.spawning:
             self.spawns_timer = max(0, self.spawns_timer - 1)
             if self.spawns_timer <= 0 and not world.level.solid_object_at(self.xy):
-                world.level.add( WorkerAnt(self.xy) )
+                # 'add_to_back_of_corpses' is a hack, but oh well
+                world.level.add_to_back_of_corpses( WorkerAnt(self.xy) )
                 self.spawns_left -= 1
                 if self.spawns_left <= 0:
                     self.spawning = False

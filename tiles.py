@@ -63,6 +63,11 @@ class Tile:
         self.block_sight = block_sight
         self.type = WALL # Defined below
         self.variant = random_get_int(0, 0, self.type.num_variants())
+    def swap(self, tile):
+        self.blocked, tile.blocked = tile.blocked, self.blocked 
+        self.block_sight, tile.block_sight = self.block_sight, self.block_sight
+        self.type, tile.type = tile.type, self.type
+        self.variant, tile.variant = tile.variant, self.variant
 
     def fallback_colors(self):
         return self.type.variant(self.variant).fallback_colors

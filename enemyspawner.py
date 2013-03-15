@@ -18,7 +18,8 @@ def spawn_with_weights(*args):
             type, weight = args[i+1], args[i]
             chance -= weight
             if chance <= 0:
-                world.level.add( type(xy) )
+                # 'add_to_back_of_corpses' is a hack, but oh well
+                world.level.add_to_back_of_corpses( type(xy) )
                 return True
     return spawner
 
@@ -41,7 +42,7 @@ def spawn_if_none_within(spawn_func = default_spawner, radius=1):
 # We spawn at a fixed rate, first near resources. If near_spawner returns false,
 # we then try across the map. If it far_spawner fails, we give up for now.
 class EnemySpawner:
-    def __init__(self,near_spawner=spawn_if_none_within(), spawn_rate = 20, enemy_maximum=200, far_spawner=None, min_near_dist = 2, max_near_dist = 10):
+    def __init__(self,near_spawner=spawn_if_none_within(), spawn_rate = 20, enemy_maximum=100, far_spawner=None, min_near_dist = 2, max_near_dist = 10):
         if not far_spawner: 
             far_spawner = near_spawner
         self.spawn_timer = 0

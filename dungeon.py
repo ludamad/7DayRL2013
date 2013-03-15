@@ -19,8 +19,15 @@ class DungeonMap:
     def __init__(self, world, size):
         self.world = world
         self.size = size
+        self.tile_memory =  [ [ None for x in range(size.w) ] for y in range(size.h) ]
         self.map = [ [ tiles.Tile(True) for x in range(size.w) ]
                         for y in range(size.h) ]
+
+    def tile_at(self, xy):
+        return self.tile_memory[xy.y][xy.x]
+    def remember_tile(self, xy):
+        from copy import copy
+        self.tile_memory[xy.y][xy.x] = copy(self[xy])
 
     # Convenience function for making a rectangle that spans the map
     def rect(self):
@@ -85,9 +92,13 @@ class DungeonMap:
                 con.set_char_background( on_screen(xy), colors.BLACK, libtcod.BKGND_SET )
             else:
                 if not SHOW_ALL:
+                    if visible:
+                        self.remember_tile(xy)
                     self[xy].explored = True
-
-                tiles.draw_tile(self[xy].type, self[xy].variant, xy, True)
+                tile = self.tile_at(xy)
+                if SHOW_ALL:
+                    tile = self[xy]
+                tiles.draw_tile(tile.type, tile.variant, xy, True)
 
         WAS_SHOW_ALL = SHOW_ALL
 
@@ -95,12 +106,17 @@ class DungeonMap:
 class DungeonLevel:
     def __init__(self, world, map, scent_map, index):
         from enemyspawner import EnemySpawner
+        from paths import PathFinder
         self.world = world
         self.map = map
         self.scents = scent_map
         self.objects = []
+        self.path_finder = PathFinder(self.map.size)
         self.queued_removals = []
         self.queued_relocations = []
+        self.good_things = []
+        self.bad_things = []
+        self.tile_memory =  [ [ None for x in range(map.size.w) ] for y in range(map.size.h) ]
         self.level_index = index
         self.enemy_spawner = EnemySpawner() # Default spawner
 
@@ -108,19 +124,29 @@ class DungeonLevel:
     def size(self): return self.map.size
     def objects_at(self, xy):
         return filter(lambda obj: obj.xy == xy, self.objects)
+
     def add(self, object):
         self.objects.append(object)
     def add_to_front(self, object):
         # Hack to always have player be first
         idx = 0 if self.world.player not in self.objects else self.objects.index(self.world.player)+1
         self.objects.insert(idx, object)
-    # For corpses... yeah
+    # For corpses... yeah, hack, I know
     def add_to_front_of_combatobjects(self, object):
         from combatobject import CombatObject
         for i in reversed( range( len(self.objects) ) ):
             if isinstance( self.objects[i], CombatObject):
                 self.objects.insert(i+1, object)
                 return
+        self.add(object)
+    # For spawned combatobjects... yeah, hack, I know
+    def add_to_back_of_corpses(self, object):
+        from enemies import Corpse
+        for i in range( len(self.objects)):
+            if isinstance( self.objects[i], Corpse):
+                self.objects.insert(i, object)
+                return
+        self.add(object)
     def remove(self, object):
         self.objects.remove(object)
     def queue_removal(self, object):
@@ -135,6 +161,12 @@ class DungeonLevel:
     def objects_of_type(self, object_type):
         return filter(lambda obj: isinstance(obj, object_type), self.objects)
 
+    def is_alive(self, object):
+        return (object in self.objects) and (object not in self.queued_removals)
+    def objects_of_team(self, team):
+        from combatobject import CombatObject
+        return filter(lambda obj: isinstance(obj, CombatObject) and obj.team == team, self.objects)
+
     def objects_of_type_at(self, xy, object_type):
         return filter(lambda obj: obj.xy == xy and isinstance(obj, object_type), self.objects)
 
@@ -144,6 +176,7 @@ class DungeonLevel:
         # hack to always draw player:
         self.world.player.draw()
     def step(self, key, mouse):
+        from enemies import Enemy
         self.handle_relocations()
 
         if self.world.player.has_action(key, mouse):
@@ -219,7 +252,7 @@ class World:
             self.fov = fieldofview.FieldOfView(8)
             self.fov.compute_fov(self.level.map, self.player.xy, 8)
 
-        if key.vk == libtcod.KEY_ESCAPE:
+        if key.vk == libtcod.KEY_ESCAPE or libtcod.console_is_window_closed():
             if key.shift:
                 exit()
             else:
