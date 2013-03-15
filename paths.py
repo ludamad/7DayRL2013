@@ -2,6 +2,7 @@ import libtcodpy as libtcod
 from geometry import Pos
 import colors
 from tiles import *
+from utils import *
 
 # Pathfinding class that copies from the game world
 
@@ -16,7 +17,8 @@ def _path_xy_function(level, to_xy, avoid_solid_objects = False, consider_unexpl
             blocked = blocked or level.solid_object_at(Pos(x,y))
         if consider_unexplored_blocked:
             blocked = blocked or not tile.explored
-        return blocked
+        if blocked: return 0
+        return max(abs(x - from_x), abs(y - from_y))
     return pather
 
 class PathFinder:

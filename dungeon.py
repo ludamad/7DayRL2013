@@ -19,15 +19,13 @@ class DungeonMap:
     def __init__(self, world, size):
         self.world = world
         self.size = size
-        self.tile_memory =  [ [ None for x in range(size.w) ] for y in range(size.h) ]
         self.map = [ [ tiles.Tile(True) for x in range(size.w) ]
                         for y in range(size.h) ]
 
-    def tile_at(self, xy):
-        return self.tile_memory[xy.y][xy.x]
     def remember_tile(self, xy):
-        from copy import copy
-        self.tile_memory[xy.y][xy.x] = copy(self[xy])
+        tile = self[xy]
+        tile.remembered_type = tile.type
+        tile.remembered_variant = tile.variant
 
     # Convenience function for making a rectangle that spans the map
     def rect(self):
@@ -91,14 +89,15 @@ class DungeonMap:
             if not visible and not self[xy].explored:
                 con.set_char_background( on_screen(xy), colors.BLACK, libtcod.BKGND_SET )
             else:
+                tile = self[xy]
                 if not SHOW_ALL:
                     if visible:
                         self.remember_tile(xy)
-                    self[xy].explored = True
-                tile = self.tile_at(xy)
+                    tile.explored = True
+                tt, tv = tile.remembered_type, tile.remembered_variant
                 if SHOW_ALL:
-                    tile = self[xy]
-                tiles.draw_tile(tile.type, tile.variant, xy, True)
+                    tt, tv = tile.type, tile.variant
+                tiles.draw_tile(tt, tv, xy, True)
 
         WAS_SHOW_ALL = SHOW_ALL
 

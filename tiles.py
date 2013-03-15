@@ -63,6 +63,8 @@ class Tile:
         self.block_sight = block_sight
         self.type = WALL # Defined below
         self.variant = random_get_int(0, 0, self.type.num_variants())
+        self.remembered_type = None
+        self.remembered_variant = None
     def swap(self, tile):
         self.blocked, tile.blocked = tile.blocked, self.blocked 
         self.block_sight, tile.block_sight = self.block_sight, self.block_sight

@@ -1,15 +1,18 @@
 import libtcodpy as libtcod
 from geometry import Pos
+import time
 
 def rand(min,max): 
     return libtcod.random_get_int(0, min, max)
 
 def nearby(map, xy):
+    near = []
     for y in range(xy.y-1, xy.y+2):
         for x in range(xy.x-1, xy.x+2):
             nearby_xy = Pos(x,y)
             if map.valid_xy(nearby_xy) and nearby_xy != xy:
-                yield nearby_xy
+                near.append(nearby_xy)
+    return near
 
 def random_nearby(level, xy, condition):
     candidates = filter(condition, nearby(level.map, xy))
@@ -31,3 +34,17 @@ def print_colored(con, xy, *parts):
 def step_towards(from_xy, to_xy):
     libtcod.line_init(from_xy.x, from_xy.y, to_xy.x, to_xy.y)
     return Pos( *libtcod.line_step() )
+
+
+def timeit(method):
+
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+
+        print '%r (%r, %r) %2.2f sec' % \
+              (method.__name__, args, kw, te-ts)
+        return result
+
+    return timed
