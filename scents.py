@@ -38,7 +38,7 @@ class ScentMaps:
 
     def get_scent_strength(self, from_xy, to_xy, going_towards):
         scent = 0
-        delta = to_xy - from_xy
+        delta = (to_xy - from_xy)
 
         if delta.x < 0: scent+=self.left[to_xy]
         if delta.x > 0: scent+=self.right[to_xy]

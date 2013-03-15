@@ -59,11 +59,10 @@ class WorkerAnt(CombatObject):
         self.trail(xy)
 
         # Add to location history
-        if not self.carrying:
-            # Update location in history if exists
-            self.past_squares.append(xy)
-            if len(self.past_squares) > WORKER_ANT_MAX_HISTORY:
-                del self.past_squares[0 : len(self.past_squares) - WORKER_ANT_MAX_HISTORY]
+        # Update location in history if exists
+        self.past_squares.append(xy)
+        if len(self.past_squares) > WORKER_ANT_MAX_HISTORY:
+            del self.past_squares[0 : len(self.past_squares) - WORKER_ANT_MAX_HISTORY]
         self.xy = xy
 
     def pickup(self, obj):
@@ -74,6 +73,7 @@ class WorkerAnt(CombatObject):
             self.tile_type = WORKER_ANT_WITH_ORANGE_TILE
         elif obj.tile_type == resource.WATERMELON or resource.DROPPED_WATERMELON: 
             self.tile_type = WORKER_ANT_WITH_WATERMELON_TILE
+        del self.past_squares[:]
         self.carrying = True
 
     def back2hole(self):
@@ -115,18 +115,14 @@ class WorkerAnt(CombatObject):
             return
 
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
-        randomness = 30
+        randomness = 0
         weights = [ world.level.scents.get_scent_strength(self.xy, xy, not self.carrying) + rand(-randomness, +randomness) for xy in valid]
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):
             if valid[i] in self.past_squares:
                 amount = len( filter(lambda xy: xy == valid[i], self.past_squares) )
-                bonus = 0 if amount <= 1 else 10
-                if self.carrying: # Retrace our steps
-                    weights[i] += WORKER_ANT_HISTORY_PENALTY + bonus
-                else:
-                    weights[i] -= WORKER_ANT_HISTORY_PENALTY + bonus
+                weights[i] -= WORKER_ANT_HISTORY_PENALTY + 10*amount
 
         max_idx = weights.index(max(weights))
         self.move( valid[max_idx] )
