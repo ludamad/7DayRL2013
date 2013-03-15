@@ -45,6 +45,7 @@ class WorkerAnt(CombatObject):
         self.carrying = False
         self.name = "Worker Ant"
         self.turns = 0
+        self.corpse_tile = WORKER_ANT_DEAD_TILE
 
     def take_damage(self, attacker, damage):
         from globals import world
@@ -68,11 +69,11 @@ class WorkerAnt(CombatObject):
     def pickup(self, obj):
         if not obj.take(): return
         self.trail()
-        if obj.tile_type == resource.APPLE: 
+        if obj.tile_type == resource.APPLE or resource.DROPPED_APPLE: 
             self.tile_type = WORKER_ANT_WITH_APPLE_TILE
-        elif obj.tile_type == resource.ORANGE: 
+        elif obj.tile_type == resource.ORANGE or resource.DROPPED_ORANGE: 
             self.tile_type = WORKER_ANT_WITH_ORANGE_TILE
-        elif obj.tile_type == resource.WATERMELON: 
+        elif obj.tile_type == resource.WATERMELON or resource.DROPPED_WATERMELON: 
             self.tile_type = WORKER_ANT_WITH_WATERMELON_TILE
         self.carrying = True
 
@@ -132,12 +133,16 @@ class WorkerAnt(CombatObject):
         self.move( valid[max_idx] )
 
     def die(self):
+        from globals import world
         from enemies import Corpse
-        globals.world.level.queue_removal(self)
-        globals.world.level.add_to_front(Corpse("Worker Ant", self.xy, self.corpse_tile, 
-                                                can_be_eaten = True,
-                                                mp_gain = WORKER_ANT_CANIBALISM_MP_GAIN, 
-                                                hp_gain = WORKER_ANT_CANIBALISM_HP_GAIN))
+        world.level.queue_removal(self)
+        world.player.take_damage(self, 15)
+        world.level.add_to_front_of_combatobjects(Corpse("Worker Ant", self.xy, self.corpse_tile, 
+                                    can_be_eaten = True,
+                                    mp_gain = WORKER_ANT_CANIBALISM_MP_GAIN, 
+                                    hp_gain = WORKER_ANT_CANIBALISM_HP_GAIN))
+        if self.carrying:
+            resource.drop_resource(self.xy, self.tile_type)
 
 WORKER_ANT_HOLE = TileType(    # ASCII mode
          { "char" : 'O', 

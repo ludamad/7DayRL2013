@@ -89,5 +89,5 @@ SUGAR_RUSH = StatusType(
         name = "Sugar Rush", 
         add_action = lambda user: change_attack(user, 10),
         remove_action = lambda user: change_attack(user, -10),
-        duration=3+1, # Account for turn that its used in
+        duration=4+1, # Account for turn that its used in
 )

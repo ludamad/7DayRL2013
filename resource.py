@@ -33,13 +33,13 @@ WATERMELON = TileType(
 )
 
 class Resource(GameObject):
-    def __init__(self, xy, name, type, variant=0):
+    def __init__(self, xy, name, type, variant=0, resources_left=2):
         GameObject.__init__(self, xy, type, solid=True, draw_once_seen=True)
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.tile_variant = variant
         self.name = name
-        self.resources_left = 3
+        self.resources_left = resources_left
         self.seen = False
     # Takes a resource, returns false if all have already been taken
     def take(self):
@@ -56,6 +56,21 @@ class Resource(GameObject):
         if not self.seen and globals.world.fov.is_visible(self.xy):
             globals.world.messages.add([colors.ORANGE, "You find " + self.name + "!"])
             self.seen = True
+
+DROPPED_APPLE = TileType({ "char" : 247, "color" : colors.PALE_RED }, { "char" : tile(9,7) } )
+DROPPED_ORANGE = TileType({ "char" : 247, "color" : colors.ORANGE }, { "char" : tile(10,7) } )
+DROPPED_WATERMELON =  TileType({ "char" : 247, "color" : colors.Color(232,34,62) }, { "char" : tile(11,7) } )
+
+def drop_resource(xy, tile):
+    from globals import world
+    from workerants import WORKER_ANT_WITH_APPLE_TILE, WORKER_ANT_WITH_ORANGE_TILE, WORKER_ANT_WITH_WATERMELON_TILE
+    if tile == WORKER_ANT_WITH_APPLE_TILE:
+        res = Resource(xy, "an apple", DROPPED_APPLE, resources_left=1)
+    elif tile == WORKER_ANT_WITH_ORANGE_TILE:
+        res = Resource(xy, "an orange", DROPPED_ORANGE, resources_left=1)
+    elif tile == WORKER_ANT_WITH_WATERMELON_TILE:
+        res = Resource(xy, "some watermelon", DROPPED_WATERMELON, resources_left=1)
+    world.level.add(res)
 
 def apple(xy, variant):
     return Resource(xy, "an apple", APPLE, variant)

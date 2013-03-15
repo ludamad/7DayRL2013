@@ -9,9 +9,11 @@ def rand(min,max):
 # Adapted from samples_py.py
 class BSPGenerator:
 
-    def __init__(self, map):
+    def __init__(self, map, size):
         self.map = map
-        self.bsp = libtcod.bsp_new_with_size(1, 1, self.map.size.w - 2, self.map.size.h - 2)
+        # Center the passed size on the map
+        pos = Pos(self.map.size.w/2 - size.w/2, self.map.size.h/2 - size.h/2)
+        self.bsp = libtcod.bsp_new_with_size(pos.x, pos.y, size.w, size.h)
 
     # Fills a line to a room
     def line2room(self, p1, p2=None, delta=None, stop_blocked = True):

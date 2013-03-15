@@ -51,13 +51,21 @@ class Player(CombatObject):
     def take_damage(self, attacker, damage):
         from globals import world
         from enemies import Enemy
+        from workerants import WorkerAnt
 
         CombatObject.take_damage(self, attacker, damage)
         if isinstance(attacker, Enemy):
             world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' bites you for ' + str(int(damage)) + ' damage!'] )
+        elif isinstance(attacker, WorkerAnt):
+            world.messages.add( [colors.PURPLE, 'A worker has died, you take ' + str(damage) + ' damage!'] )
 
     def die(self):
-        from globals import world
+        from globals import world, splash_screen, DEFEAT_IMAGE
+        from workerants import WORKER_ANT_DEAD_TILE
+        self.tile_type = WORKER_ANT_DEAD_TILE
+        world.messages.add([colors.RED, "You have died!"])
+        splash_screen()
+        splash_screen(DEFEAT_IMAGE)
         world.restart()
 
     def _adjust_view(self):
@@ -128,9 +136,9 @@ class Player(CombatObject):
         return False
 
     def add_harvest_points(self, points):
-        from globals import RESOURCES_NEEDED
+        from globals import world
         self.points += points
-        if self.points >= RESOURCES_NEEDED:
+        if self.points >= world.level.points_needed:
             menus.msgbox((colors.BABY_BLUE, "You have harvested enough to feed this sector!\n", 
                           colors.BABY_BLUE, "You have been promoted to ", colors.YELLOW, "GENERAL",
                           colors.BABY_BLUE,". Your skills are required in a more dangerous sector."))
@@ -279,11 +287,12 @@ class Player(CombatObject):
 
     def print_stats(self):
         import gui
-        from globals import panel, world, RESOURCES_NEEDED
+        from globals import panel, world
 
-        gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARK_GRAY )
-        gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARK_GRAY )
-        gui.render_bar( Pos(3,5), 20, "Harvest", self.points, RESOURCES_NEEDED, colors.DARK_GREEN, colors.DARK_GRAY )
+        if self.stats.hp > 0:
+            gui.render_bar( Pos(3,3), 20, "HP", int(self.stats.hp), self.stats.max_hp, colors.RED, colors.DARK_GRAY )
+            gui.render_bar( Pos(3,4), 20, "MP", int(self.stats.mp), self.stats.max_mp, colors.BLUE, colors.DARK_GRAY )
+        gui.render_bar( Pos(3,5), 20, "Harvest", self.points, world.level.points_needed, colors.DARK_GREEN, colors.DARK_GRAY )
 
         self.stats.inventory.draw(panel, INVENTORY_LOCATION_IN_PANEL)
         self.stats.statuses.draw(panel, Pos(3, 6))

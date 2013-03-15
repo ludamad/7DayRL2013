@@ -118,6 +118,7 @@ class DungeonLevel:
         self.tile_memory =  [ [ None for x in range(map.size.w) ] for y in range(map.size.h) ]
         self.level_index = index
         self.enemy_spawner = EnemySpawner() # Default spawner
+        self.points_needed = 80
 
     @property
     def size(self): return self.map.size
@@ -181,7 +182,10 @@ class DungeonLevel:
         if self.world.player.has_action(key, mouse):
             assert self.world.player.action
             self.scents.step()
-            for obj in list(self.objects): obj.step()
+            for obj in list(self.objects): 
+                obj.step()
+                if not self.is_alive(self.world.player):
+                    break
             for obj in self.queued_removals: self.remove(obj)
             self.queued_removals = []
             self.enemy_spawner.step()

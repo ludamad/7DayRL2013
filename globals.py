@@ -7,7 +7,6 @@ import colors
 VIEW_PADDING = 10
 SCREEN_SIZE = Size(80, 35)
 LEVEL_SIZE = SCREEN_SIZE
-RESOURCES_NEEDED = 100
 
 world = dungeon.World()
 
@@ -25,21 +24,26 @@ INTRO_IMAGE = libtcod.image_load("intro.png")
 DEFEAT_IMAGE = libtcod.image_load("defeat.png")
 VICTORY_IMAGE = libtcod.image_load("victory.png")
 
-def intro_screen():
+def splash_screen(img=None):
     from utils import print_colored
+    screen.clear()
 
     while True:
-        libtcod.image_blit_rect(INTRO_IMAGE, 0, 0,0, -1,-1, 1)
-        print_colored(screen, Pos(35, 4), colors.LIGHT_GRAY, "ANT COLONEL")
-        print_colored(screen, Pos(30, 30), colors.WHITE, "PRESS ENTER TO START!")
-        screen.flush()
+        if img:
+            libtcod.image_blit_rect(img, 0, 0,0, -1,-1, 1)
+            if img == INTRO_IMAGE:
+                print_colored(screen, Pos(35, 4), colors.LIGHT_GRAY, "ANT COLONEL")
+                print_colored(screen, Pos(30, 30), colors.WHITE, "PRESS ENTER TO START!")
+            screen.flush()
+        else:
+            game_draw()
         key, mouse = libtcod.Key(), libtcod.Mouse()
         libtcod.sys_check_for_event(libtcod.EVENT_ANY, key, mouse)
-        if key.vk == libtcod.KEY_ENTER:
+        if key.pressed and key.vk == libtcod.KEY_ENTER:
             screen.clear()
             screen.flush()
             return
-        elif key.vk == libtcod.KEY_ESCAPE or libtcod.console_is_window_closed():
+        elif (key.pressed and key.vk == libtcod.KEY_ESCAPE) or libtcod.console_is_window_closed():
             exit()
 
 ASCII_MODE = False

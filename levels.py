@@ -10,15 +10,16 @@ from tiles import *
 from utils import *
 
 class LevelTemplate:
-    def __init__(self, handler, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
+    def __init__(self, handler, size, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
         self.depth = depth
         self.handler = handler
         self.min_node_size = min_node_size
         self.maxHRatio = maxHRatio
         self.maxVRatio = maxVRatio
+        self.size = size
     def generate(self, level):
         import bspgenerator
-        bsp = bspgenerator.BSPGenerator(level.map)
+        bsp = bspgenerator.BSPGenerator(level.map, self.size)
         nodes = bsp.split(self.depth, self.min_node_size, self.maxHRatio, self.maxVRatio)
         self.handler(level, bsp, nodes)
 
@@ -69,7 +70,54 @@ def place_ant_holes(level, amount, min_dist = 7, max_dist = 13):
                 level.add( workerants.WorkerAntHole(xy) )
                 break
 
+def place_diggables(level, amount):
+    apply_nearby(level.map, amount,
+                 lambda xy: not level.is_solid(xy),
+                 lambda tile: tile.type == WALL or tile.type == DIGGABLE,
+                 lambda tile: tile.make_diggable()
+    )
+
+def add_floor_variety(level, nodes, chance=0.25):
+    for node in nodes:
+        if libtcod.bsp_is_leaf(node):
+            mutator = Tile.make_floor2 if rand(0,2) == 1 else Tile.make_floor3
+            if rand(0,999)/1000.0 < chance:
+                rect = Rect(node.x, node.y, node.w, node.h)
+                for xy in rect.xy_values():
+                    if level.map[xy].type == FLOOR:
+                        mutator(level.map[xy])
+
+def place_enemies(level, type, amount):
+    for i in range(amount):
+        xy = level.random_xy()
+        level.add( type(xy) )
+
+
 def level1(level, bsp, nodes):
+    for node in nodes: 
+        bsp.fill_node(node)
+
+    for i in range(5):
+        place_resource(level)
+
+    place_diggables(level, 200)
+
+    add_floor_variety(level, nodes)
+
+    place_ant_holes(level, 5)
+
+    for i in range(200):
+        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
+        level.map[xy].make_diggable()
+
+    place_enemies(level, enemies.ant, 10)
+    place_enemies(level, enemies.ladybug, 3)
+    place_enemies(level, enemies.roach, 1)
+    level.enemy_spawner.spawn_rate = 100
+    level.enemy_spawner.enemy_maximum = 30
+    level.points_needed = 80
+
+def level3(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 
@@ -112,11 +160,13 @@ def level1(level, bsp, nodes):
     for i in range(3):
         xy = level.random_xy()
         level.add( enemies.beetle(xy) )
+    level.points_needed = 160
 
 
-LEVEL_1 = LevelTemplate(level1, min_node_size=6)
-
-level_templates = [ LEVEL_1 ] * 5
+level_templates = [ 
+        LevelTemplate(level1, size = Size(30,30), min_node_size=8),
+        LevelTemplate(level3, size = Size(78,35), min_node_size=6)
+]
 
 def generate_level(world, num):
     from globals import LEVEL_SIZE

@@ -12,7 +12,7 @@ import colors
 
 class Corpse(GameObject):
     def __init__(self, name, xy, tiletype, can_be_eaten=True, hp_gain=0, mp_gain=0):
-        GameObject.__init__(self, xy, tiletype, solid=False, draw_once_seen = True)
+        GameObject.__init__(self, xy, tiletype, solid=False, draw_once_seen = False)
         self.name = name
         self.time_to_live = 10
         self.can_be_eaten = can_be_eaten
@@ -315,5 +315,38 @@ def beetle(xy):
                     mp = 0, 
                     mp_regen = 0, 
                     attack = 20
+            )
+    )
+
+SCORPION_TILE = TileType(
+         { "char" : 's', "color" : colors.Color(150,61,41) }, # ASCII mode              
+         { "char" : tile(0,7) } # Tile mode
+)
+SCORPION_DEAD_TILE = TileType(
+         { "char" : '%', "color" : colors.Color(150,61,41) }, # ASCII mode              
+         { "char" : tile(0,8) } # Tile mode
+)
+def scorpion(xy):
+    return Enemy(
+             "Scorpion",
+             xy,
+             SCORPION_TILE, 
+             SCORPION_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 25,
+                    corpse_mana = 10,
+                    attack_range = 2,
+                    can_burrow = True,
+                    wander_burrow_chance = 0.02,
+                    following_steps = 2,
+                    pause_chance = 0.25,
+                    sight_distance = 5.3
+             ),
+             CombatStats(
+                    hp = 20,
+                    hp_regen = 0,
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 5
             )
     )
