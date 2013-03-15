@@ -11,6 +11,8 @@ class GameObject:
         self.tile_type = tile_type
         self.draw_once_seen = draw_once_seen
         self.tile_variant = 0
+    def apply_scent(self, scents):
+        pass
     def step(self):
         pass
     def draw(self):

@@ -56,7 +56,7 @@ class WorkerAnt(CombatObject):
             world.messages.add( [colors.RED, 'The ' + attacker.name + ' bites your worker ant for ' + str(int(damage)) + ' damage!'] )
 
     def move(self, xy):
-        self.trail()
+        self.trail(xy)
 
         # Add to location history
         if not self.carrying:
@@ -68,7 +68,6 @@ class WorkerAnt(CombatObject):
 
     def pickup(self, obj):
         if not obj.take(): return
-        self.trail()
         if obj.tile_type == resource.APPLE or resource.DROPPED_APPLE: 
             self.tile_type = WORKER_ANT_WITH_APPLE_TILE
         elif obj.tile_type == resource.ORANGE or resource.DROPPED_ORANGE: 
@@ -117,7 +116,7 @@ class WorkerAnt(CombatObject):
 
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
         randomness = 30
-        weights = [ world.level.scents.trailmap[xy] + rand(-randomness, +randomness) for xy in valid]
+        weights = [ world.level.scents.get_scent_strength(self.xy, xy, not self.carrying) + rand(-randomness, +randomness) for xy in valid]
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):

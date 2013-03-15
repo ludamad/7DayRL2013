@@ -67,7 +67,7 @@ class Tile:
         self.remembered_variant = None
     def swap(self, tile):
         self.blocked, tile.blocked = tile.blocked, self.blocked 
-        self.block_sight, tile.block_sight = self.block_sight, self.block_sight
+        self.block_sight, tile.block_sight = tile.block_sight, self.block_sight
         self.type, tile.type = tile.type, self.type
         self.variant, tile.variant = tile.variant, self.variant
 

@@ -124,20 +124,9 @@ def level3(level, bsp, nodes):
     for i in range(4):
         place_resource(level)
 
-    apply_nearby(level.map, 1100,
-                 lambda xy: not level.is_solid(xy),
-                 lambda tile: tile.type == WALL or tile.type == DIGGABLE,
-                 lambda tile: tile.make_diggable()
-    )
+    place_diggables(level, 1100)
 
-    for node in nodes:
-        if libtcod.bsp_is_leaf(node):
-            mutator = Tile.make_floor2 if rand(0,2) == 1 else Tile.make_floor3
-            if rand(0,3) == 1:
-                rect = Rect(node.x, node.y, node.w, node.h)
-                for xy in rect.xy_values():
-                    if level.map[xy].type == FLOOR:
-                        mutator(level.map[xy])
+    add_floor_variety(level, nodes)
 
     place_ant_holes(level, 25)
 
@@ -145,21 +134,11 @@ def level3(level, bsp, nodes):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()
 
-    for i in range(65):
-        xy = level.random_xy()
-        level.add( enemies.ant(xy) )
+    place_enemies(level, enemies.ant, 65)
+    place_enemies(level, enemies.ladybug, 25)
+    place_enemies(level, enemies.roach, 15)
+    place_enemies(level, enemies.beetle, 3)
 
-    for i in range(25):
-        xy = level.random_xy()
-        level.add( enemies.ladybug(xy) )
-
-    for i in range(15):
-        xy = level.random_xy()
-        level.add( enemies.roach(xy) )
-
-    for i in range(3):
-        xy = level.random_xy()
-        level.add( enemies.beetle(xy) )
     level.points_needed = 160
 
 
