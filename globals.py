@@ -26,6 +26,7 @@ VICTORY_IMAGE = libtcod.image_load("victory.png")
 
 def splash_screen(img=None):
     from utils import print_colored
+    from menus import menu
     screen.clear()
 
     while True:
@@ -39,6 +40,13 @@ def splash_screen(img=None):
         key, mouse = libtcod.Key(), libtcod.Mouse()
         libtcod.sys_check_for_event(libtcod.EVENT_ANY, key, mouse)
         if key.pressed and key.vk == libtcod.KEY_ENTER:
+            if img == INTRO_IMAGE:
+                opt = menu((colors.BABY_BLUE, "Select a mode (changeable in-game with 'control')"), 
+                            [(colors.WHITE, "Tiles mode"),(colors.WHITE, "Classic ASCII") ], 50, index_color=colors.YELLOW)
+                global ASCII_MODE
+                ASCII_MODE = (opt == 1)
+                if not opt: 
+                    continue
             screen.clear()
             screen.flush()
             return

@@ -267,6 +267,7 @@ class Player(CombatObject):
         controls += [ colors.GREEN, "I ", colors.WHITE, "for inventory\n"]
         controls += [ colors.GREEN, "A ", colors.WHITE, "for abilities\n"]
         controls += [ colors.GREEN, "C ", colors.WHITE, "for this menu (controls)\n"]
+        controls += [ colors.GREEN, "CONTROL ", colors.WHITE, "to switch between ASCII and tiles\n"]
         menus.msgbox(controls, width=60)
         return False
 
