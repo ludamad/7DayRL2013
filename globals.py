@@ -60,7 +60,7 @@ def game_draw():
     if world.player.has_status(SUGAR_RUSH):
         panel.set_default_background(colors.DARK_RED)
     panel.clear()
-    world.draw()
+    world.draw()    
     world.player.print_stats()
 
     game_blit(True)

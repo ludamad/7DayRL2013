@@ -267,7 +267,6 @@ class World:
         elif key.c == ord('f'):
             console.toggle_fullscreen()
         else:
-            globals.screen.clear()
             self.level.step(key, mouse)
             if self.player not in self.level.objects:
                 # Where'd the player go ?
@@ -276,7 +275,9 @@ class World:
                         self.level = level
                         break
                 self.level.handle_relocations()
-                globals.game_draw()
+                globals.screen.clear()
+                self.fov.compute_fov(self.level.map, self.player.xy, 8)
+                self.draw(fulldraw=True)
 
     def clear(self):
         self.levels = []

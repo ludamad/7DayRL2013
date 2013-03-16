@@ -183,7 +183,7 @@ class WorkerAntHole(GameObject):
     def start_spawning(self):
         self.spawning = True
         self.spawns_left = 4
-        self.spawns_timer = 5
+        self.spawns_timer = 1
         self.tile_type= SPAWNING_WORKER_ANT_HOLE
 
     def apply_scent(self, scents):
@@ -203,5 +203,5 @@ class WorkerAntHole(GameObject):
                     self.spawning = False
                     self.tile_type = WORKER_ANT_HOLE
                 else:
-                    self.spawns_timer = 5
+                    self.spawns_timer = 1
 
