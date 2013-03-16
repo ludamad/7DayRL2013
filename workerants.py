@@ -187,7 +187,7 @@ class WorkerAntHole(GameObject):
         self.tile_type= SPAWNING_WORKER_ANT_HOLE
 
     def apply_scent(self, scents):
-        scents.apply_scent_return(self.xy, 50)
+        scents.apply_scent_return(self.xy, 120, radius=7)
 
     def step(self):
         from globals import world

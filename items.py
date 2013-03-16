@@ -132,7 +132,7 @@ def _use_watermelon(inv, user):
 
 WATERMELON_CHUNK = ItemType(
         name = "Watermelon Chunk",
-        summary = "Your exoskeleton hardens, lowering damage for 10 turns.",
+        summary = "Your exoskeleton hardens for 10 turns.",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : Color(232,34,62) },

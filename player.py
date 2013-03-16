@@ -33,7 +33,8 @@ def _get_mouse_item_slot(player, mouse):
 
 class Player(CombatObject):
     def __init__(self, xy):
-        stats = CombatStats(hp = 100, mp = 50, mp_regen = 0.5, attack = 10)
+        # Starting stats, you gain more each level
+        stats = CombatStats(hp = 50, mp = 20, mp_regen = 0.5, attack = 10)
         CombatObject.__init__(self, xy, PLAYER, stats, team = TEAM_PLAYER)
 
         self.rank = "Private"
@@ -64,7 +65,7 @@ class Player(CombatObject):
             world.messages.add( [colors.PURPLE, 'A worker has died, you take ' + str(damage) + ' damage!'] )
 
     def apply_scent(self, scents):
-        scents.apply_scent(self.xy, 50, 5)
+        scents.apply_scent(self.xy, 100, 8)
 
     def die(self):
         from globals import world, splash_screen, DEFEAT_IMAGE

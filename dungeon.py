@@ -275,10 +275,14 @@ class World:
                 self.player.stats.mp = self.player.stats.max_mp
                 self.level = None
                 # Where'd the player go ?
+                idx=0
                 for level in self.levels:
-                    if self.player in level.objects:
+                    if level and self.player in level.objects:
                         self.level = level
                         break
+                    idx +=1
+                for i in range(idx):
+                    self.levels[i] = None
                 if not self.level:
                     globals.splash_screen(globals.VICTORY_IMAGE)
                     exit()

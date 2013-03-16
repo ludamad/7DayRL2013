@@ -33,7 +33,7 @@ WATERMELON = TileType(
 )
 
 class Resource(GameObject):
-    def __init__(self, xy, name, type, variant=0, resources_left=4):
+    def __init__(self, xy, name, type, variant=0, resources_left=2):
         GameObject.__init__(self, xy, type, solid=True, draw_once_seen=True)
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
@@ -42,7 +42,7 @@ class Resource(GameObject):
         self.resources_left = resources_left
         self.seen = False
     def apply_scent(self, scents):
-        scents.apply_scent_towards(self.xy, 15)
+        scents.apply_scent_towards(self.xy, 70, radius=4)
     # Takes a resource, returns false if all have already been taken
     def take(self):
         from globals import world

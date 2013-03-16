@@ -89,54 +89,73 @@ def add_floor_variety(level, nodes, chance=0.25):
                     if level.map[xy].type == FLOOR:
                         mutator(level.map[xy])
 
+def make_diggables(level, amnt):
+    for i in range(amnt):
+        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
+        level.map[xy].make_diggable()
+
 def place_enemies(level, type, amount):
     for i in range(amount):
         xy = level.random_xy()
         level.add( type(xy) )
 
+def win_template(hpgain, mpgain, rank):
+    from globals import world
+    from menus import msgbox
+
+    stats = world.player.stats
+    stats.max_hp += hpgain
+    stats.max_mp += mpgain
+    world.player.rank = rank
+    world.messages.clear()
+    world.messages.add([ GREEN, "You travel to a more dangerous land!"])
+    world.messages.add([ BABY_BLUE, "You have mutated! You gain "+str(hpgain)+" HP and "+str(mpgain)+" MP!"])
+    msgbox((BABY_BLUE, "You have harvested enough to feed this sector!\n", 
+                  BABY_BLUE, "You have been promoted to ", YELLOW, world.player.rank+".\n",
+                  BABY_BLUE,"Your skills are required in a more dangerous sector."), 55)
+
+level_templates = []
 
 def level1(level, bsp, nodes):
-    for node in nodes: 
-        bsp.fill_node(node)
-
-    for i in range(1):
-        place_resource(level)
-
+    for node in nodes: bsp.fill_node(node)
+    for i in range(1): place_resource(level)
     place_diggables(level, 200)
-
     add_floor_variety(level, nodes)
-
     place_ant_holes(level, 2, min_dist=9,max_dist=14)
-
-    for i in range(200):
-        xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
-        level.map[xy].make_diggable()
-
+    make_diggables(level, 200)
     place_enemies(level, enemies.ant, 10)
-    place_enemies(level, enemies.ladybug, 3)
-    place_enemies(level, enemies.roach, 1)
-    level.enemy_spawner.spawn_rate = 100
-    level.enemy_spawner.enemy_maximum = 30
+    level.enemy_spawner.enemy_maximum = 0 # turn off spawner
     level.points_needed = 80
 
     def win():
         from globals import world
-        from menus import msgbox
-    
-        stats = world.player.stats
-        stats.max_hp += 10
-        stats.max_mp += 5
-        stats.abilities.add( abilities.spit() )
-        world.messages.clear()
-        world.messages.add([ GREEN, "You travel to a more dangerous land!"])
-        world.messages.add([ BABY_BLUE, "You have mutated! You gain 10 HP and 5 MP!"])
+        win_template(10, 5, "Lieutenant")
+        world.player.stats.abilities.add( abilities.spit() )
         world.messages.add([ GREEN, "You gain the power to spit acid!"])
-        world.player.rank = "Lieutenant"
-        msgbox((BABY_BLUE, "You have harvested enough to feed this sector!\n", 
-                  BABY_BLUE, "You have been promoted to ", YELLOW, world.player.rank+".\n",
-                  BABY_BLUE,"Your skills are required in a more dangerous sector."), 55)
 
     level.win_function = win
+
+level_templates.append( LevelTemplate(level1, size = Size(30,30), min_node_size=8) )
+
+def level2(level, bsp, nodes):
+    for node in nodes: bsp.fill_node(node)
+    for i in range(2): place_resource(level)
+    place_diggables(level, 400)
+    add_floor_variety(level, nodes)
+    place_ant_holes(level, 4, min_dist=9,max_dist=14)
+    make_diggables(level, 200)
+    place_enemies(level, enemies.ant, 15)
+    place_enemies(level, enemies.roach, 2)
+    place_enemies(level, enemies.ladybug, 2)
+    level.enemy_spawner.enemy_maximum = 0 # turn off spawner
+    level.points_needed = 160
+
+    def win():
+        from globals import world
+        win_template(10, 5, "Captain")
+
+    level.win_function = win
+level_templates.append( LevelTemplate(level2, size = Size(50,35), min_node_size=8) )
 
 def level3(level, bsp, nodes):
     for node in nodes: 
@@ -166,21 +185,13 @@ def level3(level, bsp, nodes):
     level.win_function = win
 
 
-level_templates = [
-        LevelTemplate(level1, size = Size(30,30), min_node_size=8),
-        LevelTemplate(level3, size = Size(78,35), min_node_size=6)
-]
-
-
-def win_level2(): pass
-#    self.stats.abilities.add( abilities.acid_splash() )
-#    self.stats.abilities.add( abilities.mutant_thorns() )
-
-
 def generate_level(world, num):
     from globals import LEVEL_SIZE
     from dungeon import DungeonMap, DungeonLevel
     from scents import ScentMaps
+
+    if num >= len(level_templates):
+        return None
 
     new_map = DungeonMap(world, LEVEL_SIZE)
     scent_map = ScentMaps(world, LEVEL_SIZE)

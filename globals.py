@@ -53,11 +53,13 @@ def on_screen(xy):
     return xy - world.view.top_left()
 
 def game_draw():
-    from statuses import SUGAR_RUSH
+    from statuses import SUGAR_RUSH, DEFENCE
     # Draw the level to the buffer
     panel.set_default_background(colors.BLACK)
     if world.player.has_status(SUGAR_RUSH):
         panel.set_default_background(colors.DARK_RED)
+    elif world.player.has_status(DEFENCE):
+        panel.set_default_background(colors.DARK_GREEN)
     panel.clear()
     world.draw()
     world.player.print_stats()
