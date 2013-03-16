@@ -97,14 +97,14 @@ def level1(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 
-    for i in range(5):
+    for i in range(1):
         place_resource(level)
 
     place_diggables(level, 200)
 
     add_floor_variety(level, nodes)
 
-    place_ant_holes(level, 5)
+    place_ant_holes(level, 2, min_dist=9,max_dist=14)
 
     for i in range(200):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )

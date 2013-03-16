@@ -33,7 +33,7 @@ WATERMELON = TileType(
 )
 
 class Resource(GameObject):
-    def __init__(self, xy, name, type, variant=0, resources_left=2):
+    def __init__(self, xy, name, type, variant=0, resources_left=4):
         GameObject.__init__(self, xy, type, solid=True, draw_once_seen=True)
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)

@@ -333,7 +333,7 @@ def scorpion(xy):
              SCORPION_TILE, 
              SCORPION_DEAD_TILE, 
              EnemyBehaviour(
-                    corpse_heal = 25,
+                    corpse_heal = 20,
                     corpse_mana = 10,
                     attack_range = 2,
                     can_burrow = True,

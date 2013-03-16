@@ -60,7 +60,7 @@ class Player(CombatObject):
             world.messages.add( [colors.PURPLE, 'A worker has died, you take ' + str(damage) + ' damage!'] )
 
     def apply_scent(self, scents):
-        scents.apply_scent(self.xy, 55, 5)
+        scents.apply_scent(self.xy, 20, 5)
 
     def die(self):
         from globals import world, splash_screen, DEFEAT_IMAGE

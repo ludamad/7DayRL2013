@@ -14,6 +14,7 @@ class ScentMaps:
     def step(self):
         from globals import world
         self.towards_map.clear()
+        self.return_map.clear()
         for dir in self.directionals:
             dir.decay()
         for obj in world.level.objects:
@@ -79,11 +80,14 @@ class ScentMap:
             self[xy] = self.maxstrength
 
     def apply_scent(self, xy, strength, radius):
+        from globals import world
         points = [ (x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
         strength_decay = (-strength / (radius+1))
         for x,y in points:
-            dist = max( abs(x), abs(y) ) * strength_decay
-            self.map[ xy.y+y ][ xy.x+x ] += dist + strength
+            p = xy +Pos(x,y)
+            if world.level.map.valid_xy(p):
+                dist = max( abs(x), abs(y) ) * strength_decay
+                self[p] += dist + strength
 
     def decay(self):
         for xy in self.rect().xy_values():

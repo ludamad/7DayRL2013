@@ -125,16 +125,20 @@ class WorkerAnt(CombatObject):
 
         if valid == []: 
             return
+        print "Valid: [", ", ".join(str(i) for i in valid), "]"
 
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
-        randomness = 10
+        randomness = 0
         weights = [ world.level.scents.get_scent_strength(self.xy, xy, not self.carrying) + rand(-randomness, +randomness) for xy in valid]
+        
+        print "WEIGHTS prehistory: [", ", ".join(str(i) for i in weights), "]"
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):
             if valid[i] in self.past_squares:
                 amount = len( filter(lambda xy: xy == valid[i], self.past_squares) )
                 weights[i] -= WORKER_ANT_HISTORY_PENALTY + 5*amount
+        print "WEIGHTS posthistory: [", ", ".join(str(i) for i in weights), "]"
 
         max_idx = weights.index(max(weights))
         self.move( valid[max_idx] )
