@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 
+import abilities
 import enemies
 import resource
 import items
@@ -8,6 +9,7 @@ import workerants
 from geometry import *
 from tiles import *
 from utils import *
+from colors import *
 
 class LevelTemplate:
     def __init__(self, handler, size, depth=8, min_node_size=5, maxHRatio=2, maxVRatio=2):
@@ -117,6 +119,25 @@ def level1(level, bsp, nodes):
     level.enemy_spawner.enemy_maximum = 30
     level.points_needed = 80
 
+    def win():
+        from globals import world
+        from menus import msgbox
+    
+        stats = world.player.stats
+        stats.max_hp += 10
+        stats.max_mp += 5
+        stats.abilities.add( abilities.spit() )
+        world.messages.clear()
+        world.messages.add([ GREEN, "You travel to a more dangerous land!"])
+        world.messages.add([ BABY_BLUE, "You have mutated! You gain 10 HP and 5 MP!"])
+        world.messages.add([ GREEN, "You gain the power to spit acid!"])
+        world.player.rank = "Lieutenant"
+        msgbox((BABY_BLUE, "You have harvested enough to feed this sector!\n", 
+                  BABY_BLUE, "You have been promoted to ", YELLOW, world.player.rank+".\n",
+                  BABY_BLUE,"Your skills are required in a more dangerous sector."), 55)
+
+    level.win_function = win
+
 def level3(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
@@ -140,12 +161,21 @@ def level3(level, bsp, nodes):
     place_enemies(level, enemies.beetle, 3)
 
     level.points_needed = 160
+    def win():
+        pass
+    level.win_function = win
 
 
-level_templates = [ 
+level_templates = [
         LevelTemplate(level1, size = Size(30,30), min_node_size=8),
         LevelTemplate(level3, size = Size(78,35), min_node_size=6)
 ]
+
+
+def win_level2(): pass
+#    self.stats.abilities.add( abilities.acid_splash() )
+#    self.stats.abilities.add( abilities.mutant_thorns() )
+
 
 def generate_level(world, num):
     from globals import LEVEL_SIZE

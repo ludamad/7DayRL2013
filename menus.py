@@ -83,6 +83,8 @@ class Messages:
             self.messages.append(Message(msg))
             if amount+1 > self.amount_to_draw:
                 del self.messages[0 : amount+1 - self.amount_to_draw]
+    def clear(self):
+        del self.messages[:]
     def draw(self, con, xy):
         for msg in self.messages:
             contents = msg.message

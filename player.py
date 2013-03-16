@@ -36,14 +36,13 @@ class Player(CombatObject):
         stats = CombatStats(hp = 100, mp = 50, mp_regen = 0.5, attack = 10)
         CombatObject.__init__(self, xy, PLAYER, stats, team = TEAM_PLAYER)
 
+        self.rank = "Private"
         self.action = None
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
+        self.defence = 0
         self.stats.abilities.add( abilities.call_ants() )
         self.stats.abilities.add( abilities.bad_smell() )
-        self.stats.abilities.add( abilities.spit() )
-        self.stats.abilities.add( abilities.acid_splash() )
-        self.stats.abilities.add( abilities.mutant_thorns() )
 
     def attack(self, target):
         from globals import world
@@ -53,6 +52,10 @@ class Player(CombatObject):
         from globals import world
         from enemies import Enemy
         from workerants import WorkerAnt
+        damage = max(0, damage - self.defence)
+        if damage == 0:
+            world.messages.add( [colors.GREEN, 'You defend the ' +attacker.name+ "'s attack!"] )
+            return
 
         CombatObject.take_damage(self, attacker, damage)
         if isinstance(attacker, Enemy):
@@ -115,10 +118,11 @@ class Player(CombatObject):
         # Transfer from level, but do it next turn
         new_index = level.level_index + 1
         new_level = globals.world[new_index]
-        new_level.add_to_front(self)
-        new_level.queue_relocation(self, new_level.random_xy() )
+        if new_level:
+            new_level.add_to_front(self)
+            new_level.queue_relocation(self, new_level.random_xy() )
         level.queue_removal(self)
-        self.stats.hp = self.stats.max_hp
+        self.points = 0
 
     def queue_move(self, dx, dy):
         from workerants import WorkerAnt
@@ -143,10 +147,6 @@ class Player(CombatObject):
         from globals import world
         self.points += points
         if self.points >= world.level.points_needed:
-            menus.msgbox((colors.BABY_BLUE, "You have harvested enough to feed this sector!\n", 
-                          colors.BABY_BLUE, "You have been promoted to ", colors.YELLOW, "GENERAL",
-                          colors.BABY_BLUE,". Your skills are required in a more dangerous sector."))
-            self.points = 0
             self.goto_next_level()
 
     def queue_use_item(self, item_slot):
@@ -306,7 +306,8 @@ class Player(CombatObject):
 
         item_slot = _get_mouse_item_slot(self, libtcod.mouse_get_status())
 
-        print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'ANT COLONEL')
+        print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'BUGHACK  ',
+                      colors.PALE_GREEN, 'Rank ', colors.PURPLE, self.rank)
 
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')

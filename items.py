@@ -125,16 +125,14 @@ ORANGE_CHUNK = ItemType(
         use_action = lambda inv, user: gain_mp(user, 50)
 )
 
-from statuses import SUGAR_RUSH
-
 def _use_watermelon(inv, user):
     from globals import world
-    user.add_status(SUGAR_RUSH)
-    world.messages.add([GREEN, "You're hyped from sugar!"])
+    user.add_status(DEFENCE)
+    world.messages.add([GREEN, "You gain defence!"])
 
 WATERMELON_CHUNK = ItemType(
         name = "Watermelon Chunk",
-        summary = "Do 10 more bite damage for the next 4 turns.",
+        summary = "Your exoskeleton hardens, lowering damage for 10 turns.",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : Color(232,34,62) },
@@ -142,4 +140,21 @@ WATERMELON_CHUNK = ItemType(
              { "char" : tile(7,7)}
         ),
         use_action = _use_watermelon
+)
+
+def _use_jellybean(inv, user):
+    from globals import world
+    user.add_status(SUGAR_RUSH)
+    world.messages.add([GREEN, "You're hyped from sugar!"])
+
+JELLYBEAN = ItemType(
+        name = "JellyBean",
+        summary = "Do 10 more bite damage for the next 4 turns.",
+        tile = TileType(
+            # ASCII mode
+             { "char" : 236, "color" : PURPLE },
+            # Tile mode
+             { "char" : tile(11,7)}
+        ),
+        use_action = _use_jellybean
 )

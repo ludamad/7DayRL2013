@@ -119,6 +119,7 @@ class DungeonLevel:
         self.level_index = index
         self.enemy_spawner = EnemySpawner() # Default spawner
         self.points_needed = 80
+        self.win_function = None
 
     @property
     def size(self): return self.map.size
@@ -269,11 +270,18 @@ class World:
         else:
             self.level.step(key, mouse)
             if self.player not in self.level.objects:
+                self.level.win_function()
+                self.player.stats.hp = self.player.stats.max_hp
+                self.player.stats.mp = self.player.stats.max_mp
+                self.level = None
                 # Where'd the player go ?
                 for level in self.levels:
                     if self.player in level.objects:
                         self.level = level
                         break
+                if not self.level:
+                    globals.splash_screen(globals.VICTORY_IMAGE)
+                    exit()
                 self.level.handle_relocations()
                 globals.screen.clear()
                 self.fov.compute_fov(self.level.map, self.player.xy, 8)

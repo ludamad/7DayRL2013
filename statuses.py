@@ -81,9 +81,18 @@ def gain_mp(user, mp):
 
 def change_maxhp(user, hp):
     user.stats.max_hp += hp
+def change_defence(user, defence):
+    user.defence += defence
 
 def change_attack(user, atk):
     user.stats.attack += atk
+
+DEFENCE = StatusType(
+        name = "Exoskeleton", 
+        add_action = lambda user: change_defence(user, +5),
+        remove_action = lambda user: change_defence(user, -5),
+        duration=10+1, # Account for turn that its used in
+)
 
 SUGAR_RUSH = StatusType(
         name = "Sugar Rush", 

@@ -32,7 +32,6 @@ def splash_screen(img=None):
         if img:
             libtcod.image_blit_rect(img, 0, 0,0, -1,-1, 1)
             if img == INTRO_IMAGE:
-                print_colored(screen, Pos(35, 4), colors.LIGHT_GRAY, "ANT COLONEL")
                 print_colored(screen, Pos(30, 30), colors.WHITE, "PRESS ENTER TO START!")
             screen.flush()
         else:
@@ -60,7 +59,7 @@ def game_draw():
     if world.player.has_status(SUGAR_RUSH):
         panel.set_default_background(colors.DARK_RED)
     panel.clear()
-    world.draw()    
+    world.draw()
     world.player.print_stats()
 
     game_blit(True)
