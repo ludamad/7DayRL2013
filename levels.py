@@ -148,6 +148,7 @@ def level1(level, bsp, nodes):
     place_ant_holes(level, 2, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, items.MUSHROOM)
+    place_items(level, 1, items.BLINKGEM)
     place_enemies(level, 6, enemies.fly, 10, enemies.ant)
     level.enemy_spawner.enemy_maximum = 0 # turn off spawner
     level.points_needed = 40
@@ -188,6 +189,7 @@ def level3(level, bsp, nodes):
     place_ant_holes(level, 7, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 2, items.MUSHROOM)
+    place_items(level, 1, items.BLINKGEM)
     place_enemies(level,  45, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 4, enemies.fly)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 50
@@ -231,7 +233,7 @@ def level5(level, bsp, nodes):
     place_ant_holes(level, 9, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, items.JELLYBEAN)
-    place_items(level, 1, items.MUSHROOM)
+    place_items(level, 1, items.BLINKGEM)
     place_enemies(level, 65, enemies.ant, 25, enemies.roach, 15, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 40
@@ -274,7 +276,7 @@ def level7(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
     wall2diggable(level, 500)
-    place_items(level, 2, items.JELLYBEAN)
+    place_items(level, 1, items.BLINKGEM)
     place_items(level, 1, items.MUSHROOM)
     place_enemies(level, 70, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly)
     level.enemy_spawner.enemy_maximum = 100
@@ -296,6 +298,8 @@ def level8(level, bsp, nodes):
     place_ant_holes(level, 9, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, items.JELLYBEAN)
+    place_items(level, 1, items.MUSHROOM)
+    place_items(level, 1, items.BLINKGEM)
     place_enemies(level, 65, enemies.ant, 35, enemies.roach, 15, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 4, enemies.fly)
     level.enemy_spawner.enemy_maximum = 200
     level.enemy_spawner.spawn_rate = 10

@@ -136,7 +136,7 @@ def _use_watermelon(inv, user):
 
 WATERMELON_CHUNK = ItemType(
         name = "Watermelon Chunk",
-        summary = "Your exoskeleton hardens for 10 turns.",
+        summary = "Your exoskeleton hardens for 10 turns",
         tile = TileType(
             # ASCII mode
              { "char" : 248, "color" : Color(232,34,62) },
@@ -153,7 +153,7 @@ def _use_jellybean(inv, user):
 
 JELLYBEAN = ItemType(
         name = "Jellybean",
-        summary = "Do 10 more bite damage for the next 4 turns.",
+        summary = "Do 10 more bite damage for the next 4 turns",
         tile = TileType(
             # ASCII mode
              { "char" : 236, "color" : PURPLE },
@@ -175,7 +175,7 @@ def _use_mushroom(inv, user):
 
 MUSHROOM = ItemType(
         name = "Mushroom",
-        summary = "Do 10 more bite damage for the next 4 turns.",
+        summary = "Paralyze enemies in a large radius",
         can_use = _can_use_mushroom,
         tile = TileType(
             # ASCII mode
@@ -184,4 +184,27 @@ MUSHROOM = ItemType(
              { "char" : tile(8,6)}
         ),
         use_action = _use_mushroom
+)
+
+def _can_use_blinkgem(inv, user):
+    inv.target = blink().target(user)
+    print inv.target
+    return inv.target != None
+    
+def _use_blinkgem(inv, user):
+    from globals import world
+    blink().perform(user, inv.target)
+    inv.target = None
+
+BLINKGEM = ItemType(
+        name = "Blink Gem",
+        summary = "Move from one point to another instantaneously",
+        can_use = _can_use_blinkgem,
+        tile = TileType(
+            # ASCII mode
+             { "char" : 229, "color" : GREEN },
+            # Tile mode
+             { "char" : tile(0,2)}
+        ),
+        use_action = _use_blinkgem
 )
