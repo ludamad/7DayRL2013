@@ -3,7 +3,7 @@ from geometry import *
 from colors import *
 import libtcodpy as libtcod
 from utils import *
-from tiles import tile
+from tiles import tile, TileType
 
 class Ability:
     def __init__(self, name, summary, perform_action, can_perform_action = None, target_action = None, mana_cost=0, cooldown=0):
@@ -150,6 +150,9 @@ def _target_object_type(user, radius,
 
         if xy.distance(user.xy) >= radius or not world.fov.is_visible(xy): 
             return False
+        if not object_criteria and not object_type:
+            if world.level.map[xy].blocked or any(world.level.objects_at(xy)): 
+                return False
 
         has_object = not object_type and not object_criteria
         for obj in world.level.objects_at(xy):
@@ -233,8 +236,6 @@ def mutant_thorns():
 
 ### NON COMBAT ABLIITIES ###
 
-
-
 def call_ants():
     from enemies import Enemy
     from workerants import WorkerAntHole, WorkerAnt
@@ -260,4 +261,30 @@ def call_ants():
                                                          draw_pointer = draw_pointer_func(char=('a', tile(8,8)) )),
         mana_cost = 5,
         cooldown = 35
+    )
+
+
+BAD_SMELL = TileType(    
+         { "char" : '#', "color" : RED }, # ASCII mode
+         { "char" : tile(10,8) }  # Tile mode
+)
+def bad_smell():
+    from enemies import Enemy
+    from workerants import WorkerAntHole, WorkerAnt
+    from scents import ScentObject
+
+    def _spawn_scent(user, xy):
+        from globals import world
+        world.level.add_to_front_of_combatobjects(ScentObject(xy, BAD_SMELL, -100))
+        world.messages.add( [PALE_YELLOW, "You create a pungent cloud!"] )
+
+    return Ability(
+        name = 'Bad Smell',
+        summary = 'Dissuades your workers from wandering somewhere.',
+        perform_action = _spawn_scent,
+        target_action = lambda user: _target_object_type(user, 9,
+                                                         guess_target=False,
+                                                         draw_pointer = draw_pointer_func(char=('#', tile(10,8)) )),
+        mana_cost = 10,
+        cooldown = 0
     )

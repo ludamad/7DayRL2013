@@ -40,6 +40,7 @@ class Player(CombatObject):
         self.view = make_rect(Pos(0,0), globals.SCREEN_SIZE)
         self.points = 0
         self.stats.abilities.add( abilities.call_ants() )
+        self.stats.abilities.add( abilities.bad_smell() )
         self.stats.abilities.add( abilities.spit() )
         self.stats.abilities.add( abilities.acid_splash() )
         self.stats.abilities.add( abilities.mutant_thorns() )
@@ -117,7 +118,7 @@ class Player(CombatObject):
         new_level.add_to_front(self)
         new_level.queue_relocation(self, new_level.random_xy() )
         level.queue_removal(self)
-        globals.game_draw()
+        self.stats.hp = self.stats.max_hp
 
     def queue_move(self, dx, dy):
         from workerants import WorkerAnt
@@ -278,6 +279,9 @@ class Player(CombatObject):
             return self.handle_controls()
         elif key.c == ord('a'):
             return self.handle_abilities()
+        elif key.c == ord('q'):
+            self.goto_next_level()
+            return self.queue_move(0,0)
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:

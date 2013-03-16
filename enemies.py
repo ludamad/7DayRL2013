@@ -18,9 +18,10 @@ class Corpse(GameObject):
         self.can_be_eaten = can_be_eaten
         self.hp_gain = hp_gain
         self.mp_gain = mp_gain
+
     def step(self):
         from globals import world
-    
+
         self.time_to_live -= 1
         for obj in globals.world.level.objects_at(self.xy):
             if isinstance(obj, CombatObject):
@@ -61,7 +62,12 @@ class Enemy(CombatObject):
         self.following_steps = 0
         self.following_object = None
 
+    def apply_scent(self, scents):
+        scents.apply_scent_towards(self.xy, -25)
+
     def die(self):
+        if not globals.world.level.is_alive(self):
+            return
         globals.world.level.queue_removal(self)
         corpse = Corpse(
             self.name, self.xy, self.corpse_tile, 
@@ -72,6 +78,8 @@ class Enemy(CombatObject):
         globals.world.level.add_to_front_of_combatobjects(corpse)
 
     def move(self, xy):
+        if not globals.world.level.is_alive(self):
+            return
         map = globals.world.level.map
         if not self.behaviour.can_fly and map[xy].type == DIGGABLE:
             # Swap tiles when digging through
@@ -122,8 +130,6 @@ class Enemy(CombatObject):
 
     def step(self):
         from globals import world
-        if not world.level.is_alive(self):
-            return
 
         CombatObject.step(self)
 

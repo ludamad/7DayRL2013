@@ -244,7 +244,6 @@ class World:
         self.level.draw(fulldraw)
 
     def step(self):
-        import globals
         key = libtcod.Key()
         mouse = libtcod.Mouse()
 
@@ -268,6 +267,7 @@ class World:
         elif key.c == ord('f'):
             console.toggle_fullscreen()
         else:
+            globals.screen.clear()
             self.level.step(key, mouse)
             if self.player not in self.level.objects:
                 # Where'd the player go ?
@@ -276,7 +276,7 @@ class World:
                         self.level = level
                         break
                 self.level.handle_relocations()
-                self.draw(True)
+                globals.game_draw()
 
     def clear(self):
         self.levels = []

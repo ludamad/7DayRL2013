@@ -50,6 +50,8 @@ class WorkerAnt(CombatObject):
     def take_damage(self, attacker, damage):
         from globals import world
         from enemies import Enemy
+        if not world.level.is_alive(self):
+            return
 
         CombatObject.take_damage(self, attacker, damage)
         if isinstance(attacker, Enemy):
@@ -69,11 +71,11 @@ class WorkerAnt(CombatObject):
 
     def pickup(self, obj):
         if not obj.take(): return
-        if obj.tile_type == resource.APPLE or resource.DROPPED_APPLE: 
+        if obj.tile_type == resource.APPLE or obj.tile_type == resource.DROPPED_APPLE: 
             self.tile_type = WORKER_ANT_WITH_APPLE_TILE
-        elif obj.tile_type == resource.ORANGE or resource.DROPPED_ORANGE: 
+        elif obj.tile_type == resource.ORANGE or obj.tile_type == resource.DROPPED_ORANGE: 
             self.tile_type = WORKER_ANT_WITH_ORANGE_TILE
-        elif obj.tile_type == resource.WATERMELON or resource.DROPPED_WATERMELON: 
+        elif obj.tile_type == resource.WATERMELON or obj.tile_type == resource.DROPPED_WATERMELON: 
             self.tile_type = WORKER_ANT_WITH_WATERMELON_TILE
         del self.past_squares[:]
         self.carrying = True
@@ -81,7 +83,6 @@ class WorkerAnt(CombatObject):
     def back2hole(self):
         from globals import world
         if self.carrying:
-            self.tile_type = WORKER_ANT_TILE
             world.player.add_harvest_points(10)
             world.messages.add([colors.BABY_BLUE, "Your worker ant delivers some harvest!"])
         else:

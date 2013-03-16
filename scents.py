@@ -1,4 +1,24 @@
 from geometry import *
+from gameobject import GameObject
+
+class ScentObject(GameObject):
+    def __init__(self, xy, tile, strength, radius=3, time_to_live=50):
+        GameObject.__init__(self, xy, tile, solid=False, draw_once_seen=True)
+        self.strength = strength
+        self.radius = radius
+        self.time_to_live = time_to_live
+    def apply_scent(self, scents):
+        scents.apply_scent(self.xy, self.strength, radius=self.radius)
+    def step(self):
+        from globals import world
+    
+        self.time_to_live -= 1
+        for obj in world.level.objects_at(self.xy):
+            if obj == world.player:
+                world.level.queue_removal(self)
+                return
+        if self.time_to_live <= 0:
+            world.level.queue_removal(self)
 
 class ScentMaps:
     def __init__(self, world, size):
