@@ -191,7 +191,7 @@ def spit():
 
     return Ability(
         name = 'Spit',
-        summary = 'Do 10 damage to an enemy from a short range.',
+        summary = 'Do 10 damage to an enemy from a short range',
         perform_action = lambda user, xy: _damage_at(user, xy, 10, "You spit at the %%!"),
         target_action = lambda user: _target_object_type(user, 3, 
                                                          object_type=Enemy,
@@ -223,7 +223,7 @@ def mutant_thorns():
 
     return Ability(
         name = 'Thorns',
-        summary = 'Do 20 damage to an enemy from a distance.',
+        summary = 'Do 20 damage to an enemy from a distance',
         perform_action = lambda user, xy: _damage_at(user, xy, 20, "You impale the %%!", 
                                                         radius=0),
         target_action = lambda user: _target_object_type(user, 5, 
@@ -253,7 +253,7 @@ def call_ants():
 
     return Ability(
         name = 'Call Ants',
-        summary = 'Call forth harvesting ants from an ant-hole.',
+        summary = 'Call forth harvesting ants from an ant-hole',
         perform_action = _spawn_ant_worker,
         target_action = lambda user: _target_object_type(user, 9,
                                                          object_criteria=_ant_hole_criteria,
@@ -280,7 +280,7 @@ def bad_smell():
 
     return Ability(
         name = 'Bad Smell',
-        summary = 'Dissuades your workers from wandering somewhere.',
+        summary = 'Dissuades your workers from wandering somewhere',
         perform_action = _spawn_scent,
         target_action = lambda user: _target_object_type(user, 9,
                                                          guess_target=False,
@@ -295,12 +295,12 @@ def blink():
 
     def _blink(user, xy):
         from globals import world
-        world.messages.add( [PALE_YELLOW, "You spontaneously translocate"] )
+        world.messages.add( [PALE_YELLOW, "You spontaneously translocate!"] )
         user.xy = xy
 
     return Ability(
         name = 'Blink',
-        summary = 'Lets you move from one point to another instantaneously',
+        summary = 'Move from one point to another instantaneously',
         perform_action = _blink,
         target_action = lambda user: _target_object_type(user, 9,
                                                          guess_target=False,
