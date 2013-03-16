@@ -44,6 +44,7 @@ class Player(CombatObject):
         self.defence = 0
         self.stats.abilities.add( abilities.call_ants() )
         self.stats.abilities.add( abilities.bad_smell() )
+        self.stats.abilities.add( abilities.blink() )
 
     def attack(self, target):
         from globals import world

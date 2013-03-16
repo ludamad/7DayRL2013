@@ -288,3 +288,23 @@ def bad_smell():
         mana_cost = 10,
         cooldown = 0
     )
+        
+def blink():
+    from enemies import Enemy
+    from workerants import WorkerAntHole, WorkerAnt
+
+    def _blink(user, xy):
+        from globals import world
+        world.messages.add( [PALE_YELLOW, "You spontaneously translocate"] )
+        user.xy = xy
+
+    return Ability(
+        name = 'Blink',
+        summary = 'Lets you move from one point to another instantaneously',
+        perform_action = _blink,
+        target_action = lambda user: _target_object_type(user, 9,
+                                                         guess_target=False,
+                                                         draw_pointer = draw_pointer_func(char=('a', tile(8,8)) )),
+        mana_cost = 10,
+        cooldown = 0
+    )
