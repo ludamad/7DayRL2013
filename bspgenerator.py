@@ -13,6 +13,7 @@ class BSPGenerator:
         self.map = map
         # Center the passed size on the map
         pos = Pos(self.map.size.w/2 - size.w/2, self.map.size.h/2 - size.h/2)
+        self.rect = Rect(pos.x, pos.y, size.w, size.h)
         self.bsp = libtcod.bsp_new_with_size(pos.x, pos.y, size.w, size.h)
 
     # Fills a line to a room

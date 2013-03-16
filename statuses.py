@@ -3,7 +3,7 @@ from utils import *
 from geometry import *
 
 class StatusType:
-    def __init__(self, name, add_action, remove_action, color=colors.GREEN, step_action=None, duration=None, remove_criteria=None):
+    def __init__(self, name=None, add_action=None, remove_action=None, color=colors.GREEN, step_action=None, duration=None, remove_criteria=None):
         self.name = name
         self.add_action = add_action
         self.remove_action = remove_action
@@ -87,6 +87,10 @@ def change_defence(user, defence):
 def change_attack(user, atk):
     user.stats.attack += atk
 
+def change_paralysis(user, paralysis):
+    user.paralyzed = paralysis
+
+
 DEFENCE = StatusType(
         name = "Exoskeleton", 
         add_action = lambda user: change_defence(user, +5),
@@ -98,5 +102,11 @@ SUGAR_RUSH = StatusType(
         name = "Sugar Rush", 
         add_action = lambda user: change_attack(user, 10),
         remove_action = lambda user: change_attack(user, -10),
+        duration=4+1, # Account for turn that its used in
+)
+
+PARALYZE = StatusType(
+        add_action = lambda user: change_paralysis(user, True),
+        remove_action = lambda user: change_paralysis(user, False),
         duration=4+1, # Account for turn that its used in
 )

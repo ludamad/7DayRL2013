@@ -288,6 +288,36 @@ def bad_smell():
         mana_cost = 10,
         cooldown = 0
     )
+
+def paralyze():
+    from enemies import Enemy
+    from globals import world
+    from workerants import WorkerAntHole, WorkerAnt
+    from scents import ScentObject
+    from statuses import PARALYZE
+
+    def _paralyze(user, xy):
+        radius=2
+        points = [ xy + Pos(x,y) for x in range(-radius, radius+1) for y in range(-radius, radius+1) ]
+        for pxy in points:
+            for obj in world.level.objects_at(pxy):
+                if isinstance(obj, Enemy):
+                    obj.add_status(PARALYZE)
+                    world.messages.add( [ BABY_BLUE, "You paralyze the " + obj.name +"!"])
+                    break
+
+    return Ability(
+        name = 'Paralyze',
+        summary = 'Stop enemies from doing anything for a while.',
+        perform_action = _paralyze,
+        target_action = lambda user: _target_object_type(user, 8, 
+                                                         guess_target=False,
+                                                         can_target_through_solids = False, 
+                                                         draw_pointer = draw_pointer_func(radius=2, char = (chr(231), tile(8,6)) )),
+        mana_cost = 10,
+        cooldown = 0
+    )
+        
         
 def blink():
     from enemies import Enemy
@@ -304,7 +334,7 @@ def blink():
         perform_action = _blink,
         target_action = lambda user: _target_object_type(user, 9,
                                                          guess_target=False,
-                                                         draw_pointer = draw_pointer_func(char=('a', tile(8,8)) )),
+                                                         draw_pointer = draw_pointer_func(char=('@', tile(8,8)) )),
         mana_cost = 10,
         cooldown = 0
     )

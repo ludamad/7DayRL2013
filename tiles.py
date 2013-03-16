@@ -137,7 +137,7 @@ DIGGABLE = TileType(   # ASCII mode
 WALL = TileType(   # ASCII mode
          { "color" : (LIGHT_RED, DARK_RED) }
         ,          # Tile mode
-        { "char" : tile(2,3) }
+        { "char" : tile(2,3), "fallback" : Color(147,143,88)  }
 )
 
 FLOOR = TileType(  # ASCII mode

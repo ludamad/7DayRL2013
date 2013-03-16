@@ -4,14 +4,16 @@ from geometry import *
 from colors import *
 from utils import *
 from statuses import *
+from abilities import *
 
 class ItemType:
-    def __init__(self, name, summary, tile, use_action, unwield_action=None):
+    def __init__(self, name, summary, tile, use_action, can_use=None,unwield_action=None):
         self.name = name
         self.use_action = use_action
         self.tile = tile
         self.unwield_action = unwield_action
         self.summary = summary
+        self.can_use = can_use
 
 class ItemSlot:
     def __init__(self, itemtype):
@@ -22,12 +24,14 @@ class Inventory:
         self.items = []
         self.equipped = None
         self.max_items = max_items
+        self.target = None # a hack
     def add_item(self, item):
         self.items.append(ItemSlot(item))
 
     def use_item(self, user, item_slot):
-        self.items.remove(item_slot)
-        item_slot.item_type.use_action(self, user)
+        if item_slot.item_type.can_use and item_slot.item_type.can_use(self, user):
+            self.items.remove(item_slot)
+            item_slot.item_type.use_action(self, user)
 
     def drop_item(self, user, item_slot):
         from globals import world
@@ -148,7 +152,7 @@ def _use_jellybean(inv, user):
     world.messages.add([GREEN, "You're hyped from sugar!"])
 
 JELLYBEAN = ItemType(
-        name = "JellyBean",
+        name = "Jellybean",
         summary = "Do 10 more bite damage for the next 4 turns.",
         tile = TileType(
             # ASCII mode
@@ -157,4 +161,27 @@ JELLYBEAN = ItemType(
              { "char" : tile(11,7)}
         ),
         use_action = _use_jellybean
+)
+
+def _can_use_mushroom(inv, user):
+    inv.target = paralyze().target(user)
+    print inv.target
+    return inv.target != None
+    
+def _use_mushroom(inv, user):
+    from globals import world
+    paralyze().perform(user, inv.target)
+    inv.target = None
+
+MUSHROOM = ItemType(
+        name = "Mushroom",
+        summary = "Do 10 more bite damage for the next 4 turns.",
+        can_use = _can_use_mushroom,
+        tile = TileType(
+            # ASCII mode
+             { "char" : 231, "color" : RED },
+            # Tile mode
+             { "char" : tile(8,6)}
+        ),
+        use_action = _use_mushroom
 )

@@ -60,8 +60,9 @@ class Player(CombatObject):
             return
 
         CombatObject.take_damage(self, attacker, damage)
+        attack = "shoots" if attacker.name == "Scorpion" else "bites"
         if isinstance(attacker, Enemy):
-            world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' bites you for ' + str(int(damage)) + ' damage!'] )
+            world.messages.add( [colors.LIGHT_RED, 'The ' + attacker.name + ' ' + attack + ' you for ' + str(int(damage)) + ' damage!'] )
         elif isinstance(attacker, WorkerAnt):
             world.messages.add( [colors.PURPLE, 'A worker has died, you take ' + str(damage) + ' damage!'] )
 

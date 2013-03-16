@@ -61,6 +61,7 @@ class Enemy(CombatObject):
         self.behaviour = behaviour
         self.following_steps = 0
         self.following_object = None
+        self.paralyzed = False
 
     def apply_scent(self, scents):
         scents.apply_scent_towards(self.xy, -25)
@@ -120,14 +121,10 @@ class Enemy(CombatObject):
         return minobj
 
     def _try_to_attack(self, target):
-        diff = self.xy - target.xy
-        sqr_dist = max(abs(diff.x), abs(diff.y))
-        if sqr_dist > self.behaviour.attack_range:
+        if self.xy.sqr_distance(target.xy) > self.behaviour.attack_range:
             return False
-        if self.behaviour.attack_range == 1 or self._line_to(target):
-            self.attack(target)
-            return True
-        return False
+        self.attack(target)
+        return True
 
     def step(self):
         from globals import world
@@ -139,7 +136,7 @@ class Enemy(CombatObject):
         if self.following_steps == 0:
             self.following_object = None
 
-        if rand(0, 100)/100.0 < self.behaviour.pause_chance: 
+        if rand(0, 100)/100.0 < self.behaviour.pause_chance or self.paralyzed: 
             return #Random chance of not moving
 
         # Move towards hostile CombatObject (different 'team', enemies can be player-aligned due to spells)
@@ -151,7 +148,10 @@ class Enemy(CombatObject):
                 if self._try_to_attack(target):
                     moved = True
                 else:
-                    xy = paths.towards(self.xy, target.xy, avoid_solid_objects = True, consider_unexplored_blocked = False, allow_digging = self.behaviour.can_burrow)
+                    xy = paths.towards(self.xy, target.xy, 
+                                       avoid_solid_objects = not self.behaviour.can_fly, 
+                                       consider_unexplored_blocked = False, 
+                                       allow_digging = self.behaviour.can_burrow)
                     if xy:
                         self.move(xy)
                         moved = True
@@ -159,8 +159,11 @@ class Enemy(CombatObject):
         # Wander
         if not moved:
             level = globals.world.level
-            can_wander_burrow = len(level.objects_at(self.xy)) == 1 and (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
-            criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
+            if not self.behaviour.can_fly:
+                can_wander_burrow = len(level.objects_at(self.xy)) == 1 and (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
+                criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
+            else:
+                criteria = lambda sxy: level.rect.within(sxy)
             xy = random_nearby(level, self.xy, criteria)
             if xy:
                 self.move(xy)
@@ -351,6 +354,38 @@ def scorpion(xy):
              ),
              CombatStats(
                     hp = 20,
+                    hp_regen = 0,
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 5
+            )
+    )
+
+FLY_TILE = TileType(
+         { "char" : 'f', "color" : colors.GRAY }, # ASCII mode              
+         { "char" : tile(2,7) } # Tile mode
+)
+FLY_DEAD_TILE = TileType(
+         { "char" : '%', "color" : colors.GRAY }, # ASCII mode              
+         { "char" : tile(2,8) } # Tile mode
+)
+def fly(xy):
+    return Enemy(
+             "Fly",
+             xy,
+             FLY_TILE, 
+             FLY_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 10,
+                    corpse_mana = 2,
+                    attack_range = 1,
+                    can_fly = True,
+                    following_steps = 2,
+                    pause_chance = 0.1,
+                    sight_distance = 5.3
+             ),
+             CombatStats(
+                    hp = 10,
                     hp_regen = 0,
                     mp = 0, 
                     mp_regen = 0, 
