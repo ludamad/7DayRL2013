@@ -158,7 +158,7 @@ class Enemy(CombatObject):
         # Wander
         if not moved:
             level = globals.world.level
-            can_wander_burrow = (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
+            can_wander_burrow = len(level.objects_at(self.xy)) == 1 and (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
             criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
             xy = random_nearby(level, self.xy, criteria)
             if xy:
