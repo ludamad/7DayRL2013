@@ -307,8 +307,10 @@ class Player(CombatObject):
 
         item_slot = _get_mouse_item_slot(self, libtcod.mouse_get_status())
 
-        print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'BUGHACK  ',
-                      colors.PALE_GREEN, 'Rank ', colors.PURPLE, self.rank)
+        print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'BUGHACK  ')
+        print_colored(panel, Pos(3, 2), 
+                      colors.WHITE, 'Level ', colors.YELLOW, str(world.level.level_index+1)+" ",
+                      colors.WHITE, 'Rank ', colors.YELLOW, self.rank )
 
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')

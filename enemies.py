@@ -82,8 +82,9 @@ class Enemy(CombatObject):
             return
         map = globals.world.level.map
         if not self.behaviour.can_fly and map[xy].type == DIGGABLE:
-            # Swap tiles when digging through
-            map[xy].swap(map[self.xy])
+            if len( globals.world.level.objects_at(xy)) == 0:
+                # Swap tiles when digging through
+                map[xy].swap(map[self.xy])
         self.xy = xy
 
     def _line_to(self, obj):

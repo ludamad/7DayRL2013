@@ -126,13 +126,11 @@ class WorkerAnt(CombatObject):
 
         if valid == []: 
             return
-        print "Valid: [", ", ".join(str(i) for i in valid), "]"
 
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_GAUSSIAN)
         randomness = 0
         weights = [ world.level.scents.get_scent_strength(self.xy, xy, not self.carrying) + rand(-randomness, +randomness) for xy in valid]
         
-        print "WEIGHTS prehistory: [", ", ".join(str(i) for i in weights), "]"
         libtcod.random_set_distribution(0, libtcod.DISTRIBUTION_LINEAR)
 
         for i in range(len(weights)):

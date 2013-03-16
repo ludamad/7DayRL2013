@@ -101,13 +101,20 @@ def wall2diggable(level, amnt):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()
 
+def place_items(level, *weights):
+    for w in range(0, len(weights), 2):
+        amount, type = weights[w], weights[w+1]
+        for i in range(amount):
+            xy = level.random_xy()
+            level.add( items.ItemObject(xy, type) )
+
 def place_enemies(level, *weights):
     for w in range(0, len(weights), 2):
         amount, type = weights[w], weights[w+1]
         for i in range(amount):
             xy = level.random_xy()
             level.add( type(xy) )
-    level.enemy_spawner.set_weights(weights)
+    level.enemy_spawner.set_weights(*weights)
 
 def win_template(hpgain, mpgain, rank):
     from globals import world
@@ -133,7 +140,7 @@ def level1(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 2, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_enemies(level, 20, enemies.ant)
+    place_enemies(level, 12, enemies.ant)
     level.enemy_spawner.enemy_maximum = 0 # turn off spawner
     level.points_needed = 40
 
@@ -156,6 +163,7 @@ def level2(level, bsp, nodes):
     wall2diggable(level, 200)
     place_enemies(level, 25, enemies.ant, 4, enemies.roach, 6, enemies.ladybug)
     level.points_needed = 80
+    place_items(level, 1, items.JELLYBEAN)
 
     def win():
         from globals import world
@@ -173,11 +181,14 @@ def level3(level, bsp, nodes):
     wall2diggable(level, 200)
     place_enemies(level,  45, enemies.ant, 6, enemies.roach, 6, enemies.ladybug)
     level.enemy_spawner.enemy_maximum = 100
+    level.enemy_spawner.spawn_rate = 50
     level.points_needed = 80
+    place_items(level, 1, items.JELLYBEAN)
 
     def win():
         from globals import world
         win_template(10, 5, "Major")
+        world.player.stats.abilities.add( abilities.acid_splash())
         world.messages.add([ GREEN, "You gain the power to spray acid!"])
 
     level.win_function = win
@@ -191,13 +202,14 @@ def level4(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_enemies(level, 85, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 1, enemies.beetle)
+    place_enemies(level, 65, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 1, enemies.beetle)
     level.enemy_spawner.enemy_maximum = 100
+    level.enemy_spawner.spawn_rate = 50
     level.points_needed = 80
 
     def win():
         from globals import world
-        win_template(10, 5, "Colonel")
+        win_template(15, 10, "Colonel")
 
     level.win_function = win
 
@@ -213,14 +225,39 @@ def level5(level, bsp, nodes):
     wall2diggable(level, 200)
     place_enemies(level, 65, enemies.ant, 25, enemies.roach, 15, enemies.ladybug, 3, enemies.beetle)
     level.enemy_spawner.enemy_maximum = 100
+    level.enemy_spawner.spawn_rate = 40
     level.points_needed = 120
+    place_items(level, 1, items.JELLYBEAN)
 
     def win():
         from globals import world
-        win_template(10, 5, "Colonel")
+        win_template(15, 10, "General")
+        world.player.stats.abilities.add( abilities.mutant_thorns())
+        world.messages.add([ GREEN, "You gain the power to shoot thorns!"])
 
     level.win_function = win
-level_templates.append( LevelTemplate(level4, size = Size(80,33), min_node_size=6) )
+level_templates.append( LevelTemplate(level5, size = Size(80,33), min_node_size=6) )
+
+def level6(level, bsp, nodes):
+    for node in nodes: bsp.fill_node(node)
+    for i in range(2): place_resource(level, min_dist=15)
+    place_diggables(level, 400)
+    add_floor_variety(level, nodes)
+    place_ant_holes(level, 4, min_dist=9,max_dist=14)
+    wall2diggable(level, 500)
+    place_enemies(level, 35, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle)
+    level.enemy_spawner.enemy_maximum = 100
+    level.enemy_spawner.spawn_rate = 30
+    level.points_needed = 80
+    place_items(level, 1, items.JELLYBEAN)
+
+    def win():
+        from globals import world
+        win_template(15, 10, "Chief")
+
+    level.win_function = win
+level_templates.append( LevelTemplate(level6, size = Size(50,33), min_node_size=10) )
+
 
 def generate_level(world, num):
     from globals import LEVEL_SIZE
