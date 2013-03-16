@@ -46,9 +46,16 @@ def place_resource_of_type(level, rxy, xy_region, resource_func, item_type):
     item_xy = edges[ rand(0,len(edges)-1) ]
     level.add( items.ItemObject(item_xy, item_type) )
 
-def place_resource(level):
+def place_resource(level, min_dist = None):
     while True:
             rxy = level.random_xy()
+            if min_dist:
+                res = filter(lambda obj: isinstance(obj, resource.Resource), level.objects )
+                if res:
+                    dist_to_resource = min( [ rxy.sqr_distance(r.xy) for r in res ] )
+                    if dist_to_resource < min_dist:
+                        continue
+
             xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]
             valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
             if valid:
@@ -89,7 +96,7 @@ def add_floor_variety(level, nodes, chance=0.25):
                     if level.map[xy].type == FLOOR:
                         mutator(level.map[xy])
 
-def make_diggables(level, amnt):
+def wall2diggable(level, amnt):
     for i in range(amnt):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()
@@ -122,10 +129,10 @@ def level1(level, bsp, nodes):
     place_diggables(level, 200)
     add_floor_variety(level, nodes)
     place_ant_holes(level, 2, min_dist=9,max_dist=14)
-    make_diggables(level, 200)
-    place_enemies(level, enemies.ant, 10)
+    wall2diggable(level, 200)
+    place_enemies(level, enemies.ant, 20)
     level.enemy_spawner.enemy_maximum = 0 # turn off spawner
-    level.points_needed = 80
+    level.points_needed = 40
 
     def win():
         from globals import world
@@ -143,12 +150,13 @@ def level2(level, bsp, nodes):
     place_diggables(level, 400)
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
-    make_diggables(level, 200)
-    place_enemies(level, enemies.ant, 15)
+    wall2diggable(level, 200)
+    place_enemies(level, enemies.ant, 25)
     place_enemies(level, enemies.roach, 2)
     place_enemies(level, enemies.ladybug, 2)
-    level.enemy_spawner.enemy_maximum = 0 # turn off spawner
-    level.points_needed = 160
+    level.enemy_spawner.enemy_maximum = 100
+    level.enemy_spawner.set_weights( 25, enemies.ant, 4, enemies.roach, 6, enemies.ladybug)
+    level.points_needed = 80
 
     def win():
         from globals import world
@@ -158,6 +166,27 @@ def level2(level, bsp, nodes):
 level_templates.append( LevelTemplate(level2, size = Size(50,35), min_node_size=8) )
 
 def level3(level, bsp, nodes):
+    for node in nodes: bsp.fill_node(node)
+    for i in range(2): place_resource(level, min_dist=35)
+    place_diggables(level, 400)
+    add_floor_variety(level, nodes)
+    place_ant_holes(level, 7, min_dist=9,max_dist=14)
+    wall2diggable(level, 200)
+    place_enemies(level, enemies.ant, 45)
+    place_enemies(level, enemies.roach, 6)
+    place_enemies(level, enemies.ladybug, 6)
+    level.enemy_spawner.enemy_maximum = 100
+    level.enemy_spawner.set_weights( 45, enemies.ant, 6, enemies.roach, 6, enemies.ladybug)
+    level.points_needed = 80
+
+    def win():
+        from globals import world
+        win_template(10, 5, "Major")
+
+    level.win_function = win
+level_templates.append( LevelTemplate(level3, size = Size(80,35), min_node_size=8) )
+
+def level4(level, bsp, nodes):
     for node in nodes: 
         bsp.fill_node(node)
 

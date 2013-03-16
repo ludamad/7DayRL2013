@@ -59,7 +59,7 @@ def game_draw():
     if world.player.has_status(SUGAR_RUSH):
         panel.set_default_background(colors.DARK_RED)
     elif world.player.has_status(DEFENCE):
-        panel.set_default_background(colors.DARK_GREEN)
+        panel.set_default_background(colors.DARKER_GRAY)
     panel.clear()
     world.draw()
     world.player.print_stats()

@@ -9,6 +9,10 @@ class Pos:
     def distance(self, pos):
         dx, dy = pos.x - self.x, pos.y - self.y
         return math.sqrt(dx*dx+dy*dy)
+    
+    def sqr_distance(self, pos):
+        dx, dy = pos.x - self.x, pos.y - self.y
+        return max(abs(dx), abs(dy))
     def __add__(self, pos): 
         return Pos(self.x+pos.x, self.y+pos.y)
     def __sub__(self, pos): 

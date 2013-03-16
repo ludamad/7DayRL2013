@@ -53,6 +53,10 @@ class EnemySpawner:
         self.enemy_maximum = enemy_maximum
         self.spawn_rate = spawn_rate
 
+    def set_weights(self, *weights):
+        self.near_spawner = spawn_if_none_within( spawn_func= spawn_with_weights(*weights) )
+        self.far_spawner = self.near_spawner
+
     def spawn_candidates(self, res, near):
         from globals import world
         level = world.level
