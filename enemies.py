@@ -41,7 +41,7 @@ class Corpse(GameObject):
             globals.world.level.queue_removal(self)
 
 class EnemyBehaviour:
-    def __init__(self, corpse_heal=0, corpse_mana=0, attack_range=1, can_fly=False, can_burrow = True, wander_burrow_chance = 0.0, following_steps = 0, sight_distance=8, pause_chance = 1.0/8):
+    def __init__(self, corpse_heal=0, corpse_mana=0, attack_range=1, can_fly=False, can_burrow = True, wander_burrow_chance = 0.0, double_move_chance = 0.0, following_steps = 0, sight_distance=8, pause_chance = 1.0/8):
         self.following_steps = following_steps
         self.can_burrow = can_burrow
         self.attack_range = attack_range
@@ -49,6 +49,7 @@ class EnemyBehaviour:
         self.corpse_heal = corpse_heal
         self.corpse_mana = corpse_mana
         self.can_fly = can_fly
+        self.double_move_chance = double_move_chance
         self.sight_distance = sight_distance
         self.pause_chance = pause_chance
 
@@ -129,6 +130,10 @@ class Enemy(CombatObject):
     def step(self):
         from globals import world
 
+        move_amount = 1
+        if rand(0,999)/1000.0 <= self.behaviour.double_move_chance:
+            move_amount += 1
+
         CombatObject.step(self)
 
         moved = False
@@ -151,23 +156,26 @@ class Enemy(CombatObject):
                     xy = paths.towards(self.xy, target.xy, 
                                        avoid_solid_objects = not self.behaviour.can_fly, 
                                        consider_unexplored_blocked = False, 
-                                       allow_digging = self.behaviour.can_burrow)
+                                       allow_digging = self.behaviour.can_burrow,
+                                       get_node = move_amount - 1)
                     if xy:
                         self.move(xy)
                         moved = True
 
         # Wander
+        
         if not moved:
-            level = globals.world.level
-            if not self.behaviour.can_fly:
-                can_wander_burrow = len(level.objects_at(self.xy)) == 1 and (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
-                criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
-            else:
-                criteria = lambda sxy: level.rect.within(sxy)
-            xy = random_nearby(level, self.xy, criteria)
-            if xy:
-                self.move(xy)
-                moved = True
+            for i in range(move_amount):
+                level = globals.world.level
+                if not self.behaviour.can_fly:
+                    can_wander_burrow = len(level.objects_at(self.xy)) == 1 and (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
+                    criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
+                else:
+                    criteria = lambda sxy: level.rect.within(sxy)
+                xy = random_nearby(level, self.xy, criteria)
+                if xy:
+                    self.move(xy)
+                    moved = True
 
     def draw(self):
         GameObject.draw(self)
@@ -362,11 +370,11 @@ def scorpion(xy):
     )
 
 FLY_TILE = TileType(
-         { "char" : 'f', "color" : colors.GRAY }, # ASCII mode              
+         { "char" : 'f', "color" : colors.WHITE }, # ASCII mode              
          { "char" : tile(2,7) } # Tile mode
 )
 FLY_DEAD_TILE = TileType(
-         { "char" : '%', "color" : colors.GRAY }, # ASCII mode              
+         { "char" : '%', "color" : colors.WHITE }, # ASCII mode              
          { "char" : tile(2,8) } # Tile mode
 )
 def fly(xy):
@@ -382,6 +390,37 @@ def fly(xy):
                     can_fly = True,
                     following_steps = 2,
                     pause_chance = 0.1,
+                    sight_distance = 5.3
+             ),
+             CombatStats(
+                    hp = 10,
+                    hp_regen = 0,
+                    mp = 0, 
+                    mp_regen = 0, 
+                    attack = 5
+            )
+    )
+
+GRASSHOPPER_TILE = TileType(
+         { "char" : 'g', "color" : colors.GREEN }, # ASCII mode              
+         { "char" : tile(6,0) } # Tile mode
+)
+GRASSHOPPER_DEAD_TILE = TileType(
+         { "char" : '%', "color" : colors.GREEN }, # ASCII mode              
+         { "char" : tile(6,6) } # Tile mode
+)
+def grasshopper(xy):
+    return Enemy(
+             "Grasshopper",
+             xy,
+             GRASSHOPPER_TILE, 
+             GRASSHOPPER_DEAD_TILE, 
+             EnemyBehaviour(
+                    corpse_heal = 6,
+                    corpse_mana = 2,
+                    following_steps = 2,
+                    pause_chance = 0.25,
+                    double_move_chance = 0.5,
                     sight_distance = 5.3
              ),
              CombatStats(

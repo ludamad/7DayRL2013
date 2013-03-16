@@ -202,7 +202,7 @@ BLINKGEM = ItemType(
         can_use = _can_use_blinkgem,
         tile = TileType(
             # ASCII mode
-             { "char" : 229, "color" : GREEN },
+             { "char" : 224, "color" : GREEN },
             # Tile mode
              { "char" : tile(0,2)}
         ),

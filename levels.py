@@ -102,12 +102,15 @@ def wall2diggable(level, amnt):
         xy = level.random_xy( lambda level,xy: level.map[xy].type == WALL )
         level.map[xy].make_diggable()
 
-def place_items(level, *weights):
+def place_items(level, spawn_amount, weights):
+    varieties = []
     for w in range(0, len(weights), 2):
         amount, type = weights[w], weights[w+1]
-        for i in range(amount):
-            xy = level.random_xy()
-            level.add( items.ItemObject(xy, type) )
+        varieties += [type] * amount
+    for i in range(spawn_amount):
+        xy = level.random_xy()
+        level.add( items.ItemObject(xy, type) )
+        
 
 def place_enemies(level, *weights):
     for w in range(0, len(weights), 2):
@@ -147,9 +150,8 @@ def level1(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 2, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 1, items.MUSHROOM)
-    place_items(level, 1, items.BLINKGEM)
-    place_enemies(level, 6, enemies.fly, 10, enemies.ant)
+    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM])
+    place_enemies(level, 3, enemies.fly, 10, enemies.ant, 1, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 0 # turn off spawner
     level.points_needed = 40
 
@@ -170,8 +172,8 @@ def level2(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 1, items.JELLYBEAN)
-    place_enemies(level, 25, enemies.ant, 4, enemies.roach, 6, enemies.ladybug, 4, enemies.fly)
+    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, items.JELLYBEAN])
+    place_enemies(level, 25, enemies.ant, 4, enemies.roach, 6, enemies.ladybug, 4, enemies.fly,1, enemies.grasshopper)
     level.points_needed = 80
 
     def win():
@@ -188,9 +190,8 @@ def level3(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 7, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 2, items.MUSHROOM)
-    place_items(level, 1, items.BLINKGEM)
-    place_enemies(level,  45, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 4, enemies.fly)
+    place_items(level, 2, [2, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+    place_enemies(level,  45, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 4, enemies.fly,1, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 50
     level.points_needed = 80
@@ -211,6 +212,7 @@ def level4(level, bsp, nodes):
     place_diggables(level, 400)
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
+    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
     wall2diggable(level, 200)
     place_enemies(level, 65, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 1, enemies.beetle, 2, enemies.scorpion)
     level.enemy_spawner.enemy_maximum = 100
@@ -232,9 +234,8 @@ def level5(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 9, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 1, items.JELLYBEAN)
-    place_items(level, 1, items.BLINKGEM)
-    place_enemies(level, 65, enemies.ant, 25, enemies.roach, 15, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly)
+    place_items(level, 1, [1, items.MUSHROOM, 2, items.BLINKGEM, 2, items.JELLYBEAN])
+    place_enemies(level, 65, enemies.ant, 25, enemies.roach, 15, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 2, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 40
     level.points_needed = 120
@@ -255,9 +256,8 @@ def level6(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
     wall2diggable(level, 500)
-    place_items(level, 1, items.JELLYBEAN)
-    place_items(level, 1, items.MUSHROOM)
-    place_enemies(level, 35, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly)
+    place_items(level, 1, [1, items.MUSHROOM, 2, items.BLINKGEM, 2, items.JELLYBEAN])
+    place_enemies(level, 35, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 30
     level.points_needed = 80
@@ -276,9 +276,8 @@ def level7(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
     wall2diggable(level, 500)
-    place_items(level, 1, items.BLINKGEM)
-    place_items(level, 1, items.MUSHROOM)
-    place_enemies(level, 70, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly)
+    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+    place_enemies(level, 70, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 2, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 20
     level.points_needed = 40
@@ -297,10 +296,8 @@ def level8(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 9, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 1, items.JELLYBEAN)
-    place_items(level, 1, items.MUSHROOM)
-    place_items(level, 1, items.BLINKGEM)
-    place_enemies(level, 65, enemies.ant, 35, enemies.roach, 15, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 4, enemies.fly)
+    place_items(level, 3, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+    place_enemies(level, 65, enemies.ant, 35, enemies.roach, 15, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 200
     level.enemy_spawner.spawn_rate = 10
     level.points_needed = 120

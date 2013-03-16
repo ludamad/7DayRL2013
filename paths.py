@@ -65,7 +65,11 @@ class PathFinder:
             con.put_char_ex(on_screen(xy), ' ', colors.WHITE, colors.YELLOW)
 
 # Returns None if not possible
-def towards(start_xy, to_xy, avoid_solid_objects = False, consider_unexplored_blocked = True, allow_digging = False):
+def towards(start_xy, to_xy, 
+            avoid_solid_objects = False, 
+            consider_unexplored_blocked = True, 
+            allow_digging = False,
+            get_node=0):
     from globals import world, con
     pather = world.level.path_finder
     pather._path_func = _path_xy_function( world.level, to_xy,
@@ -75,4 +79,5 @@ def towards(start_xy, to_xy, avoid_solid_objects = False, consider_unexplored_bl
     pather.compute_path(start_xy, to_xy, world.level)
     if pather.size() == 0: 
         return None
-    return pather.get_node(0)
+    get_node = max(0, min(get_node, pather.size() -2))
+    return pather.get_node(get_node)
