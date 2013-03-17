@@ -907,7 +907,8 @@ def console_set_key_color(con, col):
     _lib.TCOD_console_set_key_color(con, col)
 
 def console_delete(con):
-    _lib.TCOD_console_delete(con)
+    if _lib:
+        _lib.TCOD_console_delete(con)
 
 # fast color filling
 def console_fill_foreground(con,r,g,b) :

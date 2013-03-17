@@ -1,0 +1,22 @@
+Welcome to BUGHACK.
+
+The idea for the game was to include roguelike mechanics based on how ants find food through scents. 
+
+You are a leader ant who must lead worker ants to delicious harvest. Every sector you must gather a certain amount of harvest. Keep your ants safe, or you'll take damage! You must call ants out of an ant hole and then lead them to to fruit.
+
+Press C in-game to see controls.
+
+THE GAME IS TOO SMALL:
+To fullscreen, hit F in game.
+Alternatively, replace the occurrence tiles12x12_gs_ro.png in bughack.py with tiles18x18_gs_ro.png
+
+Dependencies:
+Python 2.X (32 bit is needed on windows)
+SDL (included in Windows, needed on Linux)
+
+RUNNING:
+python main.py
+(Or on windows, right click main.py and run with python 2)
+
+Created by:
+ ludamad (Adam Domurad), putterson (Pat Goebel), REZ (Clay Bullard)

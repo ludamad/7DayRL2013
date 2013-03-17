@@ -138,7 +138,7 @@ def win_template(hpgain, mpgain, rank, win_game=False):
     else:
         msgbox((BABY_BLUE, "You have led your ant colony to great heights!\n", 
                       BABY_BLUE, "You have become an ", YELLOW,  world.player.rank+".\n",
-                      BABY_BLUE,"Your powerful mutations lead you on a great 1000 day conquest."), 55, continue_key=libtcod.KEY_ENTER)
+                      BABY_BLUE,"Your powerful mutations lead you on a great 1000 day conquest."), 60, continue_key=libtcod.KEY_ENTER)
         
 
 level_templates = []
@@ -157,7 +157,7 @@ def level1(level, bsp, nodes):
 
     def win():
         from globals import world
-        win_template(10, 5, "Lieutenant")
+        win_template(15, 10, "Lieutenant")
         world.player.stats.abilities.add( abilities.spit() )
         world.messages.add([ GREEN, "You gain the power of corrosive spit!"])
 
@@ -167,10 +167,10 @@ level_templates.append( LevelTemplate(level1, size = Size(30,30), min_node_size=
 
 def level2(level, bsp, nodes):
     for node in nodes: bsp.fill_node(node)
-    for i in range(2): place_resource(level)
+    for i in range(3): place_resource(level)
     place_diggables(level, 400)
     add_floor_variety(level, nodes)
-    place_ant_holes(level, 4, min_dist=9,max_dist=14)
+    place_ant_holes(level, 5, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
     place_enemies(level, 20, enemies.ant, 2, enemies.roach, 4, enemies.ladybug, 2, enemies.fly,1, enemies.grasshopper)
@@ -178,14 +178,14 @@ def level2(level, bsp, nodes):
 
     def win():
         from globals import world
-        win_template(10, 5, "Captain")
+        win_template(15, 10, "Captain")
 
     level.win_function = win
 level_templates.append( LevelTemplate(level2, size = Size(50,35), min_node_size=8) )
 
 def level3(level, bsp, nodes):
     for node in nodes: bsp.fill_node(node)
-    for i in range(2): place_resource(level, min_dist=35)
+    for i in range(2): place_resource(level, min_dist=15)
     place_diggables(level, 400)
     add_floor_variety(level, nodes)
     place_ant_holes(level, 7, min_dist=9,max_dist=14)
@@ -198,7 +198,8 @@ def level3(level, bsp, nodes):
 
     def win():
         from globals import world
-        win_template(10, 5, "Major")
+        win_template(15, 10, "Major")
+        world.player.stats.mp_regen += 0.06
         world.player.stats.abilities.add( abilities.acid_splash())
         world.messages.add([ GREEN, "You gain the power to spray acid!"])
 
@@ -208,20 +209,23 @@ level_templates.append( LevelTemplate(level3, size = Size(80,33), min_node_size=
 
 def level4(level, bsp, nodes):
     for node in nodes: bsp.fill_node(node)
-    for i in range(2): place_resource(level, min_dist=35)
+    for i in range(3): place_resource(level, min_dist=15)
     place_diggables(level, 400)
     add_floor_variety(level, nodes)
-    place_ant_holes(level, 4, min_dist=9,max_dist=14)
+    place_ant_holes(level, 7, min_dist=9,max_dist=14)
     place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
     wall2diggable(level, 200)
-    place_enemies(level, 65, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 1, enemies.beetle, 2, enemies.scorpion)
+    place_enemies(level, 65, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 4, enemies.beetle, 2, enemies.scorpion)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 50
     level.points_needed = 80
 
     def win():
         from globals import world
-        win_template(15, 10, "Colonel")
+        win_template(15, 15, "Colonel")
+        world.player.stats.mp_regen += 0.06
+        world.player.stats.abilities.add( abilities.mutant_thorns())
+        world.messages.add([ GREEN, "You gain the power to shoot thorns!"])
 
     level.win_function = win
 
@@ -229,22 +233,21 @@ level_templates.append( LevelTemplate(level4, size = Size(80,33), min_node_size=
 
 def level5(level, bsp, nodes):
     for node in nodes: bsp.fill_node(node)
-    for i in range(3): place_resource(level, min_dist=20)
+    for i in range(3): place_resource(level, min_dist=15)
     place_diggables(level, 900)
     add_floor_variety(level, nodes)
     place_ant_holes(level, 9, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, [1, items.MUSHROOM, 2, items.BLINKGEM, 2, items.JELLYBEAN])
-    place_enemies(level, 65, enemies.ant, 25, enemies.roach, 15, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 2, enemies.grasshopper)
-    level.enemy_spawner.enemy_maximum = 100
+    place_enemies(level, 40, enemies.ant, 10, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
+    level.enemy_spawner.enemy_maximum = 80
     level.enemy_spawner.spawn_rate = 40
-    level.points_needed = 120
+    level.points_needed = 80
 
     def win():
         from globals import world
-        win_template(15, 10, "General")
-        world.player.stats.abilities.add( abilities.mutant_thorns())
-        world.messages.add([ GREEN, "You gain the power to shoot thorns!"])
+        win_template(10, 10, "Chief")
+        world.player.stats.mp_regen += 0.125
 
     level.win_function = win
 level_templates.append( LevelTemplate(level5, size = Size(80,33), min_node_size=6) )
@@ -254,60 +257,61 @@ def level6(level, bsp, nodes):
     for i in range(2): place_resource(level, min_dist=15)
     place_diggables(level, 400)
     add_floor_variety(level, nodes)
-    place_ant_holes(level, 4, min_dist=9,max_dist=14)
-    wall2diggable(level, 500)
+    place_ant_holes(level, 8, min_dist=9,max_dist=14)
+    wall2diggable(level, 100)
     place_items(level, 1, [1, items.MUSHROOM, 2, items.BLINKGEM, 2, items.JELLYBEAN])
-    place_enemies(level, 35, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
-    level.enemy_spawner.enemy_maximum = 100
-    level.enemy_spawner.spawn_rate = 30
+    place_enemies(level, 45, enemies.ant, 15, enemies.roach, 10, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 5, enemies.fly, 5, enemies.grasshopper)
+    level.enemy_spawner.enemy_maximum = 80
+    level.enemy_spawner.spawn_rate = 20
     level.points_needed = 80
 
     def win():
         from globals import world
-        win_template(15, 10, "Chief")
+        world.player.stats.mp_regen += 0.125
+        win_template(15, 10, "Emperor", win_game=True)
 
     level.win_function = win
 level_templates.append( LevelTemplate(level6, size = Size(50,33), min_node_size=10) )
-
-def level7(level, bsp, nodes):
-    for node in nodes: bsp.fill_node(node)
-    for i in range(1): place_resource(level, min_dist=15)
-    place_diggables(level, 200)
-    add_floor_variety(level, nodes)
-    place_ant_holes(level, 4, min_dist=9,max_dist=14)
-    wall2diggable(level, 500)
-    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
-    place_enemies(level, 70, enemies.ant, 15, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 2, enemies.grasshopper)
-    level.enemy_spawner.enemy_maximum = 100
-    level.enemy_spawner.spawn_rate = 20
-    level.points_needed = 40
-
-    def win():
-        from globals import world
-        win_template(25, 20, "Chief")
-
-    level.win_function = win
-level_templates.append( LevelTemplate(level7, size = Size(70,33), min_node_size=10) )
-
-def level8(level, bsp, nodes):
-    for node in nodes: bsp.fill_node(node)
-    for i in range(3): place_resource(level, min_dist=15)
-    place_diggables(level, 1100)
-    add_floor_variety(level, nodes)
-    place_ant_holes(level, 9, min_dist=9,max_dist=14)
-    wall2diggable(level, 200)
-    place_items(level, 3, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
-    place_enemies(level, 65, enemies.ant, 35, enemies.roach, 15, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
-    level.enemy_spawner.enemy_maximum = 200
-    level.enemy_spawner.spawn_rate = 10
-    level.points_needed = 120
-
-    def win():
-        from globals import world
-        win_template(15, 10, "Emperor", win_game = True)
-
-    level.win_function = win
-level_templates.append( LevelTemplate(level8, size = Size(80,33), min_node_size=6) )
+#
+#def level7(level, bsp, nodes):
+#    for node in nodes: bsp.fill_node(node)
+#    for i in range(3): place_resource(level, min_dist=15)
+#    place_diggables(level, 200)
+#    add_floor_variety(level, nodes)
+#    place_ant_holes(level, 8, min_dist=9,max_dist=14)
+#    wall2diggable(level, 100)
+#    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+#    place_enemies(level, 50, enemies.ant, 10, enemies.roach, 4, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 2, enemies.grasshopper)
+#    level.enemy_spawner.enemy_maximum = 80
+#    level.enemy_spawner.spawn_rate = 30
+#    level.points_needed = 80
+#
+#    def win():
+#        from globals import world
+#        win_template(25, 20, "Chief")
+#
+#    level.win_function = win
+#level_templates.append( LevelTemplate(level7, size = Size(70,33), min_node_size=10) )
+#
+#def level8(level, bsp, nodes):
+#    for node in nodes: bsp.fill_node(node)
+#    for i in range(3): place_resource(level, min_dist=15)
+#    place_diggables(level, 1100)
+#    add_floor_variety(level, nodes)
+#    place_ant_holes(level, 9, min_dist=9,max_dist=14)
+#    wall2diggable(level, 100)
+#    place_items(level, 3, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+#    place_enemies(level, 65, enemies.ant, 15, enemies.roach, 10, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
+#    level.enemy_spawner.enemy_maximum = 80
+#    level.enemy_spawner.spawn_rate = 30
+#    level.points_needed = 80
+#
+#    def win():
+#        from globals import world
+#        win_template(15, 10, "Emperor", win_game = True)
+#
+#    level.win_function = win
+#level_templates.append( LevelTemplate(level8, size = Size(80,33), min_node_size=6) )
 
 
 def generate_level(world, num):

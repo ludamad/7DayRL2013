@@ -72,7 +72,7 @@ class DungeonMap:
         fov = self.world.fov
 
         # For debug purposes, show the screen
-        SHOW_ALL = console.is_key_pressed(libtcod.KEY_DELETE)
+        SHOW_ALL = False and console.is_key_pressed(libtcod.KEY_DELETE)
         if WAS_SHOW_ALL: 
             fulldraw = True
         if fulldraw:
@@ -149,7 +149,8 @@ class DungeonLevel:
                 return
         self.add(object)
     def remove(self, object):
-        self.objects.remove(object)
+        if object in self.objects:
+            self.objects.remove(object)
     def queue_removal(self, object):
         self.queued_removals.append(object)
     # Used when we transfer rooms, to specify the new xy after the current step

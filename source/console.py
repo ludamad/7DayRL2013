@@ -30,7 +30,7 @@ class Console:
         self.size = size
 
     def __del__(self): # garbage collect
-        if self.con != 0:
+        if self.con != 0 and self.con != None:
             console_delete(self.con)
             self.con = None
 

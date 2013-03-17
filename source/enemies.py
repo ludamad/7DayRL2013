@@ -299,7 +299,7 @@ def roach(xy):
 
 BEETLE_TILE = TileType(    # ASCII mode
          { "char" : 'B',
-           "color" : colors.Color(123,57,59)
+           "color" : colors.LIGHT_GRAY
          },                 # Tile mode
          { "char" : tile(3,7)
          }
@@ -307,7 +307,7 @@ BEETLE_TILE = TileType(    # ASCII mode
 
 BEETLE_DEAD_TILE = TileType(    # ASCII mode
          { "char" : '%', 
-           "color" : colors.Color(123,57,59)
+           "color" : colors.LIGHT_GRAY
          },                     # Tile mode
          { "char" : tile(3,8)
          }

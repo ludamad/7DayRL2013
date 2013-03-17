@@ -158,7 +158,7 @@ JELLYBEAN = ItemType(
             # ASCII mode
              { "char" : 236, "color" : PURPLE },
             # Tile mode
-             { "char" : tile(11,7)}
+             { "char" : tile(9,6)}
         ),
         use_action = _use_jellybean
 )

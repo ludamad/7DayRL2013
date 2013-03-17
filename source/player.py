@@ -138,6 +138,7 @@ class Player(CombatObject):
                 if map[pos].type == DIGGABLE:
                     self.action = DigAction(pos)
                     return True
+                return False
             for object in globals.world.level.objects_at(pos):
                 if isinstance(object, enemies.Enemy):
                     self.action = AttackAction(object)
@@ -289,9 +290,9 @@ class Player(CombatObject):
             return self.handle_controls()
         elif key.c == ord('a'):
             return self.handle_abilities()
-        elif key.c == ord('q'):
-            self.goto_next_level()
-            return self.queue_move(0,0)
+#        elif key.c == ord('q'):
+#            self.goto_next_level()
+#            return self.queue_move(0,0)
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:

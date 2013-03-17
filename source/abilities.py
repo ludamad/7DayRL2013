@@ -212,9 +212,8 @@ def acid_splash():
                                                         radius=1),
         target_action = lambda user: _target_object_type(user, 5, 
                                                          guess_target=False,
-                                                         can_target_through_solids = False, 
                                                          draw_pointer = draw_pointer_func(radius=1, char = ('*', tile(5,8)) )),
-        mana_cost = 30,
+        mana_cost = 25,
         cooldown = 5
     )
 

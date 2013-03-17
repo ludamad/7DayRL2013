@@ -99,7 +99,7 @@ class Tile:
         self.variant = random_get_int(0, 0, self.type.num_variants())
 
 def draw_tile(tt, num, xy, bg = False):
-    SHOW_ALL = console.is_key_pressed(KEY_DELETE)
+    SHOW_ALL = False and console.is_key_pressed(KEY_DELETE)
 
     from globals import world, con, on_screen
 
