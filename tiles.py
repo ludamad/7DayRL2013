@@ -99,7 +99,7 @@ class Tile:
         self.variant = random_get_int(0, 0, self.type.num_variants())
 
 def draw_tile(tt, num, xy, bg = False):
-    SHOW_ALL = console.is_key_pressed(KEY_TAB)
+    SHOW_ALL = console.is_key_pressed(KEY_DELETE)
 
     from globals import world, con, on_screen
 
@@ -158,14 +158,14 @@ FLOOR2 = TileType(  # ASCII mode
         ,          # Tile mode
         variant_list(
             [ tile(2,4) ],
-            { "fallback" : Color(194, 148, 88) }
+            { "fallback" : Color(124, 108, 58) }
         )
 )
 
 FLOOR3 = TileType(  # ASCII mode
          { "char" : '.', 
            "color" : (WHITE, LIGHT_GRAY), 
-           "bg_color" :  Color(129, 81, 45) }
+           "bg_color" :  Color(100, 61, 25) }
         ,          # Tile mode
         variant_list(
             [ tile(1,5), tile(2,5) ],

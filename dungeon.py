@@ -72,7 +72,7 @@ class DungeonMap:
         fov = self.world.fov
 
         # For debug purposes, show the screen
-        SHOW_ALL = console.is_key_pressed(libtcod.KEY_TAB)
+        SHOW_ALL = console.is_key_pressed(libtcod.KEY_DELETE)
         if WAS_SHOW_ALL: 
             fulldraw = True
         if fulldraw:
@@ -260,7 +260,7 @@ class World:
                 exit()
             else:
                 self.messages.add([colors.GREEN, "Press Shift+Escape to exit."])
-        elif key.vk == libtcod.KEY_CONTROL:
+        elif key.vk == libtcod.KEY_TAB:
             globals.ASCII_MODE = not globals.ASCII_MODE
             self.draw(True)
 #        elif key.vk == libtcod.KEY_ENTER:

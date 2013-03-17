@@ -44,7 +44,6 @@ class Player(CombatObject):
         self.defence = 0
         self.stats.abilities.add( abilities.call_ants() )
         self.stats.abilities.add( abilities.bad_smell() )
-        self.stats.abilities.add( abilities.blink() )
 
     def attack(self, target):
         from globals import world
@@ -132,15 +131,20 @@ class Player(CombatObject):
 
         pos = self.xy + Pos(dx, dy)
         map = globals.world.level.map
-        allow_dig = not console.is_key_pressed(libtcod.KEY_SHIFT)
+        only_dig = console.is_key_pressed(libtcod.KEY_CONTROL)
+        dont_dig = console.is_key_pressed(libtcod.KEY_SHIFT)
         if map.valid_xy(pos):
+            if only_dig:
+                if map[pos].type == DIGGABLE:
+                    self.action = DigAction(pos)
+                    return True
             for object in globals.world.level.objects_at(pos):
                 if isinstance(object, enemies.Enemy):
                     self.action = AttackAction(object)
                     return True
             whitelist = lambda o: isinstance(o, Player) or isinstance(o, WorkerAnt)
             solid_obj = globals.world.level.solid_object_at(pos, whitelist=whitelist)
-            tile_walkable = (allow_dig and map[pos].type == DIGGABLE) or not map[pos].blocked
+            tile_walkable = (not dont_dig and map[pos].type == DIGGABLE) or not map[pos].blocked
             if not solid_obj and tile_walkable:
                 self.action = MoveAction(pos)
                 return True
@@ -238,6 +242,8 @@ class Player(CombatObject):
     def handle_controls(self):
         controls = [ colors.GREEN, "Arrow key ",
                     colors.WHITE, "movement accepted, but cannot do diagonals\n", colors.WHITE, '\n']
+        controls += [ colors.GREEN, "Control ",colors.WHITE, "dig without moving\n"]
+        controls += [ colors.GREEN, "Shift ",colors.WHITE, "move except if you would dig\n"]
         controls += [colors.GREEN, "'.'", colors.WHITE, " or ", colors.GREEN, "5", colors.WHITE, ' to wait a turn\n', colors.WHITE, '\n']
         controls += [ colors.LIGHT_RED, "Movement with 'vi' keys:\n",
 
@@ -267,7 +273,7 @@ class Player(CombatObject):
         controls += [ colors.GREEN, "I ", colors.WHITE, "for inventory\n"]
         controls += [ colors.GREEN, "A ", colors.WHITE, "for abilities\n"]
         controls += [ colors.GREEN, "C ", colors.WHITE, "for this menu (controls)\n"]
-        controls += [ colors.GREEN, "CONTROL ", colors.WHITE, "to switch between ASCII and tiles\n"]
+        controls += [ colors.GREEN, "Tab ", colors.WHITE, "to switch between ASCII and tiles\n"]
         menus.msgbox(controls, width=60)
         return False
 

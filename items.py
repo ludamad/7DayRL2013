@@ -29,7 +29,7 @@ class Inventory:
         self.items.append(ItemSlot(item))
 
     def use_item(self, user, item_slot):
-        if item_slot.item_type.can_use and item_slot.item_type.can_use(self, user):
+        if not item_slot.item_type.can_use or item_slot.item_type.can_use(self, user):
             self.items.remove(item_slot)
             item_slot.item_type.use_action(self, user)
 

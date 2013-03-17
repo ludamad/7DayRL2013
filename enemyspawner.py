@@ -71,6 +71,8 @@ class EnemySpawner:
 
     def spawn_try(self, res, near):
         from globals import world
+        if res == []:
+            return False
         candidates = self.spawn_candidates(res, near)
         if candidates == []:
             return False

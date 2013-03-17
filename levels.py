@@ -134,11 +134,11 @@ def win_template(hpgain, mpgain, rank, win_game=False):
         world.messages.add([ BABY_BLUE, "You have mutated! You gain "+str(hpgain)+" HP and "+str(mpgain)+" MP!"])
         msgbox((BABY_BLUE, "You have harvested enough to feed this sector!\n", 
                       BABY_BLUE, "You have been promoted to ", YELLOW, world.player.rank+".\n",
-                      BABY_BLUE,"Your skills are required in a more dangerous sector."), 55)
+                      BABY_BLUE,"Your skills are required in a more dangerous sector."), 55, continue_key=libtcod.KEY_ENTER)
     else:
         msgbox((BABY_BLUE, "You have led your ant colony to great heights!\n", 
                       BABY_BLUE, "You have become an ", YELLOW,  world.player.rank+".\n",
-                      BABY_BLUE,"Your powerful mutations lead you on a great 1000 day conquest."), 55)
+                      BABY_BLUE,"Your powerful mutations lead you on a great 1000 day conquest."), 55, continue_key=libtcod.KEY_ENTER)
         
 
 level_templates = []
@@ -172,8 +172,8 @@ def level2(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 4, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, items.JELLYBEAN])
-    place_enemies(level, 25, enemies.ant, 4, enemies.roach, 6, enemies.ladybug, 4, enemies.fly,1, enemies.grasshopper)
+    place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+    place_enemies(level, 20, enemies.ant, 2, enemies.roach, 4, enemies.ladybug, 2, enemies.fly,1, enemies.grasshopper)
     level.points_needed = 80
 
     def win():
@@ -191,7 +191,7 @@ def level3(level, bsp, nodes):
     place_ant_holes(level, 7, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 2, [2, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
-    place_enemies(level,  45, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 4, enemies.fly,1, enemies.grasshopper)
+    place_enemies(level,  25, enemies.ant, 4, enemies.roach, 4, enemies.ladybug, 4, enemies.fly,1, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 100
     level.enemy_spawner.spawn_rate = 50
     level.points_needed = 80

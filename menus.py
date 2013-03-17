@@ -12,7 +12,7 @@ def _cat_string_parts(header):
         s += header[i+1]
     return s
 
-def menu(header, options, width, index_color=colors.WHITE):
+def menu(header, options, width, index_color=colors.WHITE,continue_key=None):
     from globals import SCREEN_SIZE
 
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
@@ -60,12 +60,13 @@ def menu(header, options, width, index_color=colors.WHITE):
             index = key.c - ord('1')
         if index >= 0 and index < len(options): 
             return index
-        return None
+        if not continue_key or key.vk == continue_key:
+            return None
 #        elif key.c != ord('i'):
 #            return None
 
-def msgbox(text, width=50):
-    menu(text, [], width) 
+def msgbox(text, width=50,continue_key=None):
+    menu(text, [], width,continue_key=continue_key) 
 
 class Message:
     def __init__(self, message):

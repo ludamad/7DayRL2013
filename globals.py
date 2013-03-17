@@ -26,11 +26,13 @@ VICTORY_IMAGE = libtcod.image_load("victory.png")
 
 def splash_screen(img=None):
     from utils import print_colored
-    from menus import menu
+    from menus import menu, msgbox
+    from tiles import tile
     screen.clear()
 
     while True:
         if img:
+            screen.clear()
             libtcod.image_blit_rect(img, 0, 0,0, -1,-1, 1)
             if img == INTRO_IMAGE:
                 print_colored(screen, Pos(30, 30), colors.WHITE, "PRESS ENTER TO START!")
@@ -41,11 +43,24 @@ def splash_screen(img=None):
         libtcod.sys_check_for_event(libtcod.EVENT_ANY, key, mouse)
         if key.pressed and key.vk == libtcod.KEY_ENTER:
             if img == INTRO_IMAGE:
-                opt = menu((colors.BABY_BLUE, "Select a mode (changeable in-game with 'control')"), 
-                            [(colors.WHITE, "Tiles mode"),(colors.WHITE, "Classic ASCII") ], 50, index_color=colors.YELLOW)
+                opt = menu((colors.WHITE, "Select a mode (changeable in-game with 'tab'):"), 
+                            [(colors.PALE_RED, "Tiles mode"),(colors.PALE_GREEN, "Classic ASCII") ], 50, index_color=colors.YELLOW)
                 global ASCII_MODE
                 ASCII_MODE = (opt == 1)
-                if not opt: 
+                if opt != None: 
+                    hole= [] if not ASCII_MODE else [colors.YELLOW, ' (O)']
+                    explanation = [ colors.BABY_BLUE, "Welcome to BUGHACK\n",
+                                    colors.WHITE, "You are a leader ant who must lead worker ants to delicious harvest.\n",
+                                    colors.WHITE, "Every sector you must gather a certain amount of harvest.\n", 
+                                    colors.PALE_RED, "Keep your ants safe, or you'll take damage!\n", 
+                                    colors.WHITE, "You must call ants out of an ant hole"] + hole + [colors.WHITE,", and then lead them to \n",
+                                    colors.WHITE, "to fruit.\n",colors.WHITE, '\n',
+                                    colors.YELLOW, "Press C in-game to see controls."]
+                    screen.clear()
+                    libtcod.image_blit_rect(img, 0, 0,0, -1,-1, 1)
+                    screen.flush()
+                    msgbox(explanation, 70)
+                else:
                     continue
             screen.clear()
             screen.flush()

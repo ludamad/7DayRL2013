@@ -137,7 +137,6 @@ class WorkerAnt(CombatObject):
             if valid[i] in self.past_squares:
                 amount = len( filter(lambda xy: xy == valid[i], self.past_squares) )
                 weights[i] -= WORKER_ANT_HISTORY_PENALTY + 5*amount
-        print "WEIGHTS posthistory: [", ", ".join(str(i) for i in weights), "]"
 
         max_idx = weights.index(max(weights))
         self.move( valid[max_idx] )
@@ -152,6 +151,7 @@ class WorkerAnt(CombatObject):
                                     mp_gain = WORKER_ANT_CANIBALISM_MP_GAIN, 
                                     hp_gain = WORKER_ANT_CANIBALISM_HP_GAIN))
         if self.carrying:
+            world.messages.add([colors.RED, "The worker ant drops its food!"])
             resource.drop_resource(self.xy, self.tile_type)
 
 WORKER_ANT_HOLE = TileType(    # ASCII mode

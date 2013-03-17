@@ -13,6 +13,15 @@ class MoveAction:
 
         actor.xy = self.destination
 
+class DigAction:
+    def __init__(self, xy): 
+        self.target = xy
+    def perform(self, actor):
+        from workerants import WorkerAnt
+        from globals import world
+
+        world.level.map[self.target].make_floor()
+
 class AttackAction:
     def __init__(self, target): 
         self.target = target
