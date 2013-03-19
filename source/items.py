@@ -126,7 +126,7 @@ ORANGE_CHUNK = ItemType(
             # Tile mode
              { "char" : tile(6,1)}
         ),
-        use_action = lambda inv, user: gain_mp(user, 50)
+        use_action = lambda inv, user: gain_mp(user, 60)
 )
 
 def _use_watermelon(inv, user):
@@ -202,7 +202,7 @@ BLINKGEM = ItemType(
         can_use = _can_use_blinkgem,
         tile = TileType(
             # ASCII mode
-             { "char" : 224, "color" : GREEN },
+             { "char" : '*', "color" : GREEN },
             # Tile mode
              { "char" : tile(0,2)}
         ),

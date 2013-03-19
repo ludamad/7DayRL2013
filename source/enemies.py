@@ -171,7 +171,7 @@ class Enemy(CombatObject):
                     can_wander_burrow = len(level.objects_at(self.xy)) == 1 and (rand(0,999)/1000.0 <= self.behaviour.wander_burrow_chance)
                     criteria = lambda sxy: not level.is_solid(sxy) or (can_wander_burrow and level.map[sxy].type == DIGGABLE)
                 else:
-                    criteria = lambda sxy: level.rect.within(sxy)
+                    criteria = lambda sxy: level.rect.within(sxy) and not level.objects_of_type_at(sxy, Enemy)
                 xy = random_nearby(level, self.xy, criteria)
                 if xy:
                     self.move(xy)
@@ -220,7 +220,7 @@ def ladybug(xy):
 
 ANT_TILE = TileType(    # ASCII mode
          { "char" : 'a',
-           "color" : colors.RED
+           "color" : colors.Color(225, 46,46)
          },                 # Tile mode
          { "char" : tile(1,0)
          }
@@ -228,7 +228,7 @@ ANT_TILE = TileType(    # ASCII mode
 
 ANT_DEAD_TILE = TileType(    # ASCII mode
          { "char" : '%', 
-           "color" : colors.RED
+           "color" : colors.Color(225, 46,46)
          },                     # Tile mode
          { "char" : tile(1,6)
          }

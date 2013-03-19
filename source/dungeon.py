@@ -178,8 +178,13 @@ class DungeonLevel:
         # hack to always draw player:
         self.world.player.draw()
     def step(self, key, mouse):
-        from enemies import Enemy
+        from enemies import Enemy, Corpse
         self.handle_relocations()
+        ## Assert correct order
+        for i in range(len(self.objects)):
+            if isinstance(self.objects[i], Corpse):
+                for ii in range(i+1, len(self.objects)): 
+                    assert not isinstance(self.objects[ii], Enemy)
 
         if self.world.player.has_action(key, mouse):
             assert self.world.player.action
@@ -258,7 +263,7 @@ class World:
 
         if key.vk == libtcod.KEY_ESCAPE or libtcod.console_is_window_closed():
             if key.shift:
-                exit()
+                globals.game_save_and_exit()
             else:
                 self.messages.add([colors.GREEN, "Press Shift+Escape to exit."])
         elif key.vk == libtcod.KEY_TAB:

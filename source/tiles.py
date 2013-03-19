@@ -126,7 +126,8 @@ def variant_list(chars, properties):
 DIGGABLE = TileType(   # ASCII mode
          { "color" : PALE_RED, 
            "char" : 176, 
-           "bg_color" : (DARK_GRAY, DARKER_GRAY)}
+           "bg_color" : (DARK_GRAY, DARKER_GRAY),
+	   "fallback" : PALE_RED * 0.5 }
         ,          # Tile mode
         variant_list(
             [ tile(1,2)]*5  + [ tile(1,3) , tile(1,4) , tile(2,2) ], 
@@ -135,7 +136,7 @@ DIGGABLE = TileType(   # ASCII mode
 )
 
 WALL = TileType(   # ASCII mode
-         { "color" : (LIGHT_RED, DARK_RED) }
+         { "color" : (LIGHT_RED, DARK_RED),  "bg_color" : (LIGHT_RED, DARK_RED) }
         ,          # Tile mode
         { "char" : tile(2,3), "fallback" : Color(147,143,88)  }
 )
@@ -154,22 +155,22 @@ FLOOR = TileType(  # ASCII mode
 FLOOR2 = TileType(  # ASCII mode
          { "char" : '.', 
            "color" : (WHITE, LIGHT_GRAY), 
-           "bg_color" : Color(100, 50, 30) }
+           "bg_color" : Color(46, 10, 0) }
         ,          # Tile mode
         variant_list(
             [ tile(2,4) ],
-            { "fallback" : Color(124, 108, 58) }
+            { "fallback" : Color(188, 132, 74) }
         )
 )
 
 FLOOR3 = TileType(  # ASCII mode
          { "char" : '.', 
            "color" : (WHITE, LIGHT_GRAY), 
-           "bg_color" :  Color(100, 61, 25) }
+           "bg_color" :  Color(41, 10, 0) }
         ,          # Tile mode
         variant_list(
             [ tile(1,5), tile(2,5) ],
-            { "fallback" : Color(129, 81, 45) }
+            { "fallback" : Color(167, 105, 55) }
         )
 )
 

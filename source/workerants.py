@@ -33,7 +33,7 @@ WORKER_ANT_TURNS_BEFORE_BURROW = 100
 class WorkerAnt(CombatObject):
     def __init__(self, xy):
         stats = CombatStats(
-            hp = 20,
+            hp = 10,
             hp_regen = 0,
             mp = 0, 
             mp_regen = 0, 

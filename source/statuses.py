@@ -77,7 +77,7 @@ def gain_hp(user, hp):
     user.stats.regen_hp(hp)
 
 def gain_mp(user, mp):
-    user.stats.regen_hp(mp)
+    user.stats.regen_mp(mp)
 
 def change_maxhp(user, hp):
     user.stats.max_hp += hp

@@ -40,14 +40,15 @@ def apply_nearby(map, points, tile_cond, near_cond, mutator):
 def _free_square(level, xy):
     return not level.map[xy].blocked and not any(level.objects_at(xy))
 
-def place_resource_of_type(level, rxy, xy_region, resource_func, item_type):
+def place_resource_of_type(level, rxy, xy_region, resource_func, item_type, item_chance):
     for i in range(len(xy_region)):
         level.add( resource_func(xy_region[i], i) )
         edges = list( make_rect(rxy - Pos(1,1), Size(4,4)).edge_values() )
-    item_xy = edges[ rand(0,len(edges)-1) ]
-    level.add( items.ItemObject(item_xy, item_type) )
+    if rand(0,999)/1000.0 < item_chance:
+        item_xy = edges[ rand(0,len(edges)-1) ]
+        level.add( items.ItemObject(item_xy, item_type) )
 
-def place_resource(level, min_dist = None):
+def place_resource(level, min_dist = 7, food_chance=0.33):
     while True:
             rxy = level.random_xy()
             if min_dist:
@@ -56,18 +57,17 @@ def place_resource(level, min_dist = None):
                     dist_to_resource = min( [ rxy.sqr_distance(r.xy) for r in res ] )
                     if dist_to_resource < min_dist:
                         continue
-
             xy_near = [ rxy + Pos(x,y) for y in range(-1,3) for x in range(-1,3) ]
             valid = not any ( not level.map.valid_xy(xy) or level.is_solid(xy) for xy in xy_near )
             if valid:
                 xy_region = [ rxy + Pos(x,y) for y in range(2) for x in range(2) ]
                 type = rand(0, 2)
                 if type == 0: 
-                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK)
+                    place_resource_of_type(level, rxy, xy_region, resource.watermelon, items.WATERMELON_CHUNK, food_chance)
                 elif type == 1:
-                    place_resource_of_type(level, rxy, xy_region, resource.orange, items.ORANGE_CHUNK)
+                    place_resource_of_type(level, rxy, xy_region, resource.orange, items.ORANGE_CHUNK, food_chance)
                 elif type == 2:
-                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK)
+                    place_resource_of_type(level, rxy, xy_region, resource.apple, items.APPLE_CHUNK, food_chance)
                 break
 
 def place_ant_holes(level, amount, min_dist = 7, max_dist = 13):
@@ -138,7 +138,8 @@ def win_template(hpgain, mpgain, rank, win_game=False):
     else:
         msgbox((BABY_BLUE, "You have led your ant colony to great heights!\n", 
                       BABY_BLUE, "You have become an ", YELLOW,  world.player.rank+".\n",
-                      BABY_BLUE,"Your powerful mutations lead you on a great 1000 day conquest."), 60, continue_key=libtcod.KEY_ENTER)
+                      BABY_BLUE,"Your powerful mutations lead you on a great\n",
+                      BABY_BLUE,"1000 day conquest."), 60, continue_key=libtcod.KEY_ENTER)
         
 
 level_templates = []
@@ -173,7 +174,7 @@ def level2(level, bsp, nodes):
     place_ant_holes(level, 5, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
-    place_enemies(level, 20, enemies.ant, 2, enemies.roach, 4, enemies.ladybug, 2, enemies.fly,1, enemies.grasshopper)
+    place_enemies(level, 30, enemies.ant, 2, enemies.roach, 4, enemies.ladybug, 2, enemies.fly,1, enemies.grasshopper)
     level.points_needed = 80
 
     def win():
@@ -190,10 +191,10 @@ def level3(level, bsp, nodes):
     add_floor_variety(level, nodes)
     place_ant_holes(level, 7, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
-    place_items(level, 2, [2, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
-    place_enemies(level,  25, enemies.ant, 4, enemies.roach, 4, enemies.ladybug, 4, enemies.fly,1, enemies.grasshopper)
+    place_items(level, 1, [2, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
+    place_enemies(level,  35, enemies.ant, 8, enemies.roach, 6, enemies.ladybug, 12, enemies.fly,4, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 100
-    level.enemy_spawner.spawn_rate = 50
+    level.enemy_spawner.spawn_rate = 40
     level.points_needed = 80
 
     def win():
@@ -215,9 +216,9 @@ def level4(level, bsp, nodes):
     place_ant_holes(level, 7, min_dist=9,max_dist=14)
     place_items(level, 1, [1, items.MUSHROOM, 1, items.BLINKGEM, 1, items.JELLYBEAN])
     wall2diggable(level, 200)
-    place_enemies(level, 65, enemies.ant, 6, enemies.roach, 6, enemies.ladybug, 4, enemies.beetle, 2, enemies.scorpion)
+    place_enemies(level, 65, enemies.ant, 10, enemies.roach, 10, enemies.ladybug, 4, enemies.beetle, 5, enemies.scorpion)
     level.enemy_spawner.enemy_maximum = 100
-    level.enemy_spawner.spawn_rate = 50
+    level.enemy_spawner.spawn_rate = 35
     level.points_needed = 80
 
     def win():
@@ -239,9 +240,9 @@ def level5(level, bsp, nodes):
     place_ant_holes(level, 9, min_dist=9,max_dist=14)
     wall2diggable(level, 200)
     place_items(level, 1, [1, items.MUSHROOM, 2, items.BLINKGEM, 2, items.JELLYBEAN])
-    place_enemies(level, 40, enemies.ant, 10, enemies.roach, 5, enemies.ladybug, 3, enemies.beetle, 3, enemies.scorpion, 4, enemies.fly, 4, enemies.grasshopper)
+    place_enemies(level, 50, enemies.ant, 10, enemies.roach, 10, enemies.ladybug, 5, enemies.beetle, 6, enemies.scorpion, 10, enemies.fly, 10, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 80
-    level.enemy_spawner.spawn_rate = 40
+    level.enemy_spawner.spawn_rate = 35
     level.points_needed = 80
 
     def win():
@@ -260,9 +261,9 @@ def level6(level, bsp, nodes):
     place_ant_holes(level, 8, min_dist=9,max_dist=14)
     wall2diggable(level, 100)
     place_items(level, 1, [1, items.MUSHROOM, 2, items.BLINKGEM, 2, items.JELLYBEAN])
-    place_enemies(level, 45, enemies.ant, 15, enemies.roach, 10, enemies.ladybug, 5, enemies.beetle, 5, enemies.scorpion, 5, enemies.fly, 5, enemies.grasshopper)
+    place_enemies(level, 25, enemies.ant, 15, enemies.roach, 10, enemies.ladybug, 6, enemies.beetle, 10, enemies.scorpion, 5, enemies.fly, 5, enemies.grasshopper)
     level.enemy_spawner.enemy_maximum = 80
-    level.enemy_spawner.spawn_rate = 20
+    level.enemy_spawner.spawn_rate = 35
     level.points_needed = 80
 
     def win():
@@ -271,7 +272,7 @@ def level6(level, bsp, nodes):
         win_template(15, 10, "Emperor", win_game=True)
 
     level.win_function = win
-level_templates.append( LevelTemplate(level6, size = Size(50,33), min_node_size=10) )
+level_templates.append( LevelTemplate(level6, size = Size(60,33), min_node_size=10) )
 #
 #def level7(level, bsp, nodes):
 #    for node in nodes: bsp.fill_node(node)

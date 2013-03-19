@@ -60,6 +60,8 @@ def splash_screen(img=None):
                     libtcod.image_blit_rect(img, 0, 0,0, -1,-1, 1)
                     screen.flush()
                     msgbox(explanation, 70)
+                    if game_save_exists():
+                        game_load()
                 else:
                     continue
             screen.clear()
@@ -75,7 +77,7 @@ panel = console.Console( Size(SCREEN_SIZE.w, 7) )
 def on_screen(xy):
     return xy - world.view.top_left()
 
-def game_draw():
+def game_draw(fulldraw=False):
     from statuses import SUGAR_RUSH, DEFENCE
     # Draw the level to the buffer
     panel.set_default_background(colors.BLACK)
@@ -84,7 +86,7 @@ def game_draw():
     elif world.player.has_status(DEFENCE):
         panel.set_default_background(colors.DARKER_GRAY)
     panel.clear()
-    world.draw()
+    world.draw(fulldraw)
     world.player.print_stats()
 
     game_blit(True)
@@ -115,3 +117,26 @@ def key2direction(key):
     elif key.vk == libtcod.KEY_SPACE or key.c == ord('.') or key.vk == libtcod.KEY_KP5 or key.c == ord('5'):
         return ( 0, 0 )
     return None
+
+def game_save_exists():
+    return False
+    try: 
+        f = open("gamesave.save")
+        f.close()
+        return True
+    except IOError:
+        return False
+
+def game_load():
+    from pickle import load
+    world = load("gamesave.save")
+    world.step()
+    game_draw(True)
+
+def game_save_delete():
+    pass
+
+def game_save_and_exit():    
+#    from pickle import dump
+#    dump(world, open("gamesave.save", "w"))
+    exit()

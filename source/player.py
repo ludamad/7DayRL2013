@@ -69,10 +69,11 @@ class Player(CombatObject):
         scents.apply_scent(self.xy, 100, 8)
 
     def die(self):
-        from globals import world, splash_screen, DEFEAT_IMAGE
+        from globals import world, splash_screen, DEFEAT_IMAGE, game_save_delete
         from workerants import WORKER_ANT_DEAD_TILE
         self.tile_type = WORKER_ANT_DEAD_TILE
         world.messages.add([colors.RED, "You have died!"])
+        game_save_delete()
         splash_screen()
         splash_screen(DEFEAT_IMAGE)
         world.restart()
@@ -290,9 +291,9 @@ class Player(CombatObject):
             return self.handle_controls()
         elif key.c == ord('a'):
             return self.handle_abilities()
-#        elif key.c == ord('q'):
-#            self.goto_next_level()
-#            return self.queue_move(0,0)
+        elif key.c == ord('q'):
+            self.goto_next_level()
+            return self.queue_move(0,0)
         elif key.c == ord('m'):
             for obj in globals.world.level.objects_at(self.xy):
                 if type(obj) == Resource:
@@ -318,9 +319,11 @@ class Player(CombatObject):
         item_slot = _get_mouse_item_slot(self, libtcod.mouse_get_status())
 
         print_colored(panel, Pos(3, 0), colors.BABY_BLUE, 'BUGHACK  ')
+        level_msg = [colors.WHITE, 'Level ', colors.YELLOW, str(world.level.level_index+1)+" ", colors.WHITE, 'Rank ', colors.YELLOW, self.rank ]
+        if world.level.level_index+1 == 6:
+            level_msg = [colors.YELLOW, 'Final Level ', colors.WHITE, 'Rank ', colors.YELLOW, self.rank ]
         print_colored(panel, Pos(3, 2), 
-                      colors.WHITE, 'Level ', colors.YELLOW, str(world.level.level_index+1)+" ",
-                      colors.WHITE, 'Rank ', colors.YELLOW, self.rank )
+                      *level_msg )
 
         print_colored(panel, Pos(3, 1), colors.GOLD, 'A', colors.WHITE, 'bilities')
         print_colored(panel, Pos(14, 1), colors.GOLD, 'C', colors.WHITE, 'ontrols')
